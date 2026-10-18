@@ -161,6 +161,7 @@ export function OfficeScene({ company, agents, issues, attention }: Props) {
           height={r.h}
           fill="transparent"
           className={r.id === "floor" ? "room-hit room-hit-floor" : "room-hit"}
+          data-tour={r.id === "floor" ? "floor" : undefined}
           {...buttonProps(
             r.id === "ceo" && attention.length ? `${r.label}, ${attention.length} waiting for you` : r.label,
             () => enter(r.id),

@@ -577,3 +577,9 @@ textarea {
 .status-row { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; }
 .status-row code { word-break: break-all; background: rgba(0, 0, 0, 0.08); padding: 0 3px; }
 .day-pick { display: inline-flex; align-items: center; gap: 2px; margin-right: 6px; cursor: pointer; }
+
+/* First-run tour */
+.tour { position: fixed; inset: 0; z-index: 300; }
+.tour-dim { position: fixed; inset: 0; background: rgba(16, 20, 26, 0.6); }
+.tour-spot { position: fixed; box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(16, 20, 26, 0.6); pointer-events: none; transition: all 0.2s ease; }
+.tour-card { width: min(360px, calc(100vw - 32px)); z-index: 301; box-shadow: 0 0 0 3px var(--ink), 6px 6px 0 rgba(0, 0, 0, 0.35); }

@@ -72,13 +72,14 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
       )}
       <span className="spacer" />
       <button
+        data-tour="building"
         className={`px-btn small ${worst === "bad" ? "bad" : ""}`}
         onClick={() => open({ kind: "room", room: "status" })}
         title={worst === "ok" ? "Everything the office needs is running" : `${problems} thing(s) need attention`}
       >
         {worst ? LEVEL_ICON[worst] : "⏳"} BUILDING
       </button>
-      <button className="px-btn small" onClick={() => window.dispatchEvent(new Event("pixel-office:palette"))} title="Jump anywhere (Ctrl+K)">
+      <button data-tour="palette" className="px-btn small" onClick={() => window.dispatchEvent(new Event("pixel-office:palette"))} title="Jump anywhere (Ctrl+K)">
         🔎 Ctrl+K
       </button>
       <BrainSwitcher />
@@ -99,23 +100,23 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
           {notify.on ? (notify.sound ? "🔔" : "🔕") : "🔇"} ALERTS
         </button>
       )}
-      <button className="px-btn small" onClick={() => goFloor(floor === "ground" ? "basement" : "ground")} title="Take the stairs">
+      <button data-tour="stairs" className="px-btn small" onClick={() => goFloor(floor === "ground" ? "basement" : "ground")} title="Take the stairs">
         {floor === "ground" ? "▼ B1" : "▲ GROUND"}
       </button>
-      <button className={`px-btn small ${attentionCount ? "bad" : ""}`} onClick={() => open({ kind: "room", room: "ceo" })}>
+      <button data-tour="inbox" className={`px-btn small ${attentionCount ? "bad" : ""}`} onClick={() => open({ kind: "room", room: "ceo" })}>
         ☎ {attentionCount ? `${attentionCount} NEED YOU` : "INBOX"}
       </button>
-      <button className="px-btn small" onClick={() => open({ kind: "room", room: "intake" })} title="Bring in work: ADO, GitHub or any link">
+      <button data-tour="intake" className="px-btn small" onClick={() => open({ kind: "room", room: "intake" })} title="Bring in work: ADO, GitHub or any link">
         📥 INTAKE
       </button>
-      <button className="px-btn small" onClick={() => open({ kind: "room", room: "report" })} title="Today at the office: a stand-up summary">
+      <button data-tour="today" className="px-btn small" onClick={() => open({ kind: "room", room: "report" })} title="Today at the office: a stand-up summary">
         📰 TODAY
       </button>
-      <button className="px-btn small" onClick={() => open({ kind: "room", room: "study" })} title="Your second brain: handbook and memory">
+      <button data-tour="study" className="px-btn small" onClick={() => open({ kind: "room", room: "study" })} title="Your second brain: handbook and memory">
         📓 STUDY
       </button>
       <button className="px-btn small" onClick={() => open({ kind: "room", room: "hr" })}>+ HIRE</button>
-      <button className="px-btn small" onClick={() => open({ kind: "room", room: "meeting" })}>📌 TASK</button>
+      <button data-tour="task" className="px-btn small" onClick={() => open({ kind: "room", room: "meeting" })}>📌 TASK</button>
       <a className="px-btn small" href={CLASSIC_UI} target="_blank" rel="noreferrer" title="Open Paperclip's classic UI">
         CLASSIC ↗
       </a>

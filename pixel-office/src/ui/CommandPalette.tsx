@@ -5,6 +5,7 @@ import { keys } from "../api/hooks";
 import { useOfficeData } from "../state/officeData";
 import { useOffice, type Panel, type RoomId } from "../state/officeStore";
 import { ROOM_TITLES } from "../panels/PanelDock";
+import { TOUR_EVENT } from "./Tour";
 
 interface Command {
   id: string;
@@ -90,7 +91,8 @@ export function CommandPalette() {
       .filter((i) => !i.hiddenAt)
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
       .map((i) => ({ id: `issue:${i.id}`, icon: "📌", label: `${i.identifier} ${i.title}`, hint: i.status.replace("_", " "), run: go({ kind: "issue", issueId: i.id }) }));
-    return [...rooms, ...people, ...tasks];
+    const extras: Command[] = [{ id: "tour", icon: "🗺", label: "Take the office tour", hint: "help", run: () => window.dispatchEvent(new Event(TOUR_EVENT)) }];
+    return [...rooms, ...extras, ...people, ...tasks];
   }, [agents, issues, open, goFloor]);
 
   const q = query.trim();

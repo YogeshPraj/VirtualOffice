@@ -157,6 +157,9 @@ export function LobbyPanel() {
         <h4 style={{ fontSize: 14, color: "var(--wood)" }}>{company.name}</h4>
         {company.description && <div>{company.description}</div>}
         <div className="muted">Task prefix: {company.issuePrefix}</div>
+        <button className="px-btn small" style={{ marginTop: 6 }} onClick={() => window.dispatchEvent(new Event("pixel-office:tour"))}>
+          🗺 Take the office tour
+        </button>
       </div>
       <div className="px-card">
         <h4>MISSION POSTER</h4>
