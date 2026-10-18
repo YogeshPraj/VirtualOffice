@@ -147,6 +147,11 @@ export const api = {
   agentRuns: (companyId: string, agentId: string, limit = 3) =>
     get<HeartbeatRun[]>(`/companies/${companyId}/heartbeat-runs?agentId=${agentId}&limit=${limit}`).then((runs) => runs.filter((r) => r.agentId === agentId)),
   /** A run's stored output (ndjson). Paperclip pages it by byte offset; long runs keep only the tail. */
+  /** A task's runs, newest first. */
+  issueRuns: (issueId: string) =>
+    get<
+      { runId: string; agentId: string; status: string; startedAt: string | null; finishedAt: string | null; createdAt: string; errorCode: string | null; error: string | null; scheduledRetryAt: string | null }[]
+    >(`/issues/${issueId}/runs`),
   runLog: async (runId: string, totalBytes: number | null, maxBytes = 3_000_000) => {
     let offset = Math.max(0, (totalBytes ?? 0) - maxBytes);
     let content = "";

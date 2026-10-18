@@ -48,7 +48,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   assignee and priority on the board and intake desk.
 - [x] **(P2) Back up now.** Run the company export from Building status and show when the last backup was.
 - [x] **(P2) Finance: usage per employee.** Shifts, failures and tokens per employee over 24h / 7 days.
-- [ ] **(P2) Try again.** When a task's last shift failed, show the error on the task and offer a one-click retry.
+- [x] **(P2) Try again.** When a task's last shift failed, show the error on the task and offer a one-click retry.
 - [ ] **(P2) Search everything.** Search task threads and documents, not just titles.
 - [ ] **(P3) Keyboard shortcuts.** `?` cheat sheet; `g b` board, `g i` inbox, `g t` today, `n` new task.
 - [ ] **(P3) Weekly report.** "This week" in the daily report.

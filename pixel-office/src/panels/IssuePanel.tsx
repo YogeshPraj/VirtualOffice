@@ -14,6 +14,7 @@ import { Markdown } from "../lib/markdown";
 import { TaskDocuments, useOfficeLinks } from "./TaskDocuments";
 import { TaskDetails } from "./TaskDetails";
 import { WorkProducts } from "./WorkProducts";
+import { LastShift } from "./LastShift";
 import { linkMentions } from "../lib/mentions";
 import { MentionTextarea } from "../ui/MentionTextarea";
 
@@ -105,6 +106,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
       </div>
 
       <LinkedWork description={issue.description} done={issue.status === "done"} latestAgentComment={[...(comments.data ?? [])].reverse().find((c) => c.authorAgentId)?.body ?? null} />
+      <LastShift issue={issue} />
       {issue.status === "blocked" && <BlockedBy issueId={issueId} />}
       <WorkProducts issueId={issueId} projectId={issue.projectId} />
       <TaskDetails issue={issue} />
