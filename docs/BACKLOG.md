@@ -53,3 +53,17 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P3) Keyboard shortcuts.** `?` cheat sheet; `g b` board, `g i` inbox, `g t` today, `n` new task.
 - [x] **(P3) Weekly report.** "This week" in the daily report.
 - [x] **(P3) Night mode.** The office art dims when the company is closed or after hours.
+
+## Wave 3: running the team day to day
+- [ ] **(P1) Watched queries.** Save an ADO query or GitHub search; the office checks it every few minutes and
+  puts new matches on the intake desk (with an alert), so new work assigned to you shows up by itself.
+- [ ] **(P1) Source drift.** When a linked ADO/GitHub item is closed, reopened or reassigned outside the office,
+  flag it on the task and the board.
+- [ ] **(P2) Employee instructions.** Read and edit an employee's instructions (their AGENTS.md bundle) from
+  their desk, with history and restore.
+- [ ] **(P2) Task history.** A timeline on each task: created, status changes, assignments, comments and shifts.
+- [ ] **(P2) Bulk edit on the board.** Select several notes; assign, set priority, change status or cancel at once.
+- [ ] **(P2) Workload.** Each employee's queue, what they're on now and how long they've been idle, with a
+  one-click reassign to balance the team.
+- [ ] **(P2) Goals with progress.** Link tasks to the mission poster's goals and see progress bars.
+- [ ] **(P3) Report as a file.** Download the daily/weekly report as Markdown.
