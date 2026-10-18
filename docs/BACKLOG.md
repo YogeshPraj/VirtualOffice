@@ -57,7 +57,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 ## Wave 3: running the team day to day
 - [x] **(P1) Watched queries.** Save an ADO query or GitHub search; the office checks it every few minutes and
   puts new matches on the intake desk (with an alert), so new work assigned to you shows up by itself.
-- [ ] **(P1) Source drift.** When a linked ADO/GitHub item is closed, reopened or reassigned outside the office,
+- [x] **(P1) Source drift.** When a linked ADO/GitHub item is closed, reopened or reassigned outside the office,
   flag it on the task and the board.
 - [ ] **(P2) Employee instructions.** Read and edit an employee's instructions (their AGENTS.md bundle) from
   their desk, with history and restore.

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
-import type { IssueStatus } from "../api/types";
+import type { Issue, IssueStatus } from "../api/types";
 import { keys, useComments, useInteractions } from "../api/hooks";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
@@ -15,6 +15,7 @@ import { TaskDocuments, useOfficeLinks } from "./TaskDocuments";
 import { TaskDetails } from "./TaskDetails";
 import { WorkProducts } from "./WorkProducts";
 import { LastShift } from "./LastShift";
+import { driftFor, useSources } from "../lib/drift";
 import { linkMentions } from "../lib/mentions";
 import { MentionTextarea } from "../ui/MentionTextarea";
 
@@ -106,6 +107,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
       </div>
 
       <LinkedWork description={issue.description} done={issue.status === "done"} latestAgentComment={[...(comments.data ?? [])].reverse().find((c) => c.authorAgentId)?.body ?? null} />
+      <SourceDrift issue={issue} onStatus={(status) => update.mutate({ status })} />
       <LastShift issue={issue} />
       {issue.status === "blocked" && <BlockedBy issueId={issueId} />}
       <WorkProducts issueId={issueId} projectId={issue.projectId} />
@@ -189,6 +191,7 @@ interface LiveSource {
 /** The ADO / GitHub items a task is about, with their live state on request. */
 function LinkedWork({ description, done, latestAgentComment }: { description: string | null; done: boolean; latestAgentComment: string | null }) {
   const { company } = useOfficeData();
+  const qc = useQueryClient();
   const sources = extractSources(description);
   const [live, setLive] = useState<Record<string, LiveSource>>({});
   const [reporting, setReporting] = useState<string | null>(null);
@@ -223,6 +226,10 @@ function LinkedWork({ description, done, latestAgentComment }: { description: st
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: sources.map((s) => s.url).join(" ") }),
       });
+      // Refresh the office's record of these items too (drift badges), without waiting for it.
+      fetch("/office-admin/sources/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ urls: sources.map((s) => s.url) }) })
+        .then(() => qc.invalidateQueries({ queryKey: ["sources"] }))
+        .catch(() => undefined);
       const data = (await res.json().catch(() => ({}))) as { items?: LiveSource[]; error?: string };
       if (!res.ok) throw new Error(data.error ?? `Lookup failed (${res.status})`);
       return data.items ?? [];
@@ -287,6 +294,37 @@ function LinkedWork({ description, done, latestAgentComment }: { description: st
       <button className="px-btn small" disabled={check.isPending} onClick={() => check.mutate()}>
         {check.isPending ? "Checking…" : "↻ Check current state"}
       </button>
+    </div>
+  );
+}
+
+/** The linked ADO/GitHub item moved on without the office: say so, and offer the matching change. */
+function SourceDrift({ issue, onStatus }: { issue: Issue; onStatus: (s: IssueStatus) => void }) {
+  const { data: sources } = useSources();
+  const drift = driftFor(issue, sources);
+  if (!drift) return null;
+  const since = drift.since ? ` (${new Date(drift.since).toLocaleString([], { dateStyle: "short", timeStyle: "short" })})` : "";
+  if (drift.kind === "closed-at-source") {
+    return (
+      <div className="px-card" style={{ borderLeft: "8px solid var(--accent)" }}>
+        <h4>⚠ {drift.key} IS {drift.state.toUpperCase()}</h4>
+        <div style={{ fontSize: 17 }}>
+          The item this task is about was {drift.state.toLowerCase()} outside the office{since}, but the task is still {issue.status.replace("_", " ")}.
+        </div>
+        <div className="row">
+          <button className="px-btn small good" onClick={() => confirm(`Mark ${issue.identifier} done?`) && onStatus("done")}>✔ Mark done</button>
+          <button className="px-btn small" onClick={() => confirm(`Cancel ${issue.identifier}? The team stops working on it.`) && onStatus("cancelled")}>✖ Cancel task</button>
+          <a className="px-btn small" href={drift.url} target="_blank" rel="noreferrer">Open {drift.key} ↗</a>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="px-card" style={{ borderLeft: "8px solid var(--info)" }}>
+      <h4>ℹ {drift.key} IS STILL {drift.state.toUpperCase()}</h4>
+      <div style={{ fontSize: 17 }}>
+        The team finished this, but the source item is {drift.state.toLowerCase()}{since}. Report back below, or close it in {drift.url.includes("github.com") ? "GitHub" : "Azure DevOps"}.
+      </div>
     </div>
   );
 }

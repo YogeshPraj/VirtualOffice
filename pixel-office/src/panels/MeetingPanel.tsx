@@ -8,6 +8,7 @@ import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { extractSources, SOURCE_ICON } from "../lib/links";
 import { isQuestion } from "./AskEmployee";
+import { driftFor, useSources, type SourceState } from "../lib/drift";
 import { TemplateEditor } from "./TemplateEditor";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 
@@ -80,6 +81,7 @@ export function MeetingPanel() {
     return () => window.removeEventListener(FOCUS_NEW_TASK, focus);
   }, []);
   const { data: templates = [] } = useTemplates();
+  const { data: sources } = useSources();
   const applyTemplate = (id: string) => {
     const t = templates.find((x) => x.id === id);
     if (!t) return;
@@ -253,7 +255,7 @@ export function MeetingPanel() {
                 {col.title} <span className="muted">{all.length}</span>
               </h5>
               {notes.map((i) => (
-                <StickyNote key={i.id} issue={i} assignee={agentById(i.assigneeAgentId)?.name} onOpen={() => open({ kind: "issue", issueId: i.id })} />
+                <StickyNote key={i.id} issue={i} sources={sources} assignee={agentById(i.assigneeAgentId)?.name} onOpen={() => open({ kind: "issue", issueId: i.id })} />
               ))}
               {notes.length < all.length && (
                 <button className="px-btn small" onClick={() => setAllDone(true)}>
@@ -271,8 +273,9 @@ export function MeetingPanel() {
   );
 }
 
-function StickyNote({ issue, assignee, onOpen }: { issue: Issue; assignee?: string; onOpen: () => void }) {
+function StickyNote({ issue, assignee, onOpen, sources }: { issue: Issue; assignee?: string; onOpen: () => void; sources?: Record<string, SourceState> }) {
   const source = extractSources(issue.description)[0];
+  const drift = driftFor(issue, sources);
   return (
     <button
       className="sticky"
@@ -290,6 +293,7 @@ function StickyNote({ issue, assignee, onOpen }: { issue: Issue; assignee?: stri
         {issue.status === "blocked" ? " · BLOCKED" : ""}
         {issue.priority === "critical" ? " · ‼" : issue.priority === "high" ? " · !" : ""}
         {source ? ` · ${SOURCE_ICON[source.source]} ${source.key}` : ""}
+        {drift?.kind === "closed-at-source" ? ` · ⚠ ${drift.state.toUpperCase()} AT SOURCE` : ""}
       </span>
       {issue.title}
       {assignee && <div className="muted" style={{ fontSize: 15, marginTop: 4 }}>@{assignee}</div>}
