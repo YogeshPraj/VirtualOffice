@@ -644,3 +644,6 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .focus-note { display: flex; align-items: flex-start; gap: 2px; box-shadow: 0 0 0 2px var(--ink); padding: 4px 6px; font-size: 15px; min-width: 0; }
 .focus-note .link-btn { white-space: normal; }
 .focus-note .chip-x { border: 0; background: transparent; cursor: pointer; font: inherit; }
+
+.sticky:focus-visible { outline: 4px solid var(--info); outline-offset: 2px; position: relative; z-index: 1; }
+.px-btn:focus-visible, .rpg-option:focus-visible, .link-btn:focus-visible, .palette-item:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }

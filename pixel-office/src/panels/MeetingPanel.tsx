@@ -165,6 +165,38 @@ export function MeetingPanel() {
     onSettled: () => qc.invalidateQueries({ queryKey: keys.issues(company.id) }),
   });
 
+  /** Arrow keys walk the board; Shift+Left/Right moves the focused note to the next column. */
+  const onBoardKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const el = e.target as HTMLElement;
+    const board = e.currentTarget;
+    if (!el.classList.contains("sticky")) return;
+    const col = Number(el.dataset.col);
+    const row = Number(el.dataset.row);
+    const focusAt = (c: number, r: number) => {
+      const notes = [...board.querySelectorAll<HTMLElement>(`.sticky[data-col="${c}"]`)];
+      if (!notes.length) return false;
+      notes[Math.max(0, Math.min(notes.length - 1, r))].focus();
+      return true;
+    };
+    if (e.shiftKey && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+      e.preventDefault();
+      const target = COLUMNS[col + (e.key === "ArrowRight" ? 1 : -1)];
+      const issue = issues.find((i) => i.id === el.dataset.id);
+      if (!target || !issue || target.statuses.includes(issue.status)) return;
+      if (target.drop === "done" && !confirm(`Mark ${issue.identifier} as done?`)) return;
+      move.mutate({ id: issue.id, status: target.drop });
+      // Follow the note to its new column once it has moved.
+      setTimeout(() => board.querySelector<HTMLElement>(`.sticky[data-id="${issue.id}"]`)?.focus(), 80);
+      return;
+    }
+    const step: Record<string, [number, number]> = { ArrowDown: [0, 1], ArrowUp: [0, -1], ArrowRight: [1, 0], ArrowLeft: [-1, 0] };
+    const d = step[e.key];
+    if (!d) return;
+    e.preventDefault();
+    if (d[0] === 0) focusAt(col, row + d[1]);
+    else for (let c = col + d[0]; c >= 0 && c < COLUMNS.length; c += d[0]) if (focusAt(c, row)) break;
+  };
+
   const onDrop = (col: (typeof COLUMNS)[number], e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(null);
@@ -286,8 +318,8 @@ export function MeetingPanel() {
         />
       )}
       {selecting && selected.size === 0 && <div className="muted" style={{ fontSize: 16, margin: "0 0 6px" }}>Click notes to select them.</div>}
-      <div className="kanban">
-        {COLUMNS.map((col) => {
+      <div className="kanban" onKeyDown={onBoardKey} aria-label="Task board: arrow keys move between notes, Shift+arrows move a note between columns">
+        {COLUMNS.map((col, colIndex) => {
           const all = visible.filter((i) => col.statuses.includes(i.status));
           const notes = col.drop === "done" && !allDone && !filtered ? all.slice(0, DONE_SHOWN) : all;
           return (
@@ -308,10 +340,12 @@ export function MeetingPanel() {
               <h5>
                 {col.title} <span className="muted">{all.length}</span>
               </h5>
-              {notes.map((i) => (
+              {notes.map((i, rowIndex) => (
                 <StickyNote
                   key={i.id}
                   issue={i}
+                  col={colIndex}
+                  row={rowIndex}
                   sources={sources}
                   assignee={agentById(i.assigneeAgentId)?.name}
                   selected={selecting ? selected.has(i.id) : undefined}
@@ -329,7 +363,7 @@ export function MeetingPanel() {
         })}
       </div>
       <div className="muted" style={{ fontSize: 15, marginTop: 4 }}>
-        {filtered ? `Showing ${visible.length} matching tasks. ` : ""}Tip: drag a sticky note to another column to change its status.
+        {filtered ? `Showing ${visible.length} matching tasks. ` : ""}Tip: drag a note to another column to change its status, or use the arrow keys and Shift+←/→.
       </div>
     </>
   );
@@ -342,6 +376,8 @@ function StickyNote({
   sources,
   selected,
   changed,
+  col,
+  row,
 }: {
   issue: Issue;
   assignee?: string;
@@ -351,6 +387,8 @@ function StickyNote({
   selected?: boolean;
   /** Changed since the CEO was last here. */
   changed?: boolean;
+  col?: number;
+  row?: number;
 }) {
   const source = extractSources(issue.description)[0];
   const drift = driftFor(issue, sources);
@@ -358,6 +396,9 @@ function StickyNote({
     <button
       className={`sticky ${selected ? "selected" : ""} ${changed ? "changed" : ""}`}
       aria-pressed={selected}
+      data-id={issue.id}
+      data-col={col}
+      data-row={row}
       style={{ background: NOTE_COLORS[issue.status] }}
       onClick={onOpen}
       title={source ? `From ${source.key}` : undefined}
