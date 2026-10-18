@@ -587,3 +587,9 @@ textarea {
 .mention-pop { position: absolute; left: 0; bottom: 100%; z-index: 20; background: var(--paper); box-shadow: 0 0 0 2px var(--ink), 4px 4px 0 rgba(0,0,0,.3); min-width: 220px; }
 .question { background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 4px 8px; margin: 8px 0 4px; }
 .question .answer { font-size: 17px; max-height: 220px; overflow-y: auto; border-left: 4px solid var(--info); padding-left: 6px; margin: 4px 0; }
+.usage-table { border-collapse: collapse; width: 100%; font-size: 16px; margin-top: 6px; }
+.usage-table th, .usage-table td { text-align: right; padding: 2px 6px; border-bottom: 2px dotted rgba(0,0,0,.15); white-space: nowrap; }
+.usage-table th:first-child, .usage-table td:first-child { text-align: left; }
+.usage-table th { font-family: var(--font-title); font-size: 7px; }
+.usage-table tbody tr:hover { background: #fff3c4; }
+.usage-table tr.total td { font-weight: bold; border-top: 2px solid var(--ink); }

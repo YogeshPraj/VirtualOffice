@@ -7,6 +7,7 @@ import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { Avatar } from "../ui/Avatar";
 import { ClassicLink } from "../ui/Window";
+import { UsageCard } from "./UsageCard";
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -90,6 +91,7 @@ export function FinancePanel() {
           );
         })}
       </div>
+      <UsageCard />
       <ClassicLink path={`/${company.issuePrefix}/costs`}>Detailed costs ↗</ClassicLink>
     </>
   );

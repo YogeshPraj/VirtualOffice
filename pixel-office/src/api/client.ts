@@ -209,6 +209,10 @@ export const api = {
     post(`/companies/${companyId}/goals`, body),
   costsSummary: (companyId: string) => get<Record<string, unknown>>(`/companies/${companyId}/costs/summary`),
 
+  costsByAgent: (companyId: string, from?: string) =>
+    get<{ agentId: string; agentName: string; costCents: number; inputTokens: number; cachedInputTokens: number; outputTokens: number; subscriptionRunCount: number; apiRunCount: number }[]>(
+      `/companies/${companyId}/costs/by-agent${from ? `?from=${encodeURIComponent(from)}` : ""}`,
+    ),
   windowSpend: (companyId: string) => get<WindowSpend[]>(`/companies/${companyId}/costs/window-spend`),
   recentRuns: (companyId: string, limit = 100) => get<HeartbeatRun[]>(`/companies/${companyId}/heartbeat-runs?limit=${limit}`),
   dashboard: (companyId: string) => get<Dashboard>(`/companies/${companyId}/dashboard`),
