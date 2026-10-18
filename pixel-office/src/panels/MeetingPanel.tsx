@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FOCUS_NEW_TASK } from "../ui/Shortcuts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import type { Issue, IssueStatus } from "../api/types";
@@ -72,6 +73,12 @@ export function MeetingPanel() {
   const [showQuestions, setShowQuestions] = useState(false);
   const [priority, setPriority] = useState<Issue["priority"]>("medium");
   const [editing, setEditing] = useState(false);
+  const titleRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const focus = () => titleRef.current?.focus();
+    window.addEventListener(FOCUS_NEW_TASK, focus);
+    return () => window.removeEventListener(FOCUS_NEW_TASK, focus);
+  }, []);
   const { data: templates = [] } = useTemplates();
   const applyTemplate = (id: string) => {
     const t = templates.find((x) => x.id === id);
@@ -161,7 +168,7 @@ export function MeetingPanel() {
             ✎
           </button>
         </div>
-        <input className="px-input" aria-label="Task title" placeholder="What needs doing? (pick a template after typing to fill it in)" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input ref={titleRef} className="px-input" aria-label="Task title" placeholder="What needs doing? (pick a template after typing to fill it in)" value={title} onChange={(e) => setTitle(e.target.value)} />
         <textarea className="px-textarea" aria-label="Details" placeholder="Details, acceptance criteria, links…" value={desc} onChange={(e) => setDesc(e.target.value)} />
         <div className="row">
           <select className="px-select" style={{ flex: 1, margin: 0 }} aria-label="Assign to" value={assignee} onChange={(e) => setAssignee(e.target.value)}>

@@ -597,3 +597,6 @@ textarea {
 
 .palette-detail { display: block; font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .palette-detail mark { background: var(--accent); color: var(--ink); padding: 0 1px; }
+.key-hint { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 250; background: var(--ink); color: var(--paper); padding: 4px 10px; font-size: 16px; max-width: calc(100vw - 32px); }
+kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 0 5px; font: inherit; font-size: 15px; margin: 0 1px; }
+.keys-table td { text-align: left !important; white-space: normal; }

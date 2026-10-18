@@ -79,7 +79,7 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
       >
         {worst ? LEVEL_ICON[worst] : "⏳"} BUILDING
       </button>
-      <button data-tour="palette" className="px-btn small" onClick={() => window.dispatchEvent(new Event("pixel-office:palette"))} title="Jump anywhere (Ctrl+K)">
+      <button data-tour="palette" className="px-btn small" onClick={() => window.dispatchEvent(new Event("pixel-office:palette"))} title="Jump anywhere (Ctrl+K). Press ? for all shortcuts">
         🔎 Ctrl+K
       </button>
       <BrainSwitcher />

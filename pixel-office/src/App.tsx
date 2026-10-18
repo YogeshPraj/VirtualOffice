@@ -13,6 +13,7 @@ import { useOfficeNotifications } from "./ui/useNotifications";
 import { ErrorBar } from "./ui/ErrorBar";
 import { CommandPalette } from "./ui/CommandPalette";
 import { Tour } from "./ui/Tour";
+import { Shortcuts } from "./ui/Shortcuts";
 
 const COMPANY_KEY = "pixel-office:company";
 
@@ -89,6 +90,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
         </main>
         <CommandPalette />
         <Tour />
+        <Shortcuts />
       </div>
     </OfficeDataProvider>
   );
