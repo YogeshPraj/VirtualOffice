@@ -5,6 +5,7 @@ import type { Issue, IssueStatus } from "../api/types";
 import { keys } from "../api/hooks";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
+import { extractSources, SOURCE_ICON } from "../lib/links";
 
 export const NOTE_COLORS: Record<IssueStatus, string> = {
   backlog: "#e0e0e0",
@@ -90,11 +91,13 @@ export function MeetingPanel() {
 }
 
 function StickyNote({ issue, assignee, onOpen }: { issue: Issue; assignee?: string; onOpen: () => void }) {
+  const source = extractSources(issue.description)[0];
   return (
-    <button className="sticky" style={{ background: NOTE_COLORS[issue.status] }} onClick={onOpen}>
+    <button className="sticky" style={{ background: NOTE_COLORS[issue.status] }} onClick={onOpen} title={source ? `From ${source.key}` : undefined}>
       <span className="id">
         {issue.identifier}
         {issue.status === "blocked" ? " · BLOCKED" : ""}
+        {source ? ` · ${SOURCE_ICON[source.source]} ${source.key}` : ""}
       </span>
       {issue.title}
       {assignee && <div className="muted" style={{ fontSize: 15, marginTop: 4 }}>@{assignee}</div>}

@@ -9,6 +9,7 @@ import { Avatar } from "../ui/Avatar";
 import { ClassicLink } from "../ui/Window";
 import { InteractionDialog } from "./InteractionDialog";
 import { NOTE_COLORS } from "./MeetingPanel";
+import { extractSources, SOURCE_ICON } from "../lib/links";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
 
@@ -75,6 +76,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
         </div>
       </div>
 
+      <LinkedWork description={issue.description} />
       {issue.status === "blocked" && <BlockedBy issueId={issueId} />}
 
       {pending.map((i) => (
@@ -130,6 +132,67 @@ function BlockedBy({ issueId }: { issueId: string }) {
         ))
       )}
       <div className="muted" style={{ fontSize: 16, marginTop: 4 }}>This unblocks on its own when those finish.</div>
+    </div>
+  );
+}
+
+interface LiveSource {
+  url: string;
+  title: string;
+  type?: string;
+  state?: string;
+  error?: string;
+  fix?: string;
+}
+
+/** The ADO / GitHub items a task is about, with their live state on request. */
+function LinkedWork({ description }: { description: string | null }) {
+  const sources = extractSources(description);
+  const [live, setLive] = useState<Record<string, LiveSource>>({});
+  const check = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/office-admin/intake/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: sources.map((s) => s.url).join(" ") }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { items?: LiveSource[]; error?: string };
+      if (!res.ok) throw new Error(data.error ?? `Lookup failed (${res.status})`);
+      return data.items ?? [];
+    },
+    onSuccess: (items) => setLive(Object.fromEntries(items.map((i) => [i.url, i]))),
+  });
+  if (sources.length === 0) return null;
+  return (
+    <div className="px-card" style={{ borderLeft: "8px solid var(--info)" }}>
+      <h4>🔗 LINKED WORK</h4>
+      {sources.map((s) => {
+        const l = live[s.url];
+        return (
+          <div key={s.key} className="row" style={{ margin: "4px 0", alignItems: "flex-start" }}>
+            <span style={{ flex: 1 }}>
+              {SOURCE_ICON[s.source]} <b>{s.key}</b> <span className="muted">({s.kind})</span>
+              {l && !l.error && (
+                <small style={{ display: "block", fontSize: 16 }}>
+                  {l.title} · {[l.type, l.state].filter(Boolean).join(" · ")}
+                </small>
+              )}
+              {l?.error && (
+                <small style={{ display: "block", fontSize: 16, color: "var(--bad)" }}>
+                  ⚠ {l.error}
+                  {l.fix ? ` Fix: ${l.fix}` : ""}
+                </small>
+              )}
+            </span>
+            <a className="px-btn small" href={s.url} target="_blank" rel="noreferrer">
+              Open ↗
+            </a>
+          </div>
+        );
+      })}
+      <button className="px-btn small" disabled={check.isPending} onClick={() => check.mutate()}>
+        {check.isPending ? "Checking…" : "↻ Check current state"}
+      </button>
     </div>
   );
 }
