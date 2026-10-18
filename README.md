@@ -48,5 +48,5 @@ Paperclip's version is pinned in `start-paperclip.ps1`; upgrade on purpose.
 
 ## Licenses
 
-Original code in this repository: see `LICENSE` (if present; otherwise all rights reserved by the owner).
+Original code in this repository: [MIT](LICENSE). Character sprite templates are ported from agent-virtual-office (MIT, see `pixel-office/THIRD_PARTY_LICENSE_agent-virtual-office.txt`).
 Third-party components and their terms: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
