@@ -38,3 +38,18 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Brain import.** Bulk-import a folder of markdown notes or docs into the brain.
 - [x] **(P3) Working hours.** Optionally pause the company outside set hours.
 - [x] **(P3) First-run tour** of the rooms for a new install.
+
+## Wave 2: daily-driver depth
+- [ ] **(P1) Bulk intake from queries.** Paste an Azure DevOps query link or WIQL ("my active items this
+  sprint") or a GitHub issue search URL; preview every match and bring in the ones you tick.
+- [ ] **(P1) @mentions.** Autocomplete `@Name` in task comments; the mentioned employee is woken on that task.
+- [ ] **(P1) Ask an employee.** A quick question from the employee's panel that doesn't become a work task.
+- [ ] **(P2) Task templates.** Saved blueprints (bug fix, PR review, spike, docs) that prefill title, details,
+  assignee and priority on the board and intake desk.
+- [ ] **(P2) Back up now.** Run the company export from Building status and show when the last backup was.
+- [ ] **(P2) Finance: usage per employee.** Shifts, failures and tokens per employee over 24h / 7 days.
+- [ ] **(P2) Try again.** When a task's last shift failed, show the error on the task and offer a one-click retry.
+- [ ] **(P2) Search everything.** Search task threads and documents, not just titles.
+- [ ] **(P3) Keyboard shortcuts.** `?` cheat sheet; `g b` board, `g i` inbox, `g t` today, `n` new task.
+- [ ] **(P3) Weekly report.** "This week" in the daily report.
+- [ ] **(P3) Night mode.** The office art dims when the company is closed or after hours.
