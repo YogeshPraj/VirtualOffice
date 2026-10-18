@@ -33,7 +33,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Work products.** PRs and branches an employee produced, listed on the task.
 
 ## Running the office
-- [ ] **(P2) Building status.** One place that checks Paperclip, the brain, the office server, each
+- [x] **(P2) Building status.** One place that checks Paperclip, the brain, the office server, each
   adapter, and the Claude/Copilot/az/gh sign-ins, with the fix for anything red.
 - [ ] **(P2) Brain import.** Bulk-import a folder of markdown notes or docs into the brain.
 - [ ] **(P3) Working hours.** Optionally pause the company outside set hours.

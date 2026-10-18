@@ -55,7 +55,7 @@ function run(cmd: string, args: string[], timeoutMs = 30_000): Promise<{ ok: boo
 // Node refuses to run .cmd files (az.cmd) without a shell on Windows, and a shell would let
 // pasted text become a command. az.cmd is a thin wrapper around its bundled Python, so call
 // that directly: `python.exe -IBm azure.cli <args>`, exactly what az.cmd does.
-function azCommand(): { cmd: string; prefix: string[] } {
+export function azCommand(): { cmd: string; prefix: string[] } {
   if (process.platform !== "win32") return { cmd: "az", prefix: [] };
   const roots = [process.env.ProgramFiles, process.env["ProgramFiles(x86)"], process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, "Programs")];
   for (const root of roots) {

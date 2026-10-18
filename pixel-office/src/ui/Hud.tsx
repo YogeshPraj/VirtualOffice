@@ -5,6 +5,7 @@ import { useOffice } from "../state/officeStore";
 import { CLASSIC_UI } from "./Window";
 import { BrainSwitcher } from "./BrainSwitcher";
 import { useNotificationPref } from "./useNotifications";
+import { LEVEL_ICON, useBuildingStatus, worstLevel } from "../panels/StatusPanel";
 
 export function Hud({ company, attentionCount, companies, onSwitch }: {
   company: Company;
@@ -21,6 +22,9 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
   const { data: conns } = useToolConnections(company.id);
   const brokenAi = conns?.find((c) => c.connectionPurpose === "ai" && c.enabled && c.healthStatus === "error");
   const notify = useNotificationPref();
+  const building = useBuildingStatus();
+  const worst = worstLevel(building.data?.checks);
+  const problems = building.data?.checks.filter((c) => c.level !== "ok").length ?? 0;
   const [clock, setClock] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setClock(new Date()), 15_000);
@@ -62,6 +66,13 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
         </a>
       )}
       <span className="spacer" />
+      <button
+        className={`px-btn small ${worst === "bad" ? "bad" : ""}`}
+        onClick={() => open({ kind: "room", room: "status" })}
+        title={worst === "ok" ? "Everything the office needs is running" : `${problems} thing(s) need attention`}
+      >
+        {worst ? LEVEL_ICON[worst] : "⏳"} BUILDING
+      </button>
       <button className="px-btn small" onClick={() => window.dispatchEvent(new Event("pixel-office:palette"))} title="Jump anywhere (Ctrl+K)">
         🔎 Ctrl+K
       </button>

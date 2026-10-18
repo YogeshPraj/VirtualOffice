@@ -573,3 +573,6 @@ textarea {
 .attach small { font-size: 13px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .work-product { background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 4px 8px; margin: 6px 0; }
+
+.status-row { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; }
+.status-row code { word-break: break-all; background: rgba(0, 0, 0, 0.08); padding: 0 3px; }
