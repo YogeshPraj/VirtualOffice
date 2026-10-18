@@ -29,7 +29,7 @@ instructions, projects) belongs in a **separate private repo** checked out at `c
 (git-ignored here). Suggested contents:
 
 - `company/handbook/ceo-handbook.md`: your handbook, from `brain/ceo-handbook.template.md`. Publish with `python scripts/handbook_sync.py push company/handbook/ceo-handbook.md`.
-- `company/paperclip-export/`: `npx paperclipai company export <id> --out ./company/paperclip-export --include company,agents,skills,projects` (secret values are never exported).
+- `company/paperclip-export/`: refresh with `pwsh scripts\export-company.ps1`, then commit in `company/` (secret values are never exported).
 
 The live databases (`.paperclip/`, `~/.gbrain`) are never committed anywhere; back them up separately.
 
