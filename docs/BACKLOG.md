@@ -73,9 +73,9 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   new questions for you, failed shifts, new intake matches; changed notes glow on the board.
 - [x] **(P2) Saved board views.** Name a filter ("My ADO bugs", "QA queue") and switch to it in one click.
 - [x] **(P2) Comment drafts.** Unsent comments and questions survive closing the panel.
-- [ ] **(P2) Employee scorecard.** On each desk: tasks done, typical time to finish, failure rate and
+- [x] **(P2) Employee scorecard.** On each desk: tasks done, typical time to finish, failure rate and
   review bounce-backs over 30 days.
-- [ ] **(P2) Cycle time in reports.** How long tasks took from start to done, and the slowest ones.
+- [x] **(P2) Cycle time in reports.** How long tasks took from start to done, and the slowest ones.
 - [ ] **(P2) Task map.** A picture of a task's sub-tasks and what blocks what.
 - [ ] **(P2) Back up office settings.** Templates, watches, working hours and saved views go into the private
   company repo with each backup.

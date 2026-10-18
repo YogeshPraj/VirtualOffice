@@ -160,6 +160,8 @@ export const api = {
   instructionsRevision: (agentId: string, revisionId: string) => get<{ content: string }>(`/agents/${agentId}/instructions-bundle/revision/${revisionId}`),
   restoreInstructions: (agentId: string, path: string, revisionId: string, baseRevisionId: string) =>
     post<unknown>(`/agents/${agentId}/instructions-bundle/restore`, { path, revisionId, baseRevisionId }),
+  /** Every task-related activity entry (status changes etc.), for team statistics. */
+  companyIssueActivity: (companyId: string) => get<ActivityEntry[]>(`/companies/${companyId}/activity?entityType=issue&limit=2000`),
   issueActivity: (issueId: string) => get<ActivityEntry[]>(`/issues/${issueId}/activity`),
   /** A task's runs, newest first. */
   issueRuns: (issueId: string) =>

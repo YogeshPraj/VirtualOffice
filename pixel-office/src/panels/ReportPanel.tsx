@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import type { Issue } from "../api/types";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
+import { cycleSummary, fmtDuration } from "../lib/stats";
 
 export type Day = "today" | "yesterday" | "week" | "lastweek";
 
@@ -113,6 +114,8 @@ export function ReportPanel() {
   const tok24 = tokens24.reduce((n, s) => n + (s.inputTokens ?? 0) + (s.outputTokens ?? 0), 0);
 
   const who = (i: Issue) => agentById(i.assigneeAgentId)?.name ?? "unassigned";
+  const { data: issueActivity } = useQuery({ queryKey: ["issue-activity-all", company.id], queryFn: () => api.companyIssueActivity(company.id), staleTime: 300_000 });
+  const cycle = cycleSummary(issues, range[0], range[1], issueActivity ?? []);
   const label = PERIOD_LABEL[day];
   const dateText = isWeek(day)
     ? `${new Date(range[0]).toLocaleDateString([], { day: "numeric", month: "short" })} – ${new Date(range[1] - 1).toLocaleDateString([], { day: "numeric", month: "short" })}`
@@ -141,6 +144,9 @@ export function ReportPanel() {
       "",
       `New tasks: ${report.created.length} · Shifts worked: ${report.shifts.length}${report.failed.length ? ` (${report.failed.length} failed)` : ""}`,
       `Usage: ${usageText}`,
+      ...(cycle.count
+        ? [`Typical time to finish: ${fmtDuration(cycle.medianMs)} (${cycle.count} task${cycle.count === 1 ? "" : "s"}); slowest: ${cycle.slowest.map((x) => `${x.issue.identifier} ${fmtDuration(x.ms)}`).join(", ")}`]
+        : []),
       ...(isWeek(day) ? ["", "Who did what:", ...report.perAgent.map((x) => `  - ${x.agent.name}: ${x.done} done, ${x.shifts} shifts`)] : []),
     ].join("\n");
   };
@@ -227,6 +233,22 @@ export function ReportPanel() {
         </div>
       )}
       <Section title={`✔ DONE ${label.toUpperCase()}`} items={report.done} tone="var(--good)" />
+      {cycle.count > 0 && (
+        <div className="px-card">
+          <h4>⏱ HOW LONG THINGS TOOK</h4>
+          <div style={{ fontSize: 17 }}>
+            Typical time from start to done: <b>{fmtDuration(cycle.medianMs)}</b> across {cycle.count} task{cycle.count === 1 ? "" : "s"}.
+          </div>
+          {cycle.slowest.map(({ issue: i, ms }) => (
+            <button key={i.id} className="rpg-option" style={{ color: "var(--ink)" }} onClick={() => open({ kind: "issue", issueId: i.id })}>
+              🐢 {i.identifier} · {i.title}
+              <small style={{ color: "var(--muted)" }}>
+                {fmtDuration(ms)} · @{who(i)}
+              </small>
+            </button>
+          ))}
+        </div>
+      )}
       <Section title="⌨ IN PROGRESS" items={report.doing} tone="var(--info)" />
       {report.review.length > 0 && <Section title="🔍 READY FOR REVIEW" items={report.review} tone="#C9A7FF" />}
       {report.blocked.length > 0 && <Section title="⛔ BLOCKED" items={report.blocked} tone="var(--bad)" />}

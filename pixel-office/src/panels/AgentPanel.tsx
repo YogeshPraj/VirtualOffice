@@ -10,6 +10,7 @@ import { AgentRepair } from "./AgentRepair";
 import { OverShoulder } from "./OverShoulder";
 import { AskEmployee } from "./AskEmployee";
 import { InstructionsCard } from "./InstructionsCard";
+import { Scorecard } from "./Scorecard";
 import { ProviderTag } from "../ui/ProviderTag";
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
@@ -63,6 +64,7 @@ export function AgentPanel({ agentId }: { agentId: string }) {
       </div>
 
       <AgentRepair agent={agent} />
+      <Scorecard agent={agent} />
       <OverShoulder agent={agent} />
       <AskEmployee agent={agent} />
       <InstructionsCard agent={agent} />
