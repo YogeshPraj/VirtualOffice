@@ -18,6 +18,8 @@ import { LastShift } from "./LastShift";
 import { TaskHistory } from "./TaskHistory";
 import { TaskMap } from "./TaskMap";
 import { MAX_FOCUS, useFocus } from "../lib/focus";
+import { taskMarkdown } from "../lib/taskExport";
+import { downloadText, slug } from "../lib/download";
 import { driftFor, useSources } from "../lib/drift";
 import { linkMentions } from "../lib/mentions";
 import { MentionTextarea } from "../ui/MentionTextarea";
@@ -126,6 +128,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
           >
             {focus.ids.includes(issue.id) ? "★ Focus" : "☆ Focus"}
           </button>
+          <ShareTask issue={issue} />
           <ClassicLink path={`/${company.issuePrefix}/issues/${issue.identifier}`}>Classic ↗</ClassicLink>
         </div>
       </div>
@@ -353,5 +356,44 @@ function SourceDrift({ issue, onStatus }: { issue: Issue; onStatus: (s: IssueSta
         The team finished this, but the source item is {drift.state.toLowerCase()}{since}. Report back below, or close it in {drift.url.includes("github.com") ? "GitHub" : "Azure DevOps"}.
       </div>
     </div>
+  );
+}
+
+/** Copy or download the whole task (details, documents, work products, thread) as Markdown. */
+function ShareTask({ issue }: { issue: Issue }) {
+  const { agentById, toast } = useOfficeData();
+  const [busy, setBusy] = useState(false);
+  const build = async () => {
+    const [comments, documents, products, attachments] = await Promise.all([
+      api.comments(issue.id),
+      api.issueDocuments(issue.id).catch(() => []),
+      api.workProducts(issue.id).catch(() => []),
+      api.attachments(issue.id).catch(() => []),
+    ]);
+    return taskMarkdown({ issue, comments, documents, products, attachments }, (id) => agentById(id)?.name);
+  };
+  const run = async (how: "copy" | "file") => {
+    setBusy(true);
+    try {
+      const md = await build();
+      if (how === "copy") {
+        await navigator.clipboard.writeText(md);
+        toast(`Copied ${issue.identifier} as Markdown.`);
+      } else downloadText(`${issue.identifier}-${slug(issue.title)}.md`, md);
+    } catch (e) {
+      toast(`Couldn't export: ${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <button className="px-btn small" disabled={busy} onClick={() => run("copy")} title="Copy the whole task as Markdown (details, documents, thread)">
+        ⧉ Copy
+      </button>
+      <button className="px-btn small" disabled={busy} onClick={() => run("file")} title="Download the whole task as a Markdown file">
+        ⬇ .md
+      </button>
+    </>
   );
 }

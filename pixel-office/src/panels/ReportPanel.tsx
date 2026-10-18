@@ -7,6 +7,7 @@ import { useOffice } from "../state/officeStore";
 import { cycleSummary, fmtDuration } from "../lib/stats";
 import { useFocus } from "../lib/focus";
 import { FocusStrip } from "./FocusStrip";
+import { downloadText as download } from "../lib/download";
 
 export type Day = "today" | "yesterday" | "week" | "lastweek";
 
@@ -49,14 +50,6 @@ export function toMarkdown(text: string): string {
   );
 }
 
-function download(name: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
 
 const within = (iso: string | null | undefined, [a, b]: [number, number]) => {
   if (!iso) return false;
