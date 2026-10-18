@@ -77,6 +77,6 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   review bounce-backs over 30 days.
 - [x] **(P2) Cycle time in reports.** How long tasks took from start to done, and the slowest ones.
 - [x] **(P2) Task map.** A picture of a task's sub-tasks and what blocks what.
-- [ ] **(P2) Back up office settings.** Templates, watches, working hours and saved views go into the private
+- [x] **(P2) Back up office settings.** Templates, watches, working hours and saved views go into the private
   company repo with each backup.
 - [ ] **(P3) Office sounds.** Optional soft typing while someone works and a chime when a task is done.

@@ -5,7 +5,7 @@
 //   POST /office-admin/backup { companyId, commit, push } -> { steps: [{ step, ok, detail }] }
 
 import { execFile } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { IncomingMessage } from "node:http";
 import type { Plugin } from "vite";
@@ -14,6 +14,66 @@ import { SECRET_PATTERNS } from "./brain-bridge";
 const ROOT = resolve(__dirname, "..");
 const COMPANY = join(ROOT, "company");
 const EXPORT = join(COMPANY, "paperclip-export");
+const OFFICE = join(ROOT, ".office");
+const OFFICE_BACKUP = join(COMPANY, "office-settings");
+
+/**
+ * Office settings worth keeping with the company: name -> how to slim it for the backup.
+ * (sources.json is a cache and instructions-history.json duplicates the export, so neither goes.)
+ */
+const SETTINGS: Record<string, (data: unknown) => unknown> = {
+  "templates.json": (d) => d,
+  "views.json": (d) => d,
+  "working-hours.json": (d) => ({ settings: (d as { settings?: unknown })?.settings ?? d }),
+  // Only the definitions: pending matches and dismissals are per-machine state.
+  "watches.json": (d) =>
+    Array.isArray(d) ? d.map((w: Record<string, unknown>) => ({ id: w.id, name: w.name, query: w.query, project: w.project, mine: w.mine, everyMin: w.everyMin })) : d,
+};
+
+/** Copy office settings into company/office-settings/. Returns the files written. */
+export function saveOfficeSettings(): string[] {
+  const written: string[] = [];
+  for (const [name, slim] of Object.entries(SETTINGS)) {
+    const src = join(OFFICE, name);
+    if (!existsSync(src)) continue;
+    try {
+      const data = slim(JSON.parse(readFileSync(src, "utf8")));
+      if (!existsSync(OFFICE_BACKUP)) mkdirSync(OFFICE_BACKUP, { recursive: true });
+      writeFileSync(join(OFFICE_BACKUP, name), `${JSON.stringify(data, null, 2)}\n`);
+      written.push(name);
+    } catch {
+      /* unreadable setting: leave the previous backup alone */
+    }
+  }
+  return written;
+}
+
+/** Bring settings back from the company repo (e.g. on a new machine). Existing ones are kept unless `overwrite`. */
+export function restoreOfficeSettings(overwrite = false): string[] {
+  const restored: string[] = [];
+  if (!existsSync(OFFICE_BACKUP)) return restored;
+  for (const name of Object.keys(SETTINGS)) {
+    const src = join(OFFICE_BACKUP, name);
+    const dst = join(OFFICE, name);
+    if (!existsSync(src) || (existsSync(dst) && !overwrite)) continue;
+    try {
+      let data = JSON.parse(readFileSync(src, "utf8"));
+      if (name === "watches.json" && Array.isArray(data)) data = data.map((w) => ({ ...w, lastRunAt: null, lastError: null, pending: [], dismissed: [] }));
+      if (name === "working-hours.json") data = { settings: (data as { settings?: unknown }).settings ?? data, pausedByOffice: [] };
+      if (!existsSync(OFFICE)) mkdirSync(OFFICE, { recursive: true });
+      writeFileSync(dst, JSON.stringify(data, null, 2));
+      restored.push(name);
+    } catch {
+      /* skip a damaged file */
+    }
+  }
+  return restored;
+}
+
+const settingsStatus = () => ({
+  backedUp: existsSync(OFFICE_BACKUP) ? Object.keys(SETTINGS).filter((n) => existsSync(join(OFFICE_BACKUP, n))) : [],
+  missingHere: existsSync(OFFICE_BACKUP) ? Object.keys(SETTINGS).filter((n) => existsSync(join(OFFICE_BACKUP, n)) && !existsSync(join(OFFICE, n))) : [],
+});
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function run(cmd: string, args: string[], cwd = ROOT, timeoutMs = 180_000): Promise<{ ok: boolean; out: string }> {
@@ -48,6 +108,7 @@ export async function backupStatus() {
   const exported = newestMtime(EXPORT);
   return {
     repo: true as const,
+    settings: settingsStatus(),
     lastExportAt: exported ? new Date(exported).toISOString() : null,
     lastCommitAt: lastCommitAt || null,
     lastCommit: lastCommit || null,
@@ -122,6 +183,8 @@ export async function backupNow(opts: { companyId?: string; commit?: boolean; pu
   if (!exp.ok) return { steps };
   const restored = await dropStampOnlyChanges();
   if (restored) steps.push({ step: "Tidy", ok: true, detail: `Ignored ${restored} file(s) whose only change was Paperclip's bundled-skill commit stamp.` });
+  const settings = saveOfficeSettings();
+  if (settings.length) steps.push({ step: "Office settings", ok: true, detail: `Saved ${settings.map((n) => n.replace(".json", "")).join(", ")} to company/office-settings.` });
   if (!opts.commit) return { steps };
 
   const pending = (await git("status", "--porcelain")).out.split("\n").filter(Boolean);
@@ -163,6 +226,10 @@ export function backupBridge(): Plugin {
         res.setHeader("content-type", "application/json");
         try {
           if (req.method === "GET") return res.end(JSON.stringify(await backupStatus()));
+          if (req.method === "POST" && (req.url ?? "").startsWith("/restore-settings")) {
+            const body = await readBody(req);
+            return res.end(JSON.stringify({ restored: restoreOfficeSettings(!!body.overwrite) }));
+          }
           if (req.method !== "POST") {
             res.statusCode = 405;
             return res.end(JSON.stringify({ error: "GET or POST" }));

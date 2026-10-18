@@ -9,6 +9,7 @@ interface BackupStatus {
   lastCommit?: string | null;
   pending?: number;
   remote?: string | null;
+  settings?: { backedUp: string[]; missingHere: string[] };
 }
 
 const ago = (iso: string | null | undefined) => {
@@ -87,7 +88,27 @@ export function BackupCard() {
               {st.ok ? "✔" : "✖"} {st.step}: {st.detail}
             </small>
           ))}
-          <div className="muted" style={{ fontSize: 15 }}>Secret values are never exported, and a commit is refused if a changed file looks like it holds one.</div>
+          {s.settings && s.settings.missingHere.length > 0 && (
+            <div className="row" style={{ marginTop: 6 }}>
+              <span style={{ flex: 1, fontSize: 16 }}>
+                The company repo has office settings this PC doesn't: {s.settings.missingHere.map((n) => n.replace(".json", "")).join(", ")}.
+              </span>
+              <button
+                className="px-btn small"
+                onClick={async () => {
+                  const r = (await (await fetch("/office-admin/backup/restore-settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })).json()) as { restored?: string[] };
+                  toast(r.restored?.length ? `Restored ${r.restored.join(", ")}. Reload to see them.` : "Nothing to restore.");
+                  status.refetch();
+                }}
+              >
+                ⤓ Restore them
+              </button>
+            </div>
+          )}
+          <div className="muted" style={{ fontSize: 15 }}>
+            Secret values are never exported, and a commit is refused if a changed file looks like it holds one. Templates, watched queries, working hours and saved views are
+            backed up too.
+          </div>
         </>
       )}
     </div>
