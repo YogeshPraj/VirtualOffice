@@ -13,6 +13,7 @@ import { extractSources, SOURCE_ICON } from "../lib/links";
 import { Markdown } from "../lib/markdown";
 import { TaskDocuments, useOfficeLinks } from "./TaskDocuments";
 import { TaskDetails } from "./TaskDetails";
+import { WorkProducts } from "./WorkProducts";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
 
@@ -86,6 +87,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
 
       <LinkedWork description={issue.description} done={issue.status === "done"} latestAgentComment={[...(comments.data ?? [])].reverse().find((c) => c.authorAgentId)?.body ?? null} />
       {issue.status === "blocked" && <BlockedBy issueId={issueId} />}
+      <WorkProducts issueId={issueId} projectId={issue.projectId} />
       <TaskDetails issue={issue} />
       <TaskDocuments issueId={issueId} />
 

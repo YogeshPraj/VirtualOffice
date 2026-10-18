@@ -30,7 +30,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Board: drag and drop** to change status; filter by project, employee, priority; search.
 - [x] **(P2) Command palette (Ctrl+K).** Jump to any task, employee or room; quick-create a task.
 - [x] **(P2) Richer task panel.** Priority, project, parent and sub-tasks, blockers, attachments.
-- [ ] **(P2) Work products.** PRs and branches an employee produced, listed on the task.
+- [x] **(P2) Work products.** PRs and branches an employee produced, listed on the task.
 
 ## Running the office
 - [ ] **(P2) Building status.** One place that checks Paperclip, the brain, the office server, each

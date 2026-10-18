@@ -398,3 +398,22 @@ export interface Attachment {
   createdByUserId: string | null;
   createdAt: string;
 }
+
+export interface WorkProduct {
+  id: string;
+  issueId: string;
+  projectId: string | null;
+  type: "preview_url" | "runtime_service" | "pull_request" | "branch" | "commit" | "artifact" | "document";
+  provider: string;
+  externalId: string | null;
+  title: string;
+  url: string | null;
+  status: string;
+  reviewState: "none" | "needs_board_review" | "approved" | "changes_requested";
+  isPrimary: boolean;
+  healthStatus: string;
+  summary: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+}

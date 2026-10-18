@@ -22,6 +22,7 @@ import type {
   IssueComment,
   IssueStatus,
   HeartbeatRun,
+  WorkProduct,
   Attachment,
   WindowSpend,
   IssueDocument,
@@ -107,6 +108,10 @@ export const api = {
 
   issues: (companyId: string) => get<Issue[]>(`/companies/${companyId}/issues`),
   issue: (issueId: string) => get<Issue>(`/issues/${issueId}`),
+  workProducts: (issueId: string) => get<WorkProduct[]>(`/issues/${issueId}/work-products`),
+  addWorkProduct: (issueId: string, body: Partial<WorkProduct> & Pick<WorkProduct, "type" | "provider" | "title">) =>
+    post<WorkProduct>(`/issues/${issueId}/work-products`, body),
+  updateWorkProduct: (id: string, body: Partial<Pick<WorkProduct, "reviewState" | "status" | "isPrimary">>) => patch<WorkProduct>(`/work-products/${id}`, body),
   attachments: (issueId: string) => get<Attachment[]>(`/issues/${issueId}/attachments`),
   uploadAttachment: async (companyId: string, issueId: string, file: File) => {
     const form = new FormData();

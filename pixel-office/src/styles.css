@@ -571,3 +571,5 @@ textarea {
 .attach { display: flex; flex-direction: column; align-items: center; text-align: center; background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 4px; color: var(--ink); text-decoration: none; overflow: hidden; }
 .attach img { width: 100%; height: 64px; object-fit: cover; image-rendering: auto; }
 .attach small { font-size: 13px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.work-product { background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 4px 8px; margin: 6px 0; }
