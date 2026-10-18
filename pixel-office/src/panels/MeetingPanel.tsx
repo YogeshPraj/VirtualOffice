@@ -10,6 +10,7 @@ import { extractSources, SOURCE_ICON } from "../lib/links";
 import { isQuestion } from "./AskEmployee";
 import { driftFor, useSources, type SourceState } from "../lib/drift";
 import { TemplateEditor } from "./TemplateEditor";
+import { BulkBar } from "./BulkBar";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 
 export const NOTE_COLORS: Record<IssueStatus, string> = {
@@ -74,6 +75,15 @@ export function MeetingPanel() {
   const [showQuestions, setShowQuestions] = useState(false);
   const [priority, setPriority] = useState<Issue["priority"]>("medium");
   const [editing, setEditing] = useState(false);
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggle = (id: string) =>
+    setSelected((s) => {
+      const n = new Set(s);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
   const titleRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const focus = () => titleRef.current?.focus();
@@ -225,6 +235,16 @@ export function MeetingPanel() {
         <label style={{ cursor: "pointer", fontSize: 16 }} title="Questions you asked employees">
           <input type="checkbox" checked={showQuestions} onChange={(e) => setShowQuestions(e.target.checked)} /> 💬 questions
         </label>
+        <button
+          className={`px-btn small ${selecting ? "primary" : ""}`}
+          onClick={() => {
+            setSelecting((v) => !v);
+            setSelected(new Set());
+          }}
+          title="Select several notes to change them together"
+        >
+          ☑ Select
+        </button>
         {filtered && (
           <button className="px-btn small" onClick={() => setFilter(NO_FILTER)}>
             Clear
@@ -232,6 +252,16 @@ export function MeetingPanel() {
         )}
       </div>
 
+      {selecting && selected.size > 0 && (
+        <BulkBar
+          selected={selected}
+          onClear={() => {
+            setSelected(new Set());
+            setSelecting(false);
+          }}
+        />
+      )}
+      {selecting && selected.size === 0 && <div className="muted" style={{ fontSize: 16, margin: "0 0 6px" }}>Click notes to select them.</div>}
       <div className="kanban">
         {COLUMNS.map((col) => {
           const all = visible.filter((i) => col.statuses.includes(i.status));
@@ -255,7 +285,14 @@ export function MeetingPanel() {
                 {col.title} <span className="muted">{all.length}</span>
               </h5>
               {notes.map((i) => (
-                <StickyNote key={i.id} issue={i} sources={sources} assignee={agentById(i.assigneeAgentId)?.name} onOpen={() => open({ kind: "issue", issueId: i.id })} />
+                <StickyNote
+                  key={i.id}
+                  issue={i}
+                  sources={sources}
+                  assignee={agentById(i.assigneeAgentId)?.name}
+                  selected={selecting ? selected.has(i.id) : undefined}
+                  onOpen={() => (selecting ? toggle(i.id) : open({ kind: "issue", issueId: i.id }))}
+                />
               ))}
               {notes.length < all.length && (
                 <button className="px-btn small" onClick={() => setAllDone(true)}>
@@ -273,12 +310,26 @@ export function MeetingPanel() {
   );
 }
 
-function StickyNote({ issue, assignee, onOpen, sources }: { issue: Issue; assignee?: string; onOpen: () => void; sources?: Record<string, SourceState> }) {
+function StickyNote({
+  issue,
+  assignee,
+  onOpen,
+  sources,
+  selected,
+}: {
+  issue: Issue;
+  assignee?: string;
+  onOpen: () => void;
+  sources?: Record<string, SourceState>;
+  /** undefined = not in select mode */
+  selected?: boolean;
+}) {
   const source = extractSources(issue.description)[0];
   const drift = driftFor(issue, sources);
   return (
     <button
-      className="sticky"
+      className={`sticky ${selected ? "selected" : ""}`}
+      aria-pressed={selected}
       style={{ background: NOTE_COLORS[issue.status] }}
       onClick={onOpen}
       title={source ? `From ${source.key}` : undefined}
@@ -288,6 +339,7 @@ function StickyNote({ issue, assignee, onOpen, sources }: { issue: Issue; assign
         e.dataTransfer.effectAllowed = "move";
       }}
     >
+      {selected !== undefined && <span className="pick">{selected ? "☑" : "☐"}</span>}
       <span className="id">
         {issue.identifier}
         {issue.status === "blocked" ? " · BLOCKED" : ""}

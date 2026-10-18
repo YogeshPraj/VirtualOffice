@@ -62,7 +62,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Employee instructions.** Read and edit an employee's instructions (their AGENTS.md bundle) from
   their desk, with history and restore.
 - [x] **(P2) Task history.** A timeline on each task: created, status changes, assignments, comments and shifts.
-- [ ] **(P2) Bulk edit on the board.** Select several notes; assign, set priority, change status or cancel at once.
+- [x] **(P2) Bulk edit on the board.** Select several notes; assign, set priority, change status or cancel at once.
 - [ ] **(P2) Workload.** Each employee's queue, what they're on now and how long they've been idle, with a
   one-click reassign to balance the team.
 - [ ] **(P2) Goals with progress.** Link tasks to the mission poster's goals and see progress bars.

@@ -615,3 +615,9 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .history { max-height: 360px; overflow-y: auto; font-size: 16px; }
 .history-day { font-family: var(--font-title); font-size: 7px; margin: 8px 0 2px; color: var(--muted); }
 .history-line { display: flex; gap: 6px; align-items: flex-start; margin: 2px 0; }
+
+.bulk-bar { position: sticky; top: 0; z-index: 3; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: var(--ink); color: var(--paper); padding: 6px 8px; margin: 0 0 8px; }
+.bulk-bar .px-select { font-size: 15px; }
+.bulk-bar .muted { color: #c9bfa8; }
+.sticky.selected { outline: 4px solid var(--info); outline-offset: 1px; }
+.sticky .pick { float: right; font-size: 16px; }
