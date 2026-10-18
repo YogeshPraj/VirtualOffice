@@ -18,7 +18,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   comment on the source work item (an outward action, so it always asks the CEO first).
 
 ## Knowing what's going on
-- [ ] **(P1) Desktop notifications.** A Windows notification (and optional sound) when someone starts
+- [x] **(P1) Desktop notifications.** A Windows notification (and optional sound) when someone starts
   waiting on the CEO, when a task needs review, and when an employee errors. Toggle in the HUD.
 - [ ] **(P1) Over-the-shoulder view.** Click a working employee to watch their live run output.
 - [ ] **(P1) Task documents.** Plans and specs agents attach to tasks (e.g. the Manager's `plan`) are

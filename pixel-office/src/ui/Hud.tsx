@@ -4,6 +4,7 @@ import { useDashboard, useToolConnections } from "../api/hooks";
 import { useOffice } from "../state/officeStore";
 import { CLASSIC_UI } from "./Window";
 import { BrainSwitcher } from "./BrainSwitcher";
+import { useNotificationPref } from "./useNotifications";
 
 export function Hud({ company, attentionCount, companies, onSwitch }: {
   company: Company;
@@ -19,6 +20,7 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
   // An AI connection that needs a fresh sign-in stops every employee, so it gets a loud banner.
   const { data: conns } = useToolConnections(company.id);
   const brokenAi = conns?.find((c) => c.connectionPurpose === "ai" && c.enabled && c.healthStatus === "error");
+  const notify = useNotificationPref();
   const [clock, setClock] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setClock(new Date()), 15_000);
@@ -61,6 +63,23 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
       )}
       <span className="spacer" />
       <BrainSwitcher />
+      {notify.supported && (
+        <button
+          className={`px-btn small ${notify.on ? "primary" : ""}`}
+          onClick={notify.toggle}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            notify.toggleSound();
+          }}
+          title={
+            notify.permission === "denied"
+              ? "Notifications are blocked for this site in the browser settings"
+              : `Desktop alerts ${notify.on ? "on" : "off"} (sound ${notify.sound ? "on" : "off"}; right-click to toggle sound)`
+          }
+        >
+          {notify.on ? (notify.sound ? "🔔" : "🔕") : "🔇"} ALERTS
+        </button>
+      )}
       <button className="px-btn small" onClick={() => goFloor(floor === "ground" ? "basement" : "ground")} title="Take the stairs">
         {floor === "ground" ? "▼ B1" : "▲ GROUND"}
       </button>

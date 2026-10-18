@@ -9,6 +9,7 @@ import { OfficeDataProvider } from "./state/officeData";
 import { useOffice } from "./state/officeStore";
 import { Hud } from "./ui/Hud";
 import { PxWindow } from "./ui/Window";
+import { useOfficeNotifications } from "./ui/useNotifications";
 import { ErrorBar } from "./ui/ErrorBar";
 
 const COMPANY_KEY = "pixel-office:company";
@@ -69,6 +70,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
     issues: issues.data ?? [],
     attention: attention.data?.items ?? [],
   };
+  useOfficeNotifications(value.attention, value.agents, value.issues, !!(agents.data && issues.data && attention.data));
 
   return (
     <OfficeDataProvider value={value}>
