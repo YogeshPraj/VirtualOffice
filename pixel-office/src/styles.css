@@ -508,3 +508,23 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Over-the-shoulder: an employee's screen, as a green-on-black terminal. */
+.shoulder-log {
+  background: #10141a;
+  color: #d7f5d0;
+  box-shadow: 0 0 0 2px var(--ink);
+  padding: 6px 8px;
+  max-height: 320px;
+  overflow-y: auto;
+  font-size: 16px;
+  line-height: 1.1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.shoulder-log > div {
+  margin: 2px 0;
+}
+.shoulder-log .muted {
+  color: #7f8b99;
+}

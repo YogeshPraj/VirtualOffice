@@ -21,6 +21,7 @@ import type {
   Issue,
   IssueComment,
   IssueStatus,
+  HeartbeatRun,
 } from "./types";
 
 export class ApiError extends Error {
@@ -119,6 +120,21 @@ export const api = {
   /** Wake an employee on a specific task (same as the classic "nudge"). */
   wakeOnIssue: (agentId: string, issueId: string, reason: string) =>
     post(`/agents/${agentId}/wakeup`, { source: "on_demand", triggerDetail: "manual", reason, payload: { issueId }, forceFreshSession: false }),
+  /** An employee's most recent runs, newest first. */
+  agentRuns: (companyId: string, agentId: string, limit = 3) =>
+    get<HeartbeatRun[]>(`/companies/${companyId}/heartbeat-runs?agentId=${agentId}&limit=${limit}`).then((runs) => runs.filter((r) => r.agentId === agentId)),
+  /** A run's stored output (ndjson). Paperclip pages it by byte offset; long runs keep only the tail. */
+  runLog: async (runId: string, totalBytes: number | null, maxBytes = 3_000_000) => {
+    let offset = Math.max(0, (totalBytes ?? 0) - maxBytes);
+    let content = "";
+    for (let page = 0; page < 40; page++) {
+      const r = await get<{ content: string; nextOffset?: number | null }>(`/heartbeat-runs/${runId}/log?offset=${offset}`);
+      content += r.content ?? "";
+      if (!r.nextOffset || r.nextOffset <= offset) break;
+      offset = r.nextOffset;
+    }
+    return content;
+  },
   issueBlockers: (issueId: string) =>
     get<{
       diagnosis: string | null;

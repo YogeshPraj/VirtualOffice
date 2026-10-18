@@ -320,3 +320,14 @@ export interface RecoveryAction {
   attemptCount: number;
   createdAt: string;
 }
+
+export interface HeartbeatRun {
+  id: string;
+  agentId: string;
+  status: "queued" | "running" | "succeeded" | "failed" | "cancelled" | "timed_out" | string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  error: string | null;
+  logBytes: number | null;
+  contextSnapshot?: { issueId?: string } | null;
+}

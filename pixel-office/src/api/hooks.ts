@@ -58,6 +58,8 @@ export const useDashboard = (companyId: string) =>
 export const useActivity = (companyId: string) =>
   useQuery({ queryKey: keys.activity(companyId), queryFn: () => api.activity(companyId), refetchInterval: 30_000 });
 
+export const RUN_LOG_EVENT = "pixel-office:run-log";
+
 function invalidateFor(qc: QueryClient, companyId: string, event: LiveEvent) {
   const p = event.payload;
   switch (event.type) {
@@ -106,6 +108,8 @@ export function useLiveEvents(companyId: string) {
           const event = JSON.parse(String(msg.data)) as LiveEvent;
           if (!event?.type) return;
           pushEvent(event);
+          // The over-the-shoulder view listens for raw run output without it touching the store.
+          if (event.type === "heartbeat.run.log") window.dispatchEvent(new CustomEvent(RUN_LOG_EVENT, { detail: event.payload }));
           invalidateFor(qc, companyId, event);
         } catch {
           /* ignore malformed frames */
