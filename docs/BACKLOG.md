@@ -67,3 +67,16 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   one-click reassign to balance the team.
 - [x] **(P2) Goals with progress.** Link tasks to the mission poster's goals and see progress bars.
 - [x] **(P3) Report as a file.** Download the daily/weekly report as Markdown.
+
+## Wave 4: coming back to the office
+- [ ] **(P1) Since you were away.** When you come back after a while, a briefing of what changed: finished,
+  new questions for you, failed shifts, new intake matches; changed notes glow on the board.
+- [ ] **(P2) Saved board views.** Name a filter ("My ADO bugs", "QA queue") and switch to it in one click.
+- [ ] **(P2) Comment drafts.** Unsent comments and questions survive closing the panel.
+- [ ] **(P2) Employee scorecard.** On each desk: tasks done, typical time to finish, failure rate and
+  review bounce-backs over 30 days.
+- [ ] **(P2) Cycle time in reports.** How long tasks took from start to done, and the slowest ones.
+- [ ] **(P2) Task map.** A picture of a task's sub-tasks and what blocks what.
+- [ ] **(P2) Back up office settings.** Templates, watches, working hours and saved views go into the private
+  company repo with each backup.
+- [ ] **(P3) Office sounds.** Optional soft typing while someone works and a chime when a task is done.
