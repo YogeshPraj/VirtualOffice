@@ -77,6 +77,7 @@ export interface Issue {
   assigneeUserId: string | null;
   projectId: string | null;
   parentId: string | null;
+  goalId?: string | null;
   workMode?: "standard" | "ask" | "planning" | "skill_test" | string;
   startedAt?: string | null;
   completedAt?: string | null;

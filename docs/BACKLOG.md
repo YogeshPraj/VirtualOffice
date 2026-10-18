@@ -65,5 +65,5 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Bulk edit on the board.** Select several notes; assign, set priority, change status or cancel at once.
 - [x] **(P2) Workload.** Each employee's queue, what they're on now and how long they've been idle, with a
   one-click reassign to balance the team.
-- [ ] **(P2) Goals with progress.** Link tasks to the mission poster's goals and see progress bars.
+- [x] **(P2) Goals with progress.** Link tasks to the mission poster's goals and see progress bars.
 - [ ] **(P3) Report as a file.** Download the daily/weekly report as Markdown.

@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "../api/client";
 import type { ActivityEntry } from "../api/types";
 import { useActivity, useDashboard } from "../api/hooks";
 import { useOfficeData } from "../state/officeData";
@@ -9,6 +7,7 @@ import { Avatar } from "../ui/Avatar";
 import { ClassicLink } from "../ui/Window";
 import { UsageCard } from "./UsageCard";
 import { Workload } from "./Workload";
+import { GoalPoster } from "./GoalPoster";
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -135,20 +134,8 @@ export function SecurityPanel() {
 
 /** Lobby: the company, its mission and goals. */
 export function LobbyPanel() {
-  const { company, toast } = useOfficeData();
+  const { company } = useOfficeData();
   const open = useOffice((s) => s.open);
-  const qc = useQueryClient();
-  const { data: goals } = useQuery({ queryKey: ["goals", company.id], queryFn: () => api.goals(company.id) });
-  const [title, setTitle] = useState("");
-  const create = useMutation({
-    mutationFn: () => api.createGoal(company.id, { title: title.trim(), level: "company", status: "active" }),
-    onSuccess: () => {
-      setTitle("");
-      toast("Mission poster updated.");
-      qc.invalidateQueries({ queryKey: ["goals", company.id] });
-    },
-    onError: (e: Error) => toast(e.message),
-  });
   return (
     <>
       <div className="px-card" style={{ borderLeft: "8px solid var(--info)" }}>
@@ -164,19 +151,7 @@ export function LobbyPanel() {
           🗺 Take the office tour
         </button>
       </div>
-      <div className="px-card">
-        <h4>MISSION POSTER</h4>
-        {(goals ?? []).length === 0 && <div className="muted">No goals on the wall yet.</div>}
-        {(goals ?? []).map((g) => (
-          <div key={g.id} style={{ margin: "6px 0" }}>
-            ★ {g.title} <span className="tag">{g.status}</span>
-          </div>
-        ))}
-        <input className="px-input" aria-label="New goal" placeholder="e.g. Ship v1 of the app by December" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <button className="px-btn primary small" disabled={!title.trim() || create.isPending} onClick={() => create.mutate()}>
-          Hang it up
-        </button>
-      </div>
+      <GoalPoster />
     </>
   );
 }

@@ -625,3 +625,4 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .work-row { margin: 2px 0; font-size: 16px; }
 .link-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .link-btn:hover { text-decoration: underline; }
+.goal { margin: 6px 0 10px; }

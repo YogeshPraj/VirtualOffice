@@ -6,6 +6,7 @@ import type { Issue } from "../api/types";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { NOTE_COLORS } from "./MeetingPanel";
+import { defaultGoalId, useGoals } from "./GoalPoster";
 
 const PRIORITIES: Issue["priority"][] = ["critical", "high", "medium", "low"];
 const MAX_UPLOAD = 20 * 1024 * 1024;
@@ -18,6 +19,7 @@ export function TaskDetails({ issue }: { issue: Issue }) {
   const open = useOffice((s) => s.open);
   const qc = useQueryClient();
   const { data: projects } = useProjects(company.id);
+  const { data: goals } = useGoals(company.id);
   const { data: full } = useQuery({ queryKey: ["issue", issue.id, issue.updatedAt], queryFn: () => api.issue(issue.id) });
   const [subTitle, setSubTitle] = useState("");
 
@@ -91,6 +93,16 @@ export function TaskDetails({ issue }: { issue: Issue }) {
           {projects?.map((p) => (
             <option key={p.id} value={p.id}>{p.name}</option>
           ))}
+        </select>
+
+        <label>Goal</label>
+        <select className="px-select" aria-label="Goal" value={issue.goalId && issue.goalId !== defaultGoalId(goals) ? issue.goalId : ""} onChange={(e) => update.mutate({ goalId: e.target.value || null })}>
+          <option value="">{defaultGoalId(goals) ? "Main goal (default)" : "No goal"}</option>
+          {(goals ?? [])
+            .filter((g) => g.id !== defaultGoalId(goals) && (g.status !== "cancelled" || g.id === issue.goalId))
+            .map((g) => (
+              <option key={g.id} value={g.id}>{g.title}</option>
+            ))}
         </select>
 
         <label>Parent</label>

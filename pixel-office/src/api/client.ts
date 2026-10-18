@@ -188,7 +188,7 @@ export const api = {
   ) => post<Issue>(`/companies/${companyId}/issues`, body),
   updateIssue: (
     issueId: string,
-    body: Partial<Pick<Issue, "status" | "assigneeAgentId" | "title" | "priority" | "projectId" | "parentId">> & { blockedByIssueIds?: string[] },
+    body: Partial<Pick<Issue, "status" | "assigneeAgentId" | "title" | "priority" | "projectId" | "parentId" | "goalId">> & { blockedByIssueIds?: string[] },
   ) =>
     patch<Issue>(`/issues/${issueId}`, body),
   comments: (issueId: string) => get<IssueComment[]>(`/issues/${issueId}/comments`),
@@ -223,7 +223,9 @@ export const api = {
   approve: (id: string) => post(`/approvals/${id}/approve`, {}),
   reject: (id: string) => post(`/approvals/${id}/reject`, {}),
 
-  goals: (companyId: string) => get<{ id: string; title: string; description: string | null; level: string; status: string }[]>(`/companies/${companyId}/goals`),
+  goals: (companyId: string) =>
+    get<{ id: string; title: string; description: string | null; level: string; status: string; parentId: string | null; createdAt: string }[]>(`/companies/${companyId}/goals`),
+  updateGoal: (goalId: string, body: { status?: string; title?: string }) => patch<unknown>(`/goals/${goalId}`, body),
   createGoal: (companyId: string, body: { title: string; description?: string; level?: string; status?: string }) =>
     post(`/companies/${companyId}/goals`, body),
   costsSummary: (companyId: string) => get<Record<string, unknown>>(`/companies/${companyId}/costs/summary`),
