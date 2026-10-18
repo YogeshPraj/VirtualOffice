@@ -14,6 +14,7 @@ import { ErrorBar } from "./ui/ErrorBar";
 import { CommandPalette } from "./ui/CommandPalette";
 import { Tour } from "./ui/Tour";
 import { Shortcuts } from "./ui/Shortcuts";
+import { useOfficeMood } from "./office/mood";
 
 const COMPANY_KEY = "pixel-office:company";
 
@@ -73,6 +74,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
     issues: issues.data ?? [],
     attention: attention.data?.items ?? [],
   };
+  const mood = useOfficeMood(company);
   useOfficeNotifications(value.attention, value.agents, value.issues, !!(agents.data && issues.data && attention.data));
 
   return (
@@ -80,7 +82,13 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
       <div className="app">
         <Hud company={company} attentionCount={value.attention.length} companies={companies} onSwitch={onSwitch} />
         <ErrorBar />
-        <main className="stage">
+        <main className={`stage mood-${mood.mood}`}>
+          {mood.mood === "night" && (
+            <div className="night-sign" role="status">
+              🌙 {mood.why}
+              {mood.reopens ? ` · opens ${new Date(mood.reopens).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })}` : " · nobody picks up new work"}
+            </div>
+          )}
           {floor === "ground" ? (
             <OfficeScene company={company} agents={value.agents} issues={value.issues} attention={value.attention} />
           ) : (

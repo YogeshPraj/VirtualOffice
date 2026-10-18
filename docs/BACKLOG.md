@@ -52,4 +52,4 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Search everything.** Search task threads and documents, not just titles.
 - [x] **(P3) Keyboard shortcuts.** `?` cheat sheet; `g b` board, `g i` inbox, `g t` today, `n` new task.
 - [x] **(P3) Weekly report.** "This week" in the daily report.
-- [ ] **(P3) Night mode.** The office art dims when the company is closed or after hours.
+- [x] **(P3) Night mode.** The office art dims when the company is closed or after hours.
