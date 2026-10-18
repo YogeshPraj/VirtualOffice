@@ -20,8 +20,10 @@ function Start-Hidden([string]$script, [string]$log) {
 if (-not (Test-Up $brainUrl)) { Start-Hidden "start-brain.ps1" ".brain-run.log" }
 if (-not (Test-Up $paperclipUrl)) { Start-Hidden "start-paperclip.ps1" ".paperclip-run.log" }
 if (-not (Test-Up $officeUrl)) { Start-Hidden "start-office.ps1" ".office-run.log" }
+# Once Paperclip is up, make sure this repo's Copilot adapter is registered (no-op after first time).
+Start-Hidden "scripts\ensure-adapters.ps1" ".adapters-run.log"
 
-# The office page itself waits for Paperclip ("Unlocking the building…"), so only the
+# The office page itself waits for Paperclip ("Unlocking the building..."), so only the
 # fast front-end server needs to be ready before the window opens.
 for ($i = 0; $i -lt 60 -and -not (Test-Up $officeUrl); $i++) { Start-Sleep -Milliseconds 500 }
 
