@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import { brainApi, brainKeys, useBrainStatus, useRecentMemories, type Memory, type MemoryKind } from "../api/brain";
 import { keys, useCompanySkills } from "../api/hooks";
 import { useOfficeData } from "../state/officeData";
+import { BrainImport } from "./BrainImport";
 
 /** What the CEO picks → how the brain stores it. */
 const CAPTURE_TYPES: { id: string; label: string; kind: MemoryKind; hint: string; needsEntity?: boolean }[] = [
@@ -29,7 +30,7 @@ function Tabs<T extends string>({ tabs, value, onChange }: { tabs: [T, string][]
 }
 
 export function StudyPanel() {
-  const [tab, setTab] = useState<"capture" | "memory" | "handbook">("capture");
+  const [tab, setTab] = useState<"capture" | "memory" | "handbook" | "import">("capture");
   const status = useBrainStatus();
   return (
     <>
@@ -46,6 +47,7 @@ export function StudyPanel() {
           ["capture", "✍ Capture"],
           ["memory", "🧠 Memory"],
           ["handbook", "📖 Handbook"],
+          ["import", "📥 Import"],
         ]}
         value={tab}
         onChange={setTab}
@@ -53,6 +55,7 @@ export function StudyPanel() {
       {tab === "capture" && <Capture />}
       {tab === "memory" && <MemoryBrowser />}
       {tab === "handbook" && <HandbookEditor />}
+      {tab === "import" && <BrainImport />}
     </>
   );
 }

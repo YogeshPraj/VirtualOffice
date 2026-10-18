@@ -34,7 +34,15 @@ export const brainApi = {
   remember: (body: { fact: string; kind: MemoryKind; entity?: string; provenance?: string; origin?: "decision" }) =>
     brain<{ status?: string; id?: string }>("POST", "/remember", body),
   forget: (id: Memory["id"]) => brain("POST", "/forget", { id }),
+  importNotes: (folder: string, files: { path: string; content: string }[]) => brain<ImportResult>("POST", "/import", { folder, files }),
 };
+
+export interface ImportResult {
+  written: number;
+  slugs: string[];
+  skipped: { path: string; reason: string }[];
+  failed: { path: string; reason: string }[];
+}
 
 export const brainKeys = { recent: ["brain", "recent"] as const, status: ["brain", "status"] as const };
 

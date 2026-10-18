@@ -35,6 +35,6 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 ## Running the office
 - [x] **(P2) Building status.** One place that checks Paperclip, the brain, the office server, each
   adapter, and the Claude/Copilot/az/gh sign-ins, with the fix for anything red.
-- [ ] **(P2) Brain import.** Bulk-import a folder of markdown notes or docs into the brain.
+- [x] **(P2) Brain import.** Bulk-import a folder of markdown notes or docs into the brain.
 - [ ] **(P3) Working hours.** Optionally pause the company outside set hours.
 - [ ] **(P3) First-run tour** of the rooms for a new install.
