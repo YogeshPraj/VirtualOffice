@@ -84,7 +84,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 ## Wave 5: deciding faster
 - [x] **(P1) Review queue.** Everything ready for your review in one place: tasks in review with their work
   products, documents and latest update; approve (done), send back with a note, or open. Keys j/k, a, s.
-- [ ] **(P1) Hiring presets.** Ready-made roles (QA, backend, frontend, docs writer, reviewer) with sensible
+- [x] **(P1) Hiring presets.** Ready-made roles (QA, backend, frontend, docs writer, reviewer) with sensible
   instructions, title and capabilities: one click to post the job.
 - [ ] **(P2) Undo.** After moving, reassigning or cancelling a task, an Undo button for a few seconds.
 - [ ] **(P2) Focus list.** Pin up to five tasks as your priorities; they lead the board and the Today report.

@@ -10,6 +10,7 @@ import { useOffice } from "../state/officeStore";
 import { Avatar } from "../ui/Avatar";
 import { ProviderTag } from "../ui/ProviderTag";
 import { appearanceFor } from "../pixel/sprite";
+import { HIRE_PRESETS, freeName, withPlaybook, type HirePreset } from "../lib/hirePresets";
 
 const ROLE_LABEL: Record<AgentRole, string> = {
   ceo: "CEO",
@@ -52,6 +53,18 @@ export function HrPanel() {
   const [reportsTo, setReportsTo] = useState<string>(staff[0]?.id ?? "");
   const [budget, setBudget] = useState("20");
   const [autoWake, setAutoWake] = useState(false);
+  const [preset, setPreset] = useState<HirePreset | null>(null);
+  // The team lead is the natural manager for a new hire.
+  const lead = staff.find((a) => !a.reportsTo && ["general", "pm", "ceo", "cto"].includes(a.role)) ?? staff.find((a) => !a.reportsTo);
+  const usePreset = (p: HirePreset) => {
+    setPreset(p);
+    setRole(p.role);
+    setTitle(p.title);
+    setSkills(p.skills);
+    setBudget(p.budget);
+    if (!name.trim()) setName(freeName(agents.map((a) => a.name)));
+    if (lead) setReportsTo(lead.id);
+  };
 
   const adapters = useAdapters();
   const providers = useMemo(() => (adapters.data ?? []).filter(isProvider), [adapters.data]);
@@ -94,8 +107,19 @@ export function HrPanel() {
         budgetMonthlyCents: Math.max(0, Math.round(Number(budget || 0) * 100)),
       });
     },
-    onSuccess: ({ agent, approval }) => {
+    onSuccess: async ({ agent, approval }) => {
       toast(approval ? `${agent.name} is waiting in the lobby for your signature.` : `${agent.name} joined! Desk assigned.`);
+      // Give a preset hire their role playbook in their instructions (best effort).
+      if (preset) {
+        try {
+          const bundle = await api.instructionsBundle(agent.id);
+          const file = await api.instructionsFile(agent.id, bundle.entryFile);
+          await api.saveInstructionsFile(agent.id, bundle.entryFile, withPlaybook(file.content, preset), file.contentHash);
+        } catch {
+          toast(`${agent.name} was hired, but their role playbook couldn't be added; add it from their desk.`);
+        }
+        setPreset(null);
+      }
       setName("");
       setTitle("");
       qc.invalidateQueries({ queryKey: keys.agents(company.id) });
@@ -110,6 +134,18 @@ export function HrPanel() {
     <>
       <div className="px-card">
         <h4>JOB POSTING</h4>
+        <div className="row" style={{ flexWrap: "wrap", gap: 6, marginBottom: 8 }} role="group" aria-label="Hiring presets">
+          {HIRE_PRESETS.map((p) => (
+            <button key={p.id} className={`px-btn small ${preset?.id === p.id ? "primary" : ""}`} onClick={() => usePreset(p)} title={p.skills}>
+              {p.icon} {p.label}
+            </button>
+          ))}
+        </div>
+        {preset && (
+          <div className="muted" style={{ fontSize: 15, marginBottom: 6 }}>
+            Filled in for a {preset.label.toLowerCase()}. Their instructions get a short playbook for the role; edit anything below first.
+          </div>
+        )}
         <div className="row" style={{ alignItems: "flex-start" }}>
           <div style={{ flex: "none", textAlign: "center", width: 64 }}>
             <Avatar appearance={appearanceFor(previewId, role)} size={48} />
