@@ -200,10 +200,58 @@ function send(res: ServerResponse, status: number, body: unknown) {
   res.end(JSON.stringify(body));
 }
 
+const MAX_COMMENT = 8000; // keeps the whole command line far below Windows' limit
+
+/** Post a comment on the source item. Outward action: only called after the CEO confirms in the UI. */
+export async function postComment(url: string, text: string): Promise<{ ok: boolean; error?: string; fix?: string }> {
+  const p = parseLink(url);
+  const body = text.trim();
+  if (!p || p.source === "link") return { ok: false, error: "Only Azure DevOps work items and GitHub issues/PRs can be commented on." };
+  if (!body) return { ok: false, error: "Write the comment first." };
+  if (body.length > MAX_COMMENT) return { ok: false, error: `Keep it under ${MAX_COMMENT} characters.` };
+
+  if (p.source === "ado") {
+    if (!SAFE_NAME.test(p.org ?? "")) return { ok: false, error: "That doesn't look like an Azure DevOps organization name." };
+    const org = p.url.includes("visualstudio.com") ? `https://${p.org}.visualstudio.com` : `https://dev.azure.com/${p.org}`;
+    // ADO discussion comments are HTML.
+    const html = body
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\r?\n/g, "<br>");
+    const az = azCommand();
+    const r = await run(az.cmd, [...az.prefix, "boards", "work-item", "update", "--id", p.id!, "--org", org, "--discussion", html, "--output", "none"]);
+    if (r.missing) return { ok: false, error: "Azure CLI isn't installed.", fix: "winget install Microsoft.AzureCLI, then: az extension add --name azure-devops, then: az login" };
+    if (!r.ok) {
+      const t = r.stderr.trim();
+      return { ok: false, error: t.split("\n").find(Boolean)?.slice(0, 240) ?? "az failed", fix: /login|authenticat|AADSTS/i.test(t) ? "az login" : undefined };
+    }
+    return { ok: true };
+  }
+
+  const r = await run("gh", [p.kind === "pull" ? "pr" : "issue", "comment", p.id!, "-R", p.repo!, "--body", body]);
+  if (r.missing) return { ok: false, error: "GitHub CLI isn't installed.", fix: "winget install GitHub.cli, then: gh auth login" };
+  if (!r.ok) {
+    const t = r.stderr.trim();
+    return { ok: false, error: t.split("\n").find(Boolean)?.slice(0, 240) ?? "gh failed", fix: /auth|login|SAML|SSO/i.test(t) ? "gh auth login" : undefined };
+  }
+  return { ok: true };
+}
+
 export function intakeBridge(): Plugin {
   return {
     name: "intake-bridge",
     configureServer(server) {
+      server.middlewares.use("/office-admin/intake/comment", async (req, res) => {
+        if (req.method !== "POST") return send(res, 405, { error: "POST only" });
+        try {
+          const body = await readBody(req);
+          const result = await postComment(String(body.url ?? ""), String(body.text ?? ""));
+          send(res, result.ok ? 200 : 400, result.ok ? result : { error: result.error, fix: result.fix });
+        } catch (e) {
+          send(res, 500, { error: e instanceof Error ? e.message : String(e) });
+        }
+      });
       server.middlewares.use("/office-admin/intake/resolve", async (req, res) => {
         if (req.method !== "POST") return send(res, 405, { error: "POST only" });
         try {

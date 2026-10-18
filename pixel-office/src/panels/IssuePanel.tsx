@@ -76,7 +76,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
         </div>
       </div>
 
-      <LinkedWork description={issue.description} />
+      <LinkedWork description={issue.description} done={issue.status === "done"} latestAgentComment={[...(comments.data ?? [])].reverse().find((c) => c.authorAgentId)?.body ?? null} />
       {issue.status === "blocked" && <BlockedBy issueId={issueId} />}
 
       {pending.map((i) => (
@@ -146,9 +146,35 @@ interface LiveSource {
 }
 
 /** The ADO / GitHub items a task is about, with their live state on request. */
-function LinkedWork({ description }: { description: string | null }) {
+function LinkedWork({ description, done, latestAgentComment }: { description: string | null; done: boolean; latestAgentComment: string | null }) {
+  const { company } = useOfficeData();
   const sources = extractSources(description);
   const [live, setLive] = useState<Record<string, LiveSource>>({});
+  const [reporting, setReporting] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const [posted, setPosted] = useState<Record<string, boolean>>({});
+  const post = useMutation({
+    mutationFn: async ({ url, text }: { url: string; text: string }) => {
+      const res = await fetch("/office-admin/intake/comment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, text }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string; fix?: string };
+      if (!res.ok) throw new Error(`${data.error ?? "Posting failed"}${data.fix ? ` Fix: ${data.fix}` : ""}`);
+    },
+    onSuccess: (_d, v) => {
+      setPosted((p) => ({ ...p, [v.url]: true }));
+      setReporting(null);
+    },
+  });
+  const startReport = (url: string) => {
+    const summary = (latestAgentComment ?? "").trim().slice(0, 6000);
+    setDraft(`${summary || "Update from the team: "}
+
+(Posted from ${company.name}'s Virtual Office.)`);
+    setReporting(url);
+  };
   const check = useMutation({
     mutationFn: async () => {
       const res = await fetch("/office-admin/intake/resolve", {
@@ -187,6 +213,33 @@ function LinkedWork({ description }: { description: string | null }) {
             <a className="px-btn small" href={s.url} target="_blank" rel="noreferrer">
               Open ↗
             </a>
+            <button className={`px-btn small ${done && !posted[s.url] ? "primary" : ""}`} onClick={() => startReport(s.url)}>
+              {posted[s.url] ? "✔ Reported" : "📤 Report back"}
+            </button>
+            {reporting === s.url && (
+              <div style={{ width: "100%" }}>
+                <div className="muted" style={{ fontSize: 16 }}>
+                  This posts a comment on {s.key} as you. Edit it first; nothing is sent until you confirm.
+                </div>
+                <textarea
+                  className="px-textarea"
+                  aria-label={`Comment for ${s.key}`}
+                  style={{ minHeight: 120 }}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                />
+                <div className="row">
+                  <button
+                    className="px-btn good small"
+                    disabled={!draft.trim() || post.isPending}
+                    onClick={() => confirm(`Post this comment on ${s.key} as you?`) && post.mutate({ url: s.url, text: draft })}
+                  >
+                    {post.isPending ? "Posting…" : `Post to ${s.key}`}
+                  </button>
+                  <button className="px-btn small" onClick={() => setReporting(null)}>Cancel</button>
+                </div>
+              </div>
+            )}
           </div>
         );
       })}

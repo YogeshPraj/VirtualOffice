@@ -14,7 +14,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   to an employee, in a chosen project, with priority. Skips items that already have a task.
 - [x] **(P1) Linked work.** A task shows the ADO/GitHub item it came from (type, state, link), and the
   board shows a badge, so the CEO can jump back to the source.
-- [ ] **(P2) Report back to ADO.** Opt-in per task: when a task is done, post the team's summary as a
+- [x] **(P2) Report back to ADO.** Opt-in per task: when a task is done, post the team's summary as a
   comment on the source work item (an outward action, so it always asks the CEO first).
 
 ## Knowing what's going on
