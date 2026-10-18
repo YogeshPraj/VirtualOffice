@@ -16,6 +16,7 @@ const DIR = resolve(__dirname, "..", ".office");
 const ALLOWED = new Map<string, number>([
   ["templates", 256 * 1024],
   ["instructions-history", 4 * 1024 * 1024],
+  ["views", 64 * 1024],
 ]);
 
 async function readBody(req: IncomingMessage, max: number): Promise<string> {

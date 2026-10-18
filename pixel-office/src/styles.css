@@ -628,3 +628,8 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .goal { margin: 6px 0 10px; }
 .sticky.changed { box-shadow: 0 0 0 3px var(--accent), 0 0 10px 2px rgba(245, 197, 66, 0.8); }
 .sticky.changed .id::after { content: " · NEW"; color: #8a5a00; }
+.saved-views { flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+.view-chip { display: inline-flex; box-shadow: 0 0 0 2px var(--ink); background: #fffaf0; }
+.view-chip button { border: 0; background: transparent; font: inherit; font-size: 16px; padding: 1px 6px; cursor: pointer; color: var(--ink); }
+.view-chip button + button { border-left: 2px solid var(--ink); padding: 1px 4px; }
+.view-chip.on { background: var(--accent); }

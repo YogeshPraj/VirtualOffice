@@ -11,6 +11,7 @@ import { isQuestion } from "./AskEmployee";
 import { driftFor, useSources, type SourceState } from "../lib/drift";
 import { TemplateEditor } from "./TemplateEditor";
 import { BulkBar } from "./BulkBar";
+import { SavedViews } from "./SavedViews";
 import { awayBaseline } from "../ui/SinceAway";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 
@@ -203,6 +204,14 @@ export function MeetingPanel() {
       </div>
       {editing && <TemplateEditor onClose={() => setEditing(false)} />}
 
+      <SavedViews
+        filter={filter}
+        questions={showQuestions}
+        onApply={(v) => {
+          setFilter({ ...NO_FILTER, ...v.filter });
+          setShowQuestions(!!v.questions);
+        }}
+      />
       <div className="row board-filters">
         <input
           className="px-input"
