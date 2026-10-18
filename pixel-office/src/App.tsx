@@ -17,6 +17,7 @@ import { Shortcuts } from "./ui/Shortcuts";
 import { SinceAway } from "./ui/SinceAway";
 import { useOfficeMood } from "./office/mood";
 import { useWatchAlerts } from "./ui/useWatchAlerts";
+import { useOfficeSounds } from "./ui/useOfficeSounds";
 
 const COMPANY_KEY = "pixel-office:company";
 
@@ -78,6 +79,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
   };
   const mood = useOfficeMood(company);
   useWatchAlerts();
+  useOfficeSounds(issues.data ?? []);
   useOfficeNotifications(value.attention, value.agents, value.issues, !!(agents.data && issues.data && attention.data));
 
   return (

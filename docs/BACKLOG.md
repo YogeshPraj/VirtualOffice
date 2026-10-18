@@ -79,4 +79,4 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Task map.** A picture of a task's sub-tasks and what blocks what.
 - [x] **(P2) Back up office settings.** Templates, watches, working hours and saved views go into the private
   company repo with each backup.
-- [ ] **(P3) Office sounds.** Optional soft typing while someone works and a chime when a task is done.
+- [x] **(P3) Office sounds.** Optional soft typing while someone works and a chime when a task is done.

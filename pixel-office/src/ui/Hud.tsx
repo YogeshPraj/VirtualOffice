@@ -5,6 +5,7 @@ import { useOffice } from "../state/officeStore";
 import { CLASSIC_UI } from "./Window";
 import { BrainSwitcher } from "./BrainSwitcher";
 import { useNotificationPref } from "./useNotifications";
+import { useSoundPref } from "./useOfficeSounds";
 import { pendingTotal, useWatches } from "../lib/watches";
 import { LEVEL_ICON, useBuildingStatus, worstLevel } from "../panels/StatusPanel";
 
@@ -23,6 +24,7 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
   const { data: conns } = useToolConnections(company.id);
   const brokenAi = conns?.find((c) => c.connectionPurpose === "ai" && c.enabled && c.healthStatus === "error");
   const notify = useNotificationPref();
+  const sounds = useSoundPref();
   const { data: watches } = useWatches();
   const newWork = pendingTotal(watches);
   const building = useBuildingStatus();
@@ -86,6 +88,14 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
         🔎 Ctrl+K
       </button>
       <BrainSwitcher />
+      <button
+        className={`px-btn small ${sounds.on ? "primary" : ""}`}
+        onClick={sounds.toggle}
+        aria-pressed={sounds.on}
+        title={sounds.on ? "Office sounds on: soft typing while someone works, a chime when a task is done" : "Office sounds off"}
+      >
+        {sounds.on ? "🎵" : "🔈"}
+      </button>
       {notify.supported && (
         <button
           className={`px-btn small ${notify.on ? "primary" : ""}`}
