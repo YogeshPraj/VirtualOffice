@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { SearchHit } from "../api/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { keys } from "../api/hooks";
@@ -12,7 +14,26 @@ interface Command {
   icon: string;
   label: string;
   hint?: string;
+  detail?: ReactNode;
   run: () => void;
+}
+
+const SOURCE_ICON: Record<string, string> = { Title: "📌", Description: "📝", Comment: "💬", Artifact: "📄", Document: "📄" };
+
+/** A snippet with its search matches marked. */
+function Snippet({ hit }: { hit: SearchHit }) {
+  const s = hit.snippets?.find((x) => x.field !== "title") ?? hit.snippets?.[0];
+  const text = s?.text ?? hit.snippet;
+  if (!s?.highlights?.length) return <>{text.slice(0, 160)}</>;
+  const out: ReactNode[] = [];
+  let at = 0;
+  for (const h of s.highlights.slice(0, 6)) {
+    if (h.start < at) continue;
+    out.push(text.slice(at, h.start), <mark key={h.start}>{text.slice(h.start, h.end)}</mark>);
+    at = h.end;
+  }
+  out.push(text.slice(at));
+  return <>{out}</>;
 }
 
 const BASEMENT: RoomId[] = ["settings", "org", "skills", "routines", "projects", "tools", "vault", "adapters"];
@@ -96,6 +117,34 @@ export function CommandPalette() {
   }, [agents, issues, open, goFloor]);
 
   const q = query.trim();
+  // Deep search (threads and documents) once the CEO pauses typing.
+  const [deepQ, setDeepQ] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDeepQ(q.length >= 3 ? q : ""), 300);
+    return () => clearTimeout(t);
+  }, [q]);
+  const deep = useQuery({
+    queryKey: ["search", company.id, deepQ],
+    queryFn: () => api.search(company.id, deepQ),
+    enabled: shown && deepQ.length >= 3,
+    staleTime: 30_000,
+  });
+  const deepCommands = useMemo<Command[]>(() => {
+    if (!deepQ || deepQ !== q) return [];
+    return (deep.data?.results ?? []).map((h) => {
+      const ident = h.issue?.identifier ?? h.href.match(/\/issues\/([A-Z][A-Z0-9]*-\d+)/)?.[1];
+      const issue = h.issue?.id ? issues.find((i) => i.id === h.issue!.id) : issues.find((i) => i.identifier === ident);
+      return {
+        id: `deep:${h.id}`,
+        icon: SOURCE_ICON[h.sourceLabel] ?? "🔎",
+        label: h.title,
+        hint: h.sourceLabel.toLowerCase(),
+        detail: <Snippet hit={h} />,
+        run: () => (issue ? open({ kind: "issue", issueId: issue.id }) : toast("That result isn't a task in this office.")),
+      };
+    });
+  }, [deep.data, deepQ, q, issues, open, toast]);
+
   const results = useMemo(() => {
     if (!q) return all.filter((c) => !c.id.startsWith("issue:")).concat(all.filter((c) => c.id.startsWith("issue:")).slice(0, 5));
     const hits = all
@@ -104,9 +153,12 @@ export function CommandPalette() {
       .sort((a, b) => a.s - b.s)
       .slice(0, 12)
       .map((x) => x.c);
-    const pin: Command = { id: "new", icon: "＋", label: `New task: "${q}"`, hint: "Enter", run: () => create.mutate(q) };
-    return hits.length ? [...hits, pin] : [pin];
-  }, [all, q, create]);
+    const pin: Command = { id: "new", icon: "＋", label: `New task: "${q}"`, hint: "new", run: () => create.mutate(q) };
+    // Title hits first, then matches inside threads and documents (minus tasks already listed).
+    const shownIssues = new Set(hits.filter((c) => c.id.startsWith("issue:")).map((c) => c.label.split(" ")[0]));
+    const deeper = deepCommands.filter((c) => !shownIssues.has(c.label.split(" ")[0]) || c.hint !== "title");
+    return [...hits, ...deeper.slice(0, 10), pin];
+  }, [all, q, create, deepCommands]);
 
   if (!shown) return null;
   const pick = (c: Command | undefined) => {
@@ -156,12 +208,17 @@ export function CommandPalette() {
               onClick={() => pick(c)}
             >
               <span>{c.icon}</span>
-              <span style={{ flex: 1 }}>{c.label}</span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                {c.label}
+                {c.detail && <small className="palette-detail">{c.detail}</small>}
+              </span>
               {c.hint && <small className="muted">{c.hint}</small>}
             </button>
           ))}
         </div>
-        <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>↑↓ to move · Enter to open · Esc to close</div>
+        <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>
+          ↑↓ to move · Enter to open · Esc to close{deep.isFetching ? " · searching threads and documents…" : q.length >= 3 ? " · threads and documents included" : ""}
+        </div>
       </div>
     </div>
   );

@@ -22,6 +22,7 @@ import type {
   IssueComment,
   IssueStatus,
   HeartbeatRun,
+  SearchHit,
   WorkProduct,
   Attachment,
   WindowSpend,
@@ -214,6 +215,9 @@ export const api = {
     post(`/companies/${companyId}/goals`, body),
   costsSummary: (companyId: string) => get<Record<string, unknown>>(`/companies/${companyId}/costs/summary`),
 
+  /** Paperclip's full-text search: titles, descriptions, comments and documents, with snippets. */
+  search: (companyId: string, q: string, limit = 12) =>
+    get<{ results: SearchHit[]; hasMore: boolean }>(`/companies/${companyId}/search?q=${encodeURIComponent(q)}&limit=${limit}`),
   costsByAgent: (companyId: string, from?: string) =>
     get<{ agentId: string; agentName: string; costCents: number; inputTokens: number; cachedInputTokens: number; outputTokens: number; subscriptionRunCount: number; apiRunCount: number }[]>(
       `/companies/${companyId}/costs/by-agent${from ? `?from=${encodeURIComponent(from)}` : ""}`,

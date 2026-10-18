@@ -594,3 +594,6 @@ textarea {
 .usage-table tbody tr:hover { background: #fff3c4; }
 .usage-table tr.total td { font-weight: bold; border-top: 2px solid var(--ink); }
 .fail-detail { background: #10141a; color: #ffb3b3; padding: 4px 8px; font-size: 14px; white-space: pre-wrap; word-break: break-word; max-height: 160px; overflow-y: auto; margin: 4px 0; }
+
+.palette-detail { display: block; font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-detail mark { background: var(--accent); color: var(--ink); padding: 0 1px; }

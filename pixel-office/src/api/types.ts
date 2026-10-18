@@ -418,3 +418,14 @@ export interface WorkProduct {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface SearchHit {
+  id: string;
+  type: string; // "issue" | "artifact" | …
+  title: string;
+  href: string;
+  sourceLabel: string;
+  snippet: string;
+  snippets?: { field: string; label: string; text: string; highlights?: { start: number; end: number }[] }[];
+  issue?: { id: string; identifier: string; status: string } | null;
+}
