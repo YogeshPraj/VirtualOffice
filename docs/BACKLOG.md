@@ -59,7 +59,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   puts new matches on the intake desk (with an alert), so new work assigned to you shows up by itself.
 - [x] **(P1) Source drift.** When a linked ADO/GitHub item is closed, reopened or reassigned outside the office,
   flag it on the task and the board.
-- [ ] **(P2) Employee instructions.** Read and edit an employee's instructions (their AGENTS.md bundle) from
+- [x] **(P2) Employee instructions.** Read and edit an employee's instructions (their AGENTS.md bundle) from
   their desk, with history and restore.
 - [ ] **(P2) Task history.** A timeline on each task: created, status changes, assignments, comments and shifts.
 - [ ] **(P2) Bulk edit on the board.** Select several notes; assign, set priority, change status or cancel at once.

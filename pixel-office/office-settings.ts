@@ -12,15 +12,18 @@ import type { IncomingMessage } from "node:http";
 import type { Plugin } from "vite";
 
 const DIR = resolve(__dirname, "..", ".office");
-const ALLOWED = new Set(["templates"]);
-const MAX_BYTES = 256 * 1024;
+// name -> largest accepted body
+const ALLOWED = new Map<string, number>([
+  ["templates", 256 * 1024],
+  ["instructions-history", 4 * 1024 * 1024],
+]);
 
-async function readBody(req: IncomingMessage): Promise<string> {
+async function readBody(req: IncomingMessage, max: number): Promise<string> {
   const chunks: Buffer[] = [];
   let size = 0;
   for await (const c of req) {
     size += (c as Buffer).length;
-    if (size > MAX_BYTES) throw new Error("Too big.");
+    if (size > max) throw new Error("Too big.");
     chunks.push(c as Buffer);
   }
   return Buffer.concat(chunks).toString("utf8");
@@ -41,7 +44,7 @@ export function officeSettings(): Plugin {
         try {
           if (req.method === "GET") return res.end(existsSync(file) ? readFileSync(file, "utf8") : "null");
           if (req.method === "PUT") {
-            const text = await readBody(req);
+            const text = await readBody(req, ALLOWED.get(name)!);
             JSON.parse(text); // must be valid JSON
             if (!existsSync(DIR)) mkdirSync(DIR, { recursive: true });
             writeFileSync(file, text);

@@ -52,6 +52,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 const get = <T>(path: string) => request<T>("GET", path);
 const post = <T>(path: string, body: unknown = {}) => request<T>("POST", path, body);
 const patch = <T>(path: string, body: unknown) => request<T>("PATCH", path, body);
+const put = <T>(path: string, body: unknown) => request<T>("PUT", path, body);
 const del = <T>(path: string) => request<T>("DELETE", path);
 
 export interface HirePayload {
@@ -148,6 +149,17 @@ export const api = {
   agentRuns: (companyId: string, agentId: string, limit = 3) =>
     get<HeartbeatRun[]>(`/companies/${companyId}/heartbeat-runs?agentId=${agentId}&limit=${limit}`).then((runs) => runs.filter((r) => r.agentId === agentId)),
   /** A run's stored output (ndjson). Paperclip pages it by byte offset; long runs keep only the tail. */
+  instructionsBundle: (agentId: string) =>
+    get<{ entryFile: string; editable: boolean; files: { path: string; isEntryFile: boolean; editable: boolean; size: number }[] }>(`/agents/${agentId}/instructions-bundle`),
+  instructionsFile: (agentId: string, path: string) =>
+    get<{ path: string; content: string; contentHash: string; revision: { id: string } }>(`/agents/${agentId}/instructions-bundle/file?path=${encodeURIComponent(path)}`),
+  saveInstructionsFile: (agentId: string, path: string, content: string, baseHash: string | null) =>
+    put<unknown>(`/agents/${agentId}/instructions-bundle/file`, { path, content, baseHash }),
+  instructionsHistory: (agentId: string) =>
+    get<{ revisions: { id: string; entryFile?: string; path?: string; createdAt: string; actorAgentId: string | null; actorUserId: string | null }[] }>(`/agents/${agentId}/instructions-bundle/history`),
+  instructionsRevision: (agentId: string, revisionId: string) => get<{ content: string }>(`/agents/${agentId}/instructions-bundle/revision/${revisionId}`),
+  restoreInstructions: (agentId: string, path: string, revisionId: string, baseRevisionId: string) =>
+    post<unknown>(`/agents/${agentId}/instructions-bundle/restore`, { path, revisionId, baseRevisionId }),
   /** A task's runs, newest first. */
   issueRuns: (issueId: string) =>
     get<

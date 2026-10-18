@@ -61,7 +61,8 @@ function link(href: string, label: string, links: MdLinks, key: string): ReactNo
 const cells = (row: string) => row.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
 
 export function Markdown({ text, links = {} }: { text: string; links?: MdLinks }) {
-  const lines = text.replace(/\r/g, "").split("\n");
+  // HTML comments (e.g. the setup scripts' section markers) are notes for machines, not readers.
+  const lines = text.replace(/\r/g, "").replace(/<!--[\s\S]*?-->/g, "").split("\n");
   const blocks: ReactNode[] = [];
   let i = 0;
   while (i < lines.length) {
