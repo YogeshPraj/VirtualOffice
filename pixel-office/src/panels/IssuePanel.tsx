@@ -15,6 +15,7 @@ import { TaskDocuments, useOfficeLinks } from "./TaskDocuments";
 import { TaskDetails } from "./TaskDetails";
 import { WorkProducts } from "./WorkProducts";
 import { LastShift } from "./LastShift";
+import { TaskHistory } from "./TaskHistory";
 import { driftFor, useSources } from "../lib/drift";
 import { linkMentions } from "../lib/mentions";
 import { MentionTextarea } from "../ui/MentionTextarea";
@@ -113,6 +114,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
       <WorkProducts issueId={issueId} projectId={issue.projectId} />
       <TaskDetails issue={issue} />
       <TaskDocuments issueId={issueId} />
+      <TaskHistory issue={issue} />
 
       {pending.map((i) => (
         <InteractionDialog key={i.id} interaction={i} />

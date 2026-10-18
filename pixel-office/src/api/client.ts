@@ -160,6 +160,7 @@ export const api = {
   instructionsRevision: (agentId: string, revisionId: string) => get<{ content: string }>(`/agents/${agentId}/instructions-bundle/revision/${revisionId}`),
   restoreInstructions: (agentId: string, path: string, revisionId: string, baseRevisionId: string) =>
     post<unknown>(`/agents/${agentId}/instructions-bundle/restore`, { path, revisionId, baseRevisionId }),
+  issueActivity: (issueId: string) => get<ActivityEntry[]>(`/issues/${issueId}/activity`),
   /** A task's runs, newest first. */
   issueRuns: (issueId: string) =>
     get<

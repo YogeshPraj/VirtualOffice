@@ -612,3 +612,6 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .stage.mood-night .office-svg, .stage.mood-night .basement-svg { filter: brightness(0.6) sepia(0.45) hue-rotate(185deg) saturate(0.9); }
 .night-sign { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 5; background: #1b2240; color: #ffd479; box-shadow: 0 0 0 3px var(--ink); padding: 4px 12px; font-size: 18px; pointer-events: none; max-width: calc(100% - 32px); text-align: center; }
 @media (prefers-reduced-motion: reduce) { .stage .office-svg, .stage .basement-svg { transition: none; } }
+.history { max-height: 360px; overflow-y: auto; font-size: 16px; }
+.history-day { font-family: var(--font-title); font-size: 7px; margin: 8px 0 2px; color: var(--muted); }
+.history-line { display: flex; gap: 6px; align-items: flex-start; margin: 2px 0; }
