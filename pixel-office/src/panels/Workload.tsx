@@ -62,8 +62,13 @@ export function Workload() {
   const move = useMutation({
     mutationFn: ({ task, to }: { task: Issue; to: string }) => api.updateIssue(task.id, { assigneeAgentId: to }),
     onSuccess: (_d, v) => {
-      toast(`Moved ${v.task.identifier} to ${agents.find((a) => a.id === v.to)?.name}.`);
       qc.invalidateQueries({ queryKey: keys.issues(company.id) });
+      toast(`Moved ${v.task.identifier} to ${agents.find((a) => a.id === v.to)?.name}.`, {
+        undo: async () => {
+          await api.updateIssue(v.task.id, { assigneeAgentId: v.task.assigneeAgentId });
+          qc.invalidateQueries({ queryKey: keys.issues(company.id) });
+        },
+      });
     },
     onError: (e: Error) => toast(e.message),
   });

@@ -151,6 +151,16 @@ export function MeetingPanel() {
       if (ctx?.before) qc.setQueryData(keys.issues(company.id), ctx.before);
       toast(e.message);
     },
+    onSuccess: (_d, v, ctx) => {
+      const was = ctx?.before?.find((i) => i.id === v.id);
+      if (was && was.status !== v.status)
+        toast(`${was.identifier} moved to ${v.status.replace("_", " ")}.`, {
+          undo: async () => {
+            await api.updateIssue(v.id, { status: was.status });
+            qc.invalidateQueries({ queryKey: keys.issues(company.id) });
+          },
+        });
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: keys.issues(company.id) }),
   });
 

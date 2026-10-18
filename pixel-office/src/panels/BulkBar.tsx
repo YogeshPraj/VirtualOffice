@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import { keys } from "../api/hooks";
 import type { Issue, IssueStatus } from "../api/types";
 import { useOfficeData } from "../state/officeData";
+import { inverseOf, isEmpty } from "../lib/undo";
 
 type Change = Parameters<typeof api.updateIssue>[1];
 
@@ -33,6 +34,7 @@ export function BulkBar({ selected, onClear }: { selected: Set<string>; onClear:
 
   const run = async (label: string, change: Change, ask?: string) => {
     if (!ids.length || (ask && !confirm(ask))) return;
+    const before = ids.map((id) => issues.find((i) => i.id === id)).filter((i): i is Issue => !!i);
     setBusy(`${label} 0/${ids.length}`);
     const failed = await applyAll(ids, change, (id, c) => api.updateIssue(id, c), (n) => setBusy(`${label} ${n}/${ids.length}`));
     setBusy(null);
@@ -41,7 +43,15 @@ export function BulkBar({ selected, onClear }: { selected: Set<string>; onClear:
       const who = failed.map((f) => issues.find((i) => i.id === f.id)?.identifier ?? f.id).join(", ");
       toast(`${ids.length - failed.length} updated; ${failed.length} refused (${who}): ${failed[0].error}`);
     } else {
-      toast(`${label}: ${ids.length} task${ids.length === 1 ? "" : "s"} updated.`);
+      toast(`${label}: ${ids.length} task${ids.length === 1 ? "" : "s"} updated.`, {
+        undo: async () => {
+          for (const b of before) {
+            const back = inverseOf(b, change);
+            if (!isEmpty(back)) await api.updateIssue(b.id, back);
+          }
+          qc.invalidateQueries({ queryKey: keys.issues(company.id) });
+        },
+      });
       onClear();
     }
   };

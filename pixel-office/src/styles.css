@@ -638,3 +638,4 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .score-grid b { display: block; font-size: 22px; }
 .score-grid small { font-size: 13px; line-height: 1.1; display: block; }
 .chat-line .bubble { min-width: 0; } .chat-line .bubble .md pre, .chat-line .bubble .md table { max-width: 100%; }
+.toast-undo { margin-left: 12px; vertical-align: middle; }

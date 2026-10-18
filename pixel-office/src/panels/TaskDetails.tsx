@@ -7,6 +7,7 @@ import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { NOTE_COLORS } from "./MeetingPanel";
 import { defaultGoalId, useGoals } from "./GoalPoster";
+import { describeChange, inverseOf, isEmpty } from "../lib/undo";
 
 const PRIORITIES: Issue["priority"][] = ["critical", "high", "medium", "low"];
 const MAX_UPLOAD = 20 * 1024 * 1024;
@@ -29,7 +30,18 @@ export function TaskDetails({ issue }: { issue: Issue }) {
   };
   const update = useMutation({
     mutationFn: (body: Parameters<typeof api.updateIssue>[1]) => api.updateIssue(issue.id, body),
-    onSuccess: refresh,
+    onSuccess: (_d, body) => {
+      refresh();
+      const { blockedByIssueIds: _b, ...plain } = body;
+      const back = inverseOf(issue, plain);
+      if (!isEmpty(back))
+        toast(`${issue.identifier} ${describeChange(plain, (id) => agentById(id)?.name)}.`, {
+          undo: async () => {
+            await api.updateIssue(issue.id, back);
+            refresh();
+          },
+        });
+    },
     onError: (e: Error) => toast(e.message),
   });
   const addSub = useMutation({

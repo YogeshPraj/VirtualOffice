@@ -21,6 +21,7 @@ import { driftFor, useSources } from "../lib/drift";
 import { linkMentions } from "../lib/mentions";
 import { MentionTextarea } from "../ui/MentionTextarea";
 import { useDraft } from "../lib/useDraft";
+import { describeChange, inverseOf, isEmpty } from "../lib/undo";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
 
@@ -45,7 +46,17 @@ export function IssuePanel({ issueId }: { issueId: string }) {
   };
   const update = useMutation({
     mutationFn: (body: Parameters<typeof api.updateIssue>[1]) => api.updateIssue(issueId, body),
-    onSuccess: refresh,
+    onSuccess: (_d, body) => {
+      refresh();
+      const back = issue ? inverseOf(issue, body) : {};
+      if (issue && !isEmpty(back))
+        toast(`${issue.identifier} ${describeChange(body, (id) => agentById(id)?.name)}.`, {
+          undo: async () => {
+            await api.updateIssue(issueId, back);
+            refresh();
+          },
+        });
+    },
     onError: (e: Error) => toast(e.message),
   });
   const people = agents.filter((a) => a.status !== "terminated" && a.status !== "pending_approval");
