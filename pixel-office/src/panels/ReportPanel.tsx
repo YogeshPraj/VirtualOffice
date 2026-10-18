@@ -1,0 +1,158 @@
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../api/client";
+import type { Issue } from "../api/types";
+import { useOfficeData } from "../state/officeData";
+import { useOffice } from "../state/officeStore";
+
+type Day = "today" | "yesterday";
+
+function dayRange(day: Day): [number, number] {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  if (day === "yesterday") start.setDate(start.getDate() - 1);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return [start.getTime(), end.getTime()];
+}
+
+const within = (iso: string | null | undefined, [a, b]: [number, number]) => {
+  if (!iso) return false;
+  const t = Date.parse(iso);
+  return t >= a && t < b;
+};
+
+const fmtTokens = (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n));
+
+/** "Today at the office": a stand-up summary of the company's day, copyable as text. */
+export function ReportPanel() {
+  const { company, issues, agents, attention, agentById, toast } = useOfficeData();
+  const open = useOffice((s) => s.open);
+  const [day, setDay] = useState<Day>("today");
+  const range = dayRange(day);
+  const { data: spend } = useQuery({ queryKey: ["window-spend", company.id], queryFn: () => api.windowSpend(company.id), refetchInterval: 120_000 });
+  const { data: runs } = useQuery({ queryKey: ["runs-recent", company.id], queryFn: () => api.recentRuns(company.id, 200), refetchInterval: 120_000 });
+
+  const report = useMemo(() => {
+    const live = issues.filter((i) => !i.hiddenAt);
+    const done = live.filter((i) => i.status === "done" && within(i.completedAt ?? i.updatedAt, range));
+    const started = live.filter((i) => within(i.startedAt, range) && i.status !== "done");
+    const doing = live.filter((i) => i.status === "in_progress");
+    const review = live.filter((i) => i.status === "in_review");
+    const blocked = live.filter((i) => i.status === "blocked");
+    const created = live.filter((i) => within(i.createdAt, range));
+    const shifts = (runs ?? []).filter((r) => within(r.startedAt, range));
+    const failed = shifts.filter((r) => r.status === "failed" || r.status === "timed_out");
+    const perAgent = agents
+      .filter((a) => a.status !== "terminated")
+      .map((a) => ({
+        agent: a,
+        done: done.filter((i) => i.assigneeAgentId === a.id).length,
+        shifts: shifts.filter((r) => r.agentId === a.id).length,
+        now: doing.filter((i) => i.assigneeAgentId === a.id),
+      }))
+      .filter((x) => x.done || x.shifts || x.now.length);
+    return { done, started, doing, review, blocked, created, shifts, failed, perAgent };
+  }, [issues, agents, runs, range[0]]);
+
+  const tokens24 = spend?.filter((s) => s.window === "24h") ?? [];
+  const cents24 = tokens24.reduce((n, s) => n + (s.costCents ?? 0), 0);
+  const tok24 = tokens24.reduce((n, s) => n + (s.inputTokens ?? 0) + (s.outputTokens ?? 0), 0);
+
+  const who = (i: Issue) => agentById(i.assigneeAgentId)?.name ?? "unassigned";
+  const label = day === "today" ? "Today" : "Yesterday";
+  const dateText = new Date(range[0]).toLocaleDateString([], { weekday: "long", day: "numeric", month: "short" });
+
+  const asText = () => {
+    const list = (items: Issue[]) => (items.length ? items.map((i) => `  - ${i.identifier} ${i.title} (${who(i)})`).join("\n") : "  - none");
+    return [
+      `${company.name}: ${label.toLowerCase()} at the office (${dateText})`,
+      "",
+      `Done (${report.done.length}):`,
+      list(report.done),
+      `In progress (${report.doing.length}):`,
+      list(report.doing),
+      `Ready for review (${report.review.length}):`,
+      list(report.review),
+      `Blocked (${report.blocked.length}):`,
+      list(report.blocked),
+      `Waiting on me (${attention.length}):`,
+      attention.length ? attention.map((a) => `  - ${a.subject.identifier ?? ""} ${a.subject.title}`.trimEnd()).join("\n") : "  - none",
+      "",
+      `New tasks: ${report.created.length} · Shifts worked: ${report.shifts.length}${report.failed.length ? ` (${report.failed.length} failed)` : ""}`,
+      `Last 24h usage: ${fmtTokens(tok24)} tokens${cents24 ? ` · $${(cents24 / 100).toFixed(2)}` : ""}`,
+    ].join("\n");
+  };
+
+  const Section = ({ title, items, tone }: { title: string; items: Issue[]; tone?: string }) => (
+    <div className="px-card" style={tone ? { borderLeft: `8px solid ${tone}` } : undefined}>
+      <h4>
+        {title} <span className="muted">{items.length}</span>
+      </h4>
+      {items.length === 0 && <div className="muted">None.</div>}
+      {items.map((i) => (
+        <button key={i.id} className="rpg-option" style={{ color: "var(--ink)" }} onClick={() => open({ kind: "issue", issueId: i.id })}>
+          {i.identifier} · {i.title}
+          <small style={{ color: "var(--muted)" }}>@{who(i)}</small>
+        </button>
+      ))}
+    </div>
+  );
+
+  return (
+    <>
+      <div className="px-card">
+        <div className="row">
+          <h4 style={{ flex: 1, margin: 0 }}>📰 {label.toUpperCase()} · {dateText}</h4>
+          <select className="px-select" style={{ width: "auto", margin: 0 }} aria-label="Day" value={day} onChange={(e) => setDay(e.target.value as Day)}>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+          </select>
+          <button className="px-btn small primary" onClick={() => navigator.clipboard?.writeText(asText()).then(() => toast("Copied for your stand-up."))}>
+            ⧉ Copy as text
+          </button>
+        </div>
+        <div className="row" style={{ flexWrap: "wrap", marginTop: 6 }}>
+          <span className="stat-chip">✔ {report.done.length} done</span>
+          <span className="stat-chip">⌨ {report.doing.length} in progress</span>
+          <span className="stat-chip">🔍 {report.review.length} in review</span>
+          <span className="stat-chip" style={report.blocked.length ? { color: "var(--bad)" } : undefined}>⛔ {report.blocked.length} blocked</span>
+          <span className="stat-chip" style={attention.length ? { color: "var(--bad)" } : undefined}>☎ {attention.length} waiting on you</span>
+          <span className="stat-chip">📌 {report.created.length} new</span>
+          <span className="stat-chip">🕒 {report.shifts.length} shifts{report.failed.length ? ` (${report.failed.length} failed)` : ""}</span>
+          <span className="stat-chip" title="Tokens used in the last 24 hours">🪙 {fmtTokens(tok24)} tokens / 24h{cents24 ? ` · $${(cents24 / 100).toFixed(2)}` : ""}</span>
+        </div>
+      </div>
+
+      {attention.length > 0 && (
+        <div className="px-card" style={{ borderLeft: "8px solid var(--bad)" }}>
+          <h4>☎ WAITING ON YOU <span className="muted">{attention.length}</span></h4>
+          {attention.map((a) => (
+            <button key={`${a.sourceKind}:${a.subject.id}`} className="rpg-option" style={{ color: "var(--ink)" }} onClick={() => open({ kind: "room", room: "ceo" })}>
+              {a.subject.identifier ? `${a.subject.identifier} · ` : ""}
+              {a.subject.title}
+              <small style={{ color: "var(--muted)" }}>{a.whyNow}</small>
+            </button>
+          ))}
+        </div>
+      )}
+      <Section title={`✔ DONE ${label.toUpperCase()}`} items={report.done} tone="var(--good)" />
+      <Section title="⌨ IN PROGRESS" items={report.doing} tone="var(--info)" />
+      {report.review.length > 0 && <Section title="🔍 READY FOR REVIEW" items={report.review} tone="#C9A7FF" />}
+      {report.blocked.length > 0 && <Section title="⛔ BLOCKED" items={report.blocked} tone="var(--bad)" />}
+
+      <div className="px-card">
+        <h4>👥 WHO DID WHAT</h4>
+        {report.perAgent.length === 0 && <div className="muted">A quiet day: nobody clocked in.</div>}
+        {report.perAgent.map(({ agent, done, shifts, now }) => (
+          <button key={agent.id} className="rpg-option" style={{ color: "var(--ink)" }} onClick={() => open({ kind: "agent", agentId: agent.id })}>
+            {agent.name}
+            <small style={{ color: "var(--muted)" }}>
+              {done} done · {shifts} shifts{now.length ? ` · now on ${now.map((i) => i.identifier).join(", ")}` : ""}
+            </small>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}

@@ -9,6 +9,7 @@ export type GroundRoomId =
   | "ceo"
   | "study"
   | "intake"
+  | "report"
   | "meeting"
   | "lounge"
   | "finance"

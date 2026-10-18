@@ -546,3 +546,5 @@ textarea {
 .md a { color: var(--info); }
 .chat-line .bubble .md { white-space: normal; }
 .doc-view { background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 6px 10px; margin: 4px 0 10px; font-size: 18px; max-height: 480px; overflow-y: auto; }
+
+.stat-chip { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 1px 6px; margin: 3px; font-size: 16px; }

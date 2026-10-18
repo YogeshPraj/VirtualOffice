@@ -77,6 +77,9 @@ export interface Issue {
   assigneeUserId: string | null;
   projectId: string | null;
   parentId: string | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  hiddenAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -361,4 +364,15 @@ export interface DocumentRevision {
   createdByAgentId: string | null;
   createdByUserId: string | null;
   createdAt: string;
+}
+
+export interface WindowSpend {
+  provider: string;
+  biller: string;
+  window: string;
+  windowHours: number;
+  costCents: number;
+  inputTokens: number;
+  cachedInputTokens: number;
+  outputTokens: number;
 }

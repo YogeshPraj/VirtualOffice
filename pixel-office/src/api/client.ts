@@ -22,6 +22,7 @@ import type {
   IssueComment,
   IssueStatus,
   HeartbeatRun,
+  WindowSpend,
   IssueDocument,
   DocumentRevision,
 } from "./types";
@@ -190,6 +191,8 @@ export const api = {
     post(`/companies/${companyId}/goals`, body),
   costsSummary: (companyId: string) => get<Record<string, unknown>>(`/companies/${companyId}/costs/summary`),
 
+  windowSpend: (companyId: string) => get<WindowSpend[]>(`/companies/${companyId}/costs/window-spend`),
+  recentRuns: (companyId: string, limit = 100) => get<HeartbeatRun[]>(`/companies/${companyId}/heartbeat-runs?limit=${limit}`),
   dashboard: (companyId: string) => get<Dashboard>(`/companies/${companyId}/dashboard`),
   activity: (companyId: string) => get<ActivityEntry[]>(`/companies/${companyId}/activity`),
 

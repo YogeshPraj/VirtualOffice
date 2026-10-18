@@ -23,7 +23,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P1) Over-the-shoulder view.** Click a working employee to watch their live run output.
 - [x] **(P1) Task documents.** Plans and specs agents attach to tasks (e.g. the Manager's `plan`) are
   readable in the task panel, with revisions.
-- [ ] **(P2) Daily report.** "Today at the office": done, in progress, blocked, waiting on you,
+- [x] **(P2) Daily report.** "Today at the office": done, in progress, blocked, waiting on you,
   spend; copy as text for a stand-up.
 
 ## Managing work

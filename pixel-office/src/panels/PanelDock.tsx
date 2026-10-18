@@ -9,6 +9,7 @@ import { IssuePanel } from "./IssuePanel";
 import { MeetingPanel } from "./MeetingPanel";
 import { StudyPanel } from "./StudyPanel";
 import { IntakePanel } from "./IntakePanel";
+import { ReportPanel } from "./ReportPanel";
 import { FinancePanel, FloorPanel, LobbyPanel, LoungePanel, SecurityPanel } from "./RoomPanels";
 import {
   AdaptersPanel,
@@ -28,6 +29,7 @@ const ROOM_TITLES: Record<RoomId, string> = {
   ceo: "CEO OFFICE",
   study: "CEO'S STUDY · SECOND BRAIN",
   intake: "INTAKE DESK · NEW WORK",
+  report: "DAILY REPORT",
   meeting: "TASK BOARD",
   lounge: "#GENERAL",
   finance: "FINANCE",
@@ -50,6 +52,7 @@ const ROOM_BODY: Record<RoomId, () => React.ReactElement> = {
   ceo: CeoPanel,
   study: StudyPanel,
   intake: IntakePanel,
+  report: ReportPanel,
   meeting: MeetingPanel,
   lounge: LoungePanel,
   finance: FinancePanel,
