@@ -19,6 +19,7 @@ import { TaskHistory } from "./TaskHistory";
 import { driftFor, useSources } from "../lib/drift";
 import { linkMentions } from "../lib/mentions";
 import { MentionTextarea } from "../ui/MentionTextarea";
+import { useDraft } from "../lib/useDraft";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
 
@@ -34,7 +35,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
   const issue = cached ?? fetched;
   const comments = useComments(issueId);
   const interactions = useInteractions(issueId);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft, clearDraft, restoredDraft] = useDraft(`comment:${issueId}`);
   const links = useOfficeLinks();
 
   const refresh = () => {
@@ -65,7 +66,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
       return woken;
     },
     onSuccess: (woken) => {
-      setDraft("");
+      clearDraft();
       refresh();
       if (woken.length) toast(`Pinged ${woken.join(", ")}.`);
     },
@@ -147,6 +148,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
         people={people}
         onSubmit={() => draft.trim() && !comment.isPending && comment.mutate()}
       />
+      {restoredDraft && <div className="muted" style={{ fontSize: 14 }}>📝 Your unsent comment was kept.</div>}
       <button className="px-btn primary" disabled={!draft.trim() || comment.isPending} onClick={() => comment.mutate()}>
         💬 Post
       </button>

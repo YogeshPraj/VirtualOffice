@@ -14,6 +14,7 @@ import { BulkBar } from "./BulkBar";
 import { SavedViews } from "./SavedViews";
 import { awayBaseline } from "../ui/SinceAway";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
+import { useDraft } from "../lib/useDraft";
 
 export const NOTE_COLORS: Record<IssueStatus, string> = {
   backlog: "#e0e0e0",
@@ -66,8 +67,8 @@ export function MeetingPanel() {
   const { company, issues, agents, agentById, toast } = useOfficeData();
   const open = useOffice((s) => s.open);
   const qc = useQueryClient();
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
+  const [title, setTitle, clearTitle] = useDraft("note:title");
+  const [desc, setDesc, clearDesc] = useDraft("note:details");
   const [assignee, setAssignee] = useState("");
   const staff = agents.filter((a) => a.status !== "terminated" && a.status !== "pending_approval");
   const { data: projects } = useProjects(company.id);
@@ -128,8 +129,8 @@ export function MeetingPanel() {
       }),
     onSuccess: (issue) => {
       toast(`Pinned ${issue.identifier} to the board.`);
-      setTitle("");
-      setDesc("");
+      clearTitle();
+      clearDesc();
       setPriority("medium");
       qc.invalidateQueries({ queryKey: keys.issues(company.id) });
     },

@@ -72,7 +72,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P1) Since you were away.** When you come back after a while, a briefing of what changed: finished,
   new questions for you, failed shifts, new intake matches; changed notes glow on the board.
 - [x] **(P2) Saved board views.** Name a filter ("My ADO bugs", "QA queue") and switch to it in one click.
-- [ ] **(P2) Comment drafts.** Unsent comments and questions survive closing the panel.
+- [x] **(P2) Comment drafts.** Unsent comments and questions survive closing the panel.
 - [ ] **(P2) Employee scorecard.** On each desk: tasks done, typical time to finish, failure rate and
   review bounce-backs over 30 days.
 - [ ] **(P2) Cycle time in reports.** How long tasks took from start to done, and the slowest ones.

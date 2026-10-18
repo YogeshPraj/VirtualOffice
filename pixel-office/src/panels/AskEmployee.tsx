@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { keys, useComments } from "../api/hooks";
@@ -7,6 +7,7 @@ import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { Markdown } from "../lib/markdown";
 import { useOfficeLinks } from "./TaskDocuments";
+import { useDraft } from "../lib/useDraft";
 
 /** Questions are Paperclip tasks in "ask" mode: the employee answers in the thread, no code, no plan. */
 export const isQuestion = (i: Issue) => i.workMode === "ask";
@@ -15,7 +16,7 @@ export const isQuestion = (i: Issue) => i.workMode === "ask";
 export function AskEmployee({ agent }: { agent: Agent }) {
   const { company, issues, toast } = useOfficeData();
   const qc = useQueryClient();
-  const [text, setText] = useState("");
+  const [text, setText, clearText] = useDraft(`ask:${agent.id}`);
   const asked = issues
     .filter((i) => isQuestion(i) && i.assigneeAgentId === agent.id && i.status !== "cancelled")
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -35,7 +36,7 @@ export function AskEmployee({ agent }: { agent: Agent }) {
       });
     },
     onSuccess: () => {
-      setText("");
+      clearText();
       toast(`Asked ${agent.name}. The answer will appear here.`);
       qc.invalidateQueries({ queryKey: keys.issues(company.id) });
     },

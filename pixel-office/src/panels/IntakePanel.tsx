@@ -7,6 +7,7 @@ import { useOffice } from "../state/officeStore";
 import { QueryIntake } from "./QueryIntake";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 import { WatchesCard } from "./WatchesCard";
+import { useDraft } from "../lib/useDraft";
 
 /** Mirrors IntakeItem in ../../intake-bridge.ts (server side). */
 interface IntakeItem {
@@ -64,8 +65,8 @@ export function IntakePanel() {
   const lead = staff.find((a) => !a.reportsTo && ["general", "pm", "ceo", "cto"].includes(a.role)) ?? staff.find((a) => !a.reportsTo);
 
   const { data: templates = [] } = useTemplates();
-  const [text, setText] = useState("");
-  const [notes, setNotes] = useState("");
+  const [text, setText, clearText] = useDraft("intake:links");
+  const [notes, setNotes, clearNotes] = useDraft("intake:notes");
   const [items, setItems] = useState<IntakeItem[] | null>(null);
   const [skip, setSkip] = useState<Set<string>>(new Set());
   const [mode, setMode] = useState<"each" | "one">("each");
@@ -114,8 +115,8 @@ export function IntakePanel() {
     onSuccess: (created) => {
       toast(`Pinned ${created.map((i) => i.identifier).join(", ")} to the board.`);
       setItems(null);
-      setText("");
-      setNotes("");
+      clearText();
+      clearNotes();
       qc.invalidateQueries({ queryKey: keys.issues(company.id) });
       if (created.length === 1) open({ kind: "issue", issueId: created[0].id });
     },
