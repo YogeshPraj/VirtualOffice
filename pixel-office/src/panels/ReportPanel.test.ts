@@ -16,3 +16,12 @@ describe("report periods", () => {
     expect(b - a).toBe(86_400_000);
   });
 });
+
+import { toMarkdown } from "./ReportPanel";
+
+describe("report markdown", () => {
+  it("turns the stand-up text into headings and bullets", () => {
+    const md = toMarkdown("Lab: today at the office (Sun)\n\nDone (1):\n  - YOG-1 Ship (Ada)\nBlocked (0):\n  - none\n\nNew tasks: 2");
+    expect(md).toBe("# Lab: today at the office (Sun)\n\n## Done (1)\n- YOG-1 Ship (Ada)\n\n## Blocked (0)\n- none\n\nNew tasks: 2\n");
+  });
+});

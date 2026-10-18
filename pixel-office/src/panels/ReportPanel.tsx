@@ -29,6 +29,32 @@ export function dayRange(day: Day, now = new Date()): [number, number] {
 
 const isWeek = (d: Day) => d === "week" || d === "lastweek";
 
+/** The copyable stand-up text as a Markdown document: title, section headings and bullets. */
+export function toMarkdown(text: string): string {
+  return (
+    text
+      .split("\n")
+      .map((l, i) => {
+        if (i === 0) return `# ${l}`;
+        if (/^\S.*:$/.test(l)) return `\n## ${l.slice(0, -1)}`;
+        if (/^ {2}- /.test(l)) return l.slice(2);
+        return l;
+      })
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim() + "\n"
+  );
+}
+
+function download(name: string, text: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 const within = (iso: string | null | undefined, [a, b]: [number, number]) => {
   if (!iso) return false;
   const t = Date.parse(iso);
@@ -147,6 +173,19 @@ export function ReportPanel() {
           </select>
           <button className="px-btn small primary" onClick={() => navigator.clipboard?.writeText(asText()).then(() => toast(isWeek(day) ? "Copied for your weekly update." : "Copied for your stand-up."))}>
             ⧉ Copy as text
+          </button>
+          <button
+            className="px-btn small"
+            title="Save the report as a Markdown file"
+            onClick={() => {
+              // Local calendar date (toISOString would shift local midnight to the previous UTC day).
+              const d0 = new Date(range[0]);
+              const date = `${d0.getFullYear()}-${String(d0.getMonth() + 1).padStart(2, "0")}-${String(d0.getDate()).padStart(2, "0")}`;
+              const slug = company.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+              download(`${slug}-${isWeek(day) ? "week" : "day"}-${date}.md`, toMarkdown(asText()));
+            }}
+          >
+            ⬇ .md
           </button>
         </div>
         <div className="row" style={{ flexWrap: "wrap", marginTop: 6 }}>
