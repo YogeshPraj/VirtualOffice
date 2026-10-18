@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import { keys, useProjects } from "../api/hooks";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
+import { QueryIntake } from "./QueryIntake";
 
 /** Mirrors IntakeItem in ../../intake-bridge.ts (server side). */
 interface IntakeItem {
@@ -84,7 +85,7 @@ export function IntakePanel() {
   }, [issues, items]);
 
   const lookup = useMutation({
-    mutationFn: () => resolve(text),
+    mutationFn: (t: string) => resolve(t),
     onSuccess: (r) => {
       setItems(r.items);
       setSkip(new Set(r.items.filter((it) => issues.some((i) => i.status !== "cancelled" && i.description?.includes(it.url))).map((it) => it.url)));
@@ -126,6 +127,14 @@ export function IntakePanel() {
         Paste Azure DevOps work items, GitHub issues or PRs, or any link. Details are fetched with your own sign-ins (az, gh) and
         become tasks the team can start on.
       </p>
+      <QueryIntake
+        existing={(url) => issues.find((i) => i.status !== "cancelled" && i.description?.includes(url))?.identifier}
+        onAdd={(urls) => {
+          const next = [text.trim(), ...urls].filter(Boolean).join("\n");
+          setText(next);
+          lookup.mutate(next);
+        }}
+      />
       <div className="px-card">
         <h4>WHAT CAME IN?</h4>
         <textarea
@@ -145,7 +154,7 @@ export function IntakePanel() {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
         />
-        <button className="px-btn primary" disabled={!text.trim() || lookup.isPending} onClick={() => lookup.mutate()}>
+        <button className="px-btn primary" disabled={!text.trim() || lookup.isPending} onClick={() => lookup.mutate(text)}>
           {lookup.isPending ? "Looking up…" : "🔎 Look up"}
         </button>
       </div>

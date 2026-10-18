@@ -40,7 +40,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P3) First-run tour** of the rooms for a new install.
 
 ## Wave 2: daily-driver depth
-- [ ] **(P1) Bulk intake from queries.** Paste an Azure DevOps query link or WIQL ("my active items this
+- [x] **(P1) Bulk intake from queries.** Paste an Azure DevOps query link or WIQL ("my active items this
   sprint") or a GitHub issue search URL; preview every match and bring in the ones you tick.
 - [ ] **(P1) @mentions.** Autocomplete `@Name` in task comments; the mentioned employee is woken on that task.
 - [ ] **(P1) Ask an employee.** A quick question from the employee's panel that doesn't become a work task.

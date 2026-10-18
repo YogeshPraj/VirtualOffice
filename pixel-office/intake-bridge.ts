@@ -238,6 +238,127 @@ export async function postComment(url: string, text: string): Promise<{ ok: bool
   return { ok: true };
 }
 
+// ---- Bulk intake: a saved ADO query, WIQL, "my items", or a GitHub issue search ----
+
+export interface QueryHit {
+  url: string;
+  key: string;
+  title: string;
+  type?: string;
+  state?: string;
+  assignee?: string;
+}
+
+const MAX_HITS = 100;
+const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const MY_ITEMS_WIQL =
+  "SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = @project AND [System.AssignedTo] = @Me AND [System.State] NOT IN ('Closed', 'Done', 'Removed', 'Resolved') ORDER BY [System.ChangedDate] DESC";
+
+/** Where an ADO project lives, from any URL inside it (project home, board, query, work item). */
+export function parseAdoProject(raw: string): { org: string; orgUrl: string; project: string; queryId?: string } | null {
+  const url = raw.trim();
+  let m = url.match(/^https:\/\/dev\.azure\.com\/([^/?#]+)\/([^/?#]+)/i);
+  let org: string, orgUrl: string, project: string;
+  if (m) {
+    org = decodeURIComponent(m[1]);
+    project = decodeURIComponent(m[2]);
+    orgUrl = `https://dev.azure.com/${org}`;
+  } else {
+    m = url.match(/^https:\/\/([^./]+)\.visualstudio\.com\/([^/?#]+)/i);
+    if (!m) return null;
+    org = m[1];
+    project = decodeURIComponent(m[2]);
+    orgUrl = `https://${org}.visualstudio.com`;
+  }
+  if (project.startsWith("_") || !SAFE_NAME.test(org) || !SAFE_NAME.test(project)) return null;
+  const q = url.match(/\/_queries\/(?:query|query-edit)\/([0-9a-f-]{36})/i)?.[1];
+  return { org, orgUrl, project, queryId: q && GUID.test(q) ? q : undefined };
+}
+
+/** github.com/{owner}/{repo}/issues?q=…  |  /pulls?q=…  |  github.com/issues?q=… */
+export function parseGithubSearch(raw: string): { repo?: string; kind: "issue" | "pr"; q: string } | null {
+  let u: URL;
+  try {
+    u = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+  if (u.hostname !== "github.com") return null;
+  const parts = u.pathname.split("/").filter(Boolean);
+  const q = (u.searchParams.get("q") ?? "").trim();
+  if (parts.length === 1 && (parts[0] === "issues" || parts[0] === "pulls")) return { kind: parts[0] === "pulls" || /is:pr/.test(q) ? "pr" : "issue", q: q || "is:open" };
+  if (parts.length === 3 && (parts[2] === "issues" || parts[2] === "pulls")) {
+    return { repo: `${parts[0]}/${parts[1]}`, kind: parts[2] === "pulls" || /is:pr/.test(q) ? "pr" : "issue", q: q || "is:open" };
+  }
+  return null;
+}
+
+/** Split a search box query into words, keeping "quoted phrases" together (gh quotes each argument). */
+export function searchWords(q: string): string[] {
+  return (q.match(/(?:[^\s"]+|"[^"]*")+/g) ?? []).slice(0, 30);
+}
+
+const azError = (stderr: string) => {
+  const t = stderr.trim();
+  if (/az login|not logged in|authenticat|AADSTS|credential/i.test(t)) return { error: "Azure CLI isn't signed in.", fix: "az login" };
+  if (/extension|'boards' is misspelled|not in the 'az' command group/i.test(t)) return { error: "The Azure DevOps extension is missing.", fix: "az extension add --name azure-devops" };
+  return { error: t.split("\n").find(Boolean)?.slice(0, 300) ?? "az failed" };
+};
+
+export async function runQuery(input: { query?: string; project?: string; mine?: boolean }): Promise<{ hits: QueryHit[]; total: number; truncated: boolean } | { error: string; fix?: string }> {
+  const query = String(input.query ?? "").trim();
+  const gh = parseGithubSearch(query);
+  if (gh) {
+    const fields = "number,title,state,url,assignees";
+    const args = gh.repo
+      ? [gh.kind === "pr" ? "pr" : "issue", "list", "-R", gh.repo, "--search", gh.q.replace(/\bis:(issue|pr)\b/g, "").trim() || "is:open", "--limit", String(MAX_HITS), "--state", "all", "--json", fields]
+      : ["search", gh.kind === "pr" ? "prs" : "issues", ...searchWords(gh.q.replace(/\bis:(issue|pr)\b/g, "")), "--limit", String(MAX_HITS), "--json", `number,title,state,url,assignees,repository`];
+    const r = await run("gh", args, 60_000);
+    if (r.missing) return { error: "GitHub CLI isn't installed.", fix: "winget install GitHub.cli, then: gh auth login" };
+    if (!r.ok) return { error: r.stderr.trim().split("\n").find(Boolean)?.slice(0, 300) ?? "gh failed", fix: /auth|login|SAML|SSO/i.test(r.stderr) ? "gh auth login" : undefined };
+    const rows = JSON.parse(r.stdout || "[]") as { number: number; title: string; state: string; url: string; assignees?: { login: string }[]; repository?: { nameWithOwner?: string } }[];
+    const hits = rows.map((x) => {
+      const repo = gh.repo ?? x.repository?.nameWithOwner ?? x.url.split("/").slice(3, 5).join("/");
+      return { url: x.url, key: `${repo}#${x.number}`, title: x.title, type: gh.kind === "pr" ? "Pull request" : "Issue", state: x.state.toLowerCase(), assignee: x.assignees?.map((a) => a.login).join(", ") || undefined };
+    });
+    return { hits, total: hits.length, truncated: hits.length >= MAX_HITS };
+  }
+
+  // Azure DevOps: a saved query link, or WIQL / "my items" against a project URL.
+  const fromQuery = parseAdoProject(query);
+  const proj = fromQuery?.queryId ? fromQuery : parseAdoProject(String(input.project ?? ""));
+  if (!proj) {
+    return { error: "Paste a saved Azure DevOps query link, a GitHub issue search URL, or WIQL with the ADO project link it should run in." };
+  }
+  const az = azCommand();
+  const base = ["boards", "query", "--org", proj.orgUrl, "--project", proj.project, "--output", "json"];
+  let args: string[];
+  if (fromQuery?.queryId) args = [...base, "--id", fromQuery.queryId];
+  else {
+    const wiql = input.mine || !query ? MY_ITEMS_WIQL : query;
+    if (!/^\s*select\b/i.test(wiql)) return { error: "WIQL starts with SELECT. Or tick 'My open items'." };
+    if (wiql.length > 4000) return { error: "That WIQL is too long." };
+    args = [...base, "--wiql", wiql];
+  }
+  const r = await run(az.cmd, [...az.prefix, ...args], 90_000);
+  if (r.missing) return { error: "Azure CLI isn't installed, so ADO queries can't run.", fix: "winget install Microsoft.AzureCLI, then: az extension add --name azure-devops, then: az login" };
+  if (!r.ok) return azError(r.stderr);
+  const rows = JSON.parse(r.stdout || "[]") as { id: number; fields?: Record<string, unknown> }[];
+  const hits = rows.slice(0, MAX_HITS).map((w) => {
+    const f = w.fields ?? {};
+    const who = f["System.AssignedTo"];
+    return {
+      url: `${proj.orgUrl}/${encodeURIComponent(proj.project)}/_workitems/edit/${w.id}`,
+      key: `ADO ${w.id}`,
+      title: String(f["System.Title"] ?? `Work item ${w.id}`),
+      type: f["System.WorkItemType"] ? String(f["System.WorkItemType"]) : undefined,
+      state: f["System.State"] ? String(f["System.State"]) : undefined,
+      assignee: typeof who === "object" && who ? String((who as { displayName?: string }).displayName ?? "") || undefined : typeof who === "string" ? who : undefined,
+    };
+  });
+  return { hits, total: rows.length, truncated: rows.length > MAX_HITS };
+}
+
 export function intakeBridge(): Plugin {
   return {
     name: "intake-bridge",
@@ -248,6 +369,16 @@ export function intakeBridge(): Plugin {
           const body = await readBody(req);
           const result = await postComment(String(body.url ?? ""), String(body.text ?? ""));
           send(res, result.ok ? 200 : 400, result.ok ? result : { error: result.error, fix: result.fix });
+        } catch (e) {
+          send(res, 500, { error: e instanceof Error ? e.message : String(e) });
+        }
+      });
+      server.middlewares.use("/office-admin/intake/query", async (req, res) => {
+        if (req.method !== "POST") return send(res, 405, { error: "POST only" });
+        try {
+          const body = await readBody(req);
+          const result = await runQuery({ query: String(body.query ?? "").slice(0, 5000), project: String(body.project ?? ""), mine: !!body.mine });
+          send(res, "error" in result ? 400 : 200, result);
         } catch (e) {
           send(res, 500, { error: e instanceof Error ? e.message : String(e) });
         }
