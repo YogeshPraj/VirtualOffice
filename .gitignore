@@ -34,3 +34,6 @@ pixel-office/.gstack/
 # Your company's private data lives in its own (private) git repo, checked out here.
 company/
 .adapters-run.log
+
+# Office server settings (working hours etc.)
+.office/

@@ -54,6 +54,11 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
           <span className="stat">🪙 ${(dash.costs.monthSpendCents / 100).toFixed(2)}</span>
         </>
       )}
+      {company.status === "paused" && (
+        <span className="stat" style={{ color: "#ffd479" }} title="The company is closed: nobody picks up new work. Reopen it in B1 · Management.">
+          🌙 CLOSED
+        </span>
+      )}
       {brokenAi && (
         <a
           className="px-btn small bad"

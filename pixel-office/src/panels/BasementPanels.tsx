@@ -19,6 +19,7 @@ import { useOfficeData } from "../state/officeData";
 import { Avatar } from "../ui/Avatar";
 import { ClassicLink } from "../ui/Window";
 import { ROLE_LABEL } from "./HrPanel";
+import { WorkingHoursCard } from "./WorkingHours";
 
 /** Shared mutation wrapper: toast on success/failure, then refresh the given queries. */
 function useAction<TArgs>(fn: (args: TArgs) => Promise<unknown>, success: string | ((args: TArgs) => string), refresh: readonly (readonly unknown[])[]) {
@@ -105,6 +106,7 @@ export function SettingsPanel() {
           {paused ? "🔓 Reopen the office" : "🔒 Close the office"}
         </button>
       </div>
+      <WorkingHoursCard />
       <div className="row">
         <span className="muted">Members, invites and environments:</span>
         <ClassicLink path={`/${company.issuePrefix}/company/settings/members`}>Members ↗</ClassicLink>
