@@ -14,6 +14,8 @@ import { Markdown } from "../lib/markdown";
 import { TaskDocuments, useOfficeLinks } from "./TaskDocuments";
 import { TaskDetails } from "./TaskDetails";
 import { WorkProducts } from "./WorkProducts";
+import { linkMentions } from "../lib/mentions";
+import { MentionTextarea } from "../ui/MentionTextarea";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
 
@@ -41,11 +43,28 @@ export function IssuePanel({ issueId }: { issueId: string }) {
     onSuccess: refresh,
     onError: (e: Error) => toast(e.message),
   });
+  const people = agents.filter((a) => a.status !== "terminated" && a.status !== "pending_approval");
   const comment = useMutation({
-    mutationFn: () => api.addComment(issueId, draft.trim()),
-    onSuccess: () => {
+    mutationFn: async () => {
+      // "@Ada" becomes Paperclip's mention link, and whoever is mentioned is woken on this task.
+      const { body, ids } = linkMentions(draft.trim(), people);
+      await api.addComment(issueId, body);
+      const woken: string[] = [];
+      for (const id of ids) {
+        if (id === issue?.assigneeAgentId) continue; // the assignee already hears about new comments
+        try {
+          await api.wakeOnIssue(id, issueId, "Mentioned by the CEO in a comment");
+          woken.push(agentById(id)?.name ?? "someone");
+        } catch {
+          /* the comment still landed; the mention link is there for them */
+        }
+      }
+      return woken;
+    },
+    onSuccess: (woken) => {
       setDraft("");
       refresh();
+      if (woken.length) toast(`Pinged ${woken.join(", ")}.`);
     },
     onError: (e: Error) => toast(e.message),
   });
@@ -113,7 +132,15 @@ export function IssuePanel({ issueId }: { issueId: string }) {
         );
       })}
 
-      <textarea className="px-textarea" aria-label="Write a comment" placeholder="Say something to the team…" value={draft} onChange={(e) => setDraft(e.target.value)} />
+      <MentionTextarea
+        className="px-textarea"
+        aria-label="Write a comment"
+        placeholder="Say something to the team… type @ to mention someone (Ctrl+Enter posts)"
+        value={draft}
+        onChange={setDraft}
+        people={people}
+        onSubmit={() => draft.trim() && !comment.isPending && comment.mutate()}
+      />
       <button className="px-btn primary" disabled={!draft.trim() || comment.isPending} onClick={() => comment.mutate()}>
         💬 Post
       </button>
