@@ -34,7 +34,7 @@ export function ReportPanel() {
   const { data: runs } = useQuery({ queryKey: ["runs-recent", company.id], queryFn: () => api.recentRuns(company.id, 200), refetchInterval: 120_000 });
 
   const report = useMemo(() => {
-    const live = issues.filter((i) => !i.hiddenAt);
+    const live = issues.filter((i) => !i.hiddenAt && i.workMode !== "ask");
     const done = live.filter((i) => i.status === "done" && within(i.completedAt ?? i.updatedAt, range));
     const started = live.filter((i) => within(i.startedAt, range) && i.status !== "done");
     const doing = live.filter((i) => i.status === "in_progress");

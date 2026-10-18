@@ -165,7 +165,7 @@ export const api = {
     }>(`/issues/${issueId}/diagnostics/blockers`),
   createIssue: (
     companyId: string,
-    body: { title: string; description?: string; assigneeAgentId?: string | null; status?: IssueStatus; priority?: string; projectId?: string | null; parentId?: string | null },
+    body: { title: string; description?: string; assigneeAgentId?: string | null; status?: IssueStatus; priority?: string; projectId?: string | null; parentId?: string | null; workMode?: "standard" | "ask" | "planning" },
   ) => post<Issue>(`/companies/${companyId}/issues`, body),
   updateIssue: (
     issueId: string,

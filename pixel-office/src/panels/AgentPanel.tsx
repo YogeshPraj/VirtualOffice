@@ -8,6 +8,7 @@ import { ClassicLink } from "../ui/Window";
 import { ROLE_LABEL } from "./HrPanel";
 import { AgentRepair } from "./AgentRepair";
 import { OverShoulder } from "./OverShoulder";
+import { AskEmployee } from "./AskEmployee";
 import { ProviderTag } from "../ui/ProviderTag";
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
@@ -62,6 +63,7 @@ export function AgentPanel({ agentId }: { agentId: string }) {
 
       <AgentRepair agent={agent} />
       <OverShoulder agent={agent} />
+      <AskEmployee agent={agent} />
 
       <div className="px-card">
         <h4>PAYCHECK</h4>

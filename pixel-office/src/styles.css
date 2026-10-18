@@ -585,3 +585,5 @@ textarea {
 .tour-card { width: min(360px, calc(100vw - 32px)); z-index: 301; box-shadow: 0 0 0 3px var(--ink), 6px 6px 0 rgba(0, 0, 0, 0.35); }
 .query-hits { max-height: 320px; overflow-y: auto; margin: 4px 0; }
 .mention-pop { position: absolute; left: 0; bottom: 100%; z-index: 20; background: var(--paper); box-shadow: 0 0 0 2px var(--ink), 4px 4px 0 rgba(0,0,0,.3); min-width: 220px; }
+.question { background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 4px 8px; margin: 8px 0 4px; }
+.question .answer { font-size: 17px; max-height: 220px; overflow-y: auto; border-left: 4px solid var(--info); padding-left: 6px; margin: 4px 0; }

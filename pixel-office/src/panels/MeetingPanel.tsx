@@ -6,6 +6,7 @@ import { keys, useProjects } from "../api/hooks";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { extractSources, SOURCE_ICON } from "../lib/links";
+import { isQuestion } from "./AskEmployee";
 
 export const NOTE_COLORS: Record<IssueStatus, string> = {
   backlog: "#e0e0e0",
@@ -66,6 +67,7 @@ export function MeetingPanel() {
   const [filter, setFilterState] = useState<BoardFilter>(loadFilter);
   const [dragOver, setDragOver] = useState<string | null>(null);
   const [allDone, setAllDone] = useState(false);
+  const [showQuestions, setShowQuestions] = useState(false);
 
   const setFilter = (patch: Partial<BoardFilter>) =>
     setFilterState((f) => {
@@ -124,7 +126,7 @@ export function MeetingPanel() {
 
   const filtered = Object.values(filter).some(Boolean);
   const visible = issues
-    .filter((i) => i.status !== "cancelled" && !i.hiddenAt && matchesFilter(i, filter))
+    .filter((i) => i.status !== "cancelled" && !i.hiddenAt && (showQuestions || !isQuestion(i)) && matchesFilter(i, filter))
     .sort((a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || b.updatedAt.localeCompare(a.updatedAt));
 
   return (
@@ -177,6 +179,9 @@ export function MeetingPanel() {
             <option key={p} value={p}>{p}</option>
           ))}
         </select>
+        <label style={{ cursor: "pointer", fontSize: 16 }} title="Questions you asked employees">
+          <input type="checkbox" checked={showQuestions} onChange={(e) => setShowQuestions(e.target.checked)} /> 💬 questions
+        </label>
         {filtered && (
           <button className="px-btn small" onClick={() => setFilter(NO_FILTER)}>
             Clear
