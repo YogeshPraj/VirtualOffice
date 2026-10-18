@@ -55,6 +55,8 @@ Step "Prerequisites" {
     if (-not (Have claude)) { $missing += "Claude Code CLI (npm i -g @anthropic-ai/claude-code) for Claude employees" }
     if (-not (Have copilot)) { $missing += "GitHub Copilot CLI (winget install GitHub.Copilot) for Copilot employees" }
     if (-not (Have python)) { $missing += "Python 3 for scripts\*.py" }
+    if (-not (Have az)) { $missing += "Azure CLI for ADO work items at the intake desk (winget install Microsoft.AzureCLI; az extension add --name azure-devops; az login)" }
+    if (-not (Have gh)) { $missing += "GitHub CLI for GitHub issues/PRs at the intake desk (winget install GitHub.cli; gh auth login)" }
     foreach ($m in $missing) { Write-Host "   optional, not found: $m" -ForegroundColor Yellow }
     if ($missing.Count) { "missing optional: $($missing.Count)" } else { "all present" }
 }

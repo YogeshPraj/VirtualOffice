@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { brainBridge } from "./brain-bridge";
 import { recoveryBlockers } from "./recovery-blockers";
+import { intakeBridge } from "./intake-bridge";
 
 // Paperclip runs on 127.0.0.1:3100 in local_trusted mode. Proxying /api keeps the
 // pixel office same-origin, so REST calls and the live-events WebSocket need no auth.
@@ -65,7 +66,7 @@ function detachAiConnection(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), detachAiConnection(), brainBridge(), recoveryBlockers()],
+  plugins: [react(), detachAiConnection(), brainBridge(), recoveryBlockers(), intakeBridge()],
   server: {
     port: 5180,
     strictPort: true,

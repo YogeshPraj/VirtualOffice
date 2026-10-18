@@ -67,6 +67,9 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
       <button className={`px-btn small ${attentionCount ? "bad" : ""}`} onClick={() => open({ kind: "room", room: "ceo" })}>
         ☎ {attentionCount ? `${attentionCount} NEED YOU` : "INBOX"}
       </button>
+      <button className="px-btn small" onClick={() => open({ kind: "room", room: "intake" })} title="Bring in work: ADO, GitHub or any link">
+        📥 INTAKE
+      </button>
       <button className="px-btn small" onClick={() => open({ kind: "room", room: "study" })} title="Your second brain: handbook and memory">
         📓 STUDY
       </button>

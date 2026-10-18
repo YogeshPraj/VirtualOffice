@@ -133,6 +133,7 @@ export function SecurityPanel() {
 /** Lobby: the company, its mission and goals. */
 export function LobbyPanel() {
   const { company, toast } = useOfficeData();
+  const open = useOffice((s) => s.open);
   const qc = useQueryClient();
   const { data: goals } = useQuery({ queryKey: ["goals", company.id], queryFn: () => api.goals(company.id) });
   const [title, setTitle] = useState("");
@@ -147,6 +148,11 @@ export function LobbyPanel() {
   });
   return (
     <>
+      <div className="px-card" style={{ borderLeft: "8px solid var(--info)" }}>
+        <h4>📥 INTAKE DESK</h4>
+        <div style={{ marginBottom: 6 }}>Got ADO work items, GitHub issues or links for the team? Drop them here.</div>
+        <button className="px-btn primary small" onClick={() => open({ kind: "room", room: "intake" })}>Open the intake desk</button>
+      </div>
       <div className="px-card" style={{ textAlign: "center" }}>
         <h4 style={{ fontSize: 14, color: "var(--wood)" }}>{company.name}</h4>
         {company.description && <div>{company.description}</div>}

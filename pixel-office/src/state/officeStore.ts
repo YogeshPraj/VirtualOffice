@@ -8,6 +8,7 @@ export type GroundRoomId =
   | "floor"
   | "ceo"
   | "study"
+  | "intake"
   | "meeting"
   | "lounge"
   | "finance"

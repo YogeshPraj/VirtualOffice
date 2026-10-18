@@ -126,7 +126,7 @@ export const api = {
     }>(`/issues/${issueId}/diagnostics/blockers`),
   createIssue: (
     companyId: string,
-    body: { title: string; description?: string; assigneeAgentId?: string | null; status?: IssueStatus; priority?: string },
+    body: { title: string; description?: string; assigneeAgentId?: string | null; status?: IssueStatus; priority?: string; projectId?: string | null },
   ) => post<Issue>(`/companies/${companyId}/issues`, body),
   updateIssue: (issueId: string, body: Partial<Pick<Issue, "status" | "assigneeAgentId" | "title" | "priority">>) =>
     patch<Issue>(`/issues/${issueId}`, body),
