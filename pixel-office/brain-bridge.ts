@@ -71,7 +71,7 @@ function send(res: ServerResponse, status: number, body: unknown) {
 }
 
 /** Cheap guard: the brain is readable by every agent, so secrets must never go in. */
-const SECRET_PATTERNS = [
+export const SECRET_PATTERNS = [
   /gbrain_[A-Za-z0-9_-]{20,}/,
   /gh[pousr]_[A-Za-z0-9]{20,}/,
   /sk-[A-Za-z0-9_-]{20,}/,

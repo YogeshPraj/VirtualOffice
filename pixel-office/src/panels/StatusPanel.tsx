@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../api/client";
 import type { EnvironmentTestResult } from "../api/types";
 import { useOfficeData } from "../state/officeData";
+import { BackupCard } from "./BackupCard";
 
 export interface StatusCheck {
   id: string;
@@ -85,6 +86,8 @@ export function StatusPanel() {
             ))}
         </div>
       ))}
+
+      <BackupCard />
 
       <div className="px-card">
         <h4>🧪 TEST EMPLOYEES</h4>
