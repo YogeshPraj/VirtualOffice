@@ -8,6 +8,7 @@ import { ClassicLink } from "../ui/Window";
 import { Avatar } from "../ui/Avatar";
 import { InteractionDialog } from "./InteractionDialog";
 import { AgentRepair } from "./AgentRepair";
+import { RecoveryCard, StaleBlockerCard } from "./RecoveryCards";
 import { logDecision } from "../api/brain";
 
 const SEVERITY_COLOR: Record<string, string> = { critical: "#E24B4A", high: "#D85A30", medium: "#F5C542", low: "#9BE59B" };
@@ -50,6 +51,8 @@ function AttentionCard({ item }: { item: AttentionItem }) {
       {item.subject.kind === "interaction" && issueId && <InteractionBody issueId={issueId} interactionId={item.subject.id} />}
       {item.sourceKind === "approval" && <ApprovalActions approvalId={item.subject.id} />}
       {errored && <AgentRepair agent={errored} />}
+      {item.sourceKind === "blocker_attention" && <StaleBlockerCard item={item} />}
+      {item.sourceKind === "recovery_action" && <RecoveryCard item={item} />}
       <div className="row">
         {issueId && (
           <button className="px-btn small" onClick={() => open({ kind: "issue", issueId })}>

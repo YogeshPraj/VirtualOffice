@@ -306,3 +306,17 @@ export interface EnvironmentTestResult {
   checks: { code: string; level: string; message: string; detail?: string | null; hint?: string | null }[];
   testedAt: string;
 }
+
+export interface RecoveryAction {
+  id: string;
+  kind: string;
+  status: string;
+  cause: string;
+  nextAction: string;
+  evidence: Record<string, unknown>;
+  sourceRunId?: string | null;
+  previousOwnerAgentId: string | null;
+  ownerType: string;
+  attemptCount: number;
+  createdAt: string;
+}

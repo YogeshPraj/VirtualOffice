@@ -1,5 +1,6 @@
 import type {
   ActivityEntry,
+  RecoveryAction,
   AdapterInfo,
   AgentSkillSnapshot,
   CatalogSkill,
@@ -101,6 +102,23 @@ export const api = {
 
   issues: (companyId: string) => get<Issue[]>(`/companies/${companyId}/issues`),
   issue: (issueId: string) => get<Issue>(`/issues/${issueId}`),
+  recoveryActions: (issueId: string) =>
+    get<RecoveryAction[] | { actions?: RecoveryAction[]; items?: RecoveryAction[] }>(`/issues/${issueId}/recovery-actions`).then((r) =>
+      Array.isArray(r) ? r : (r.actions ?? r.items ?? []),
+    ),
+  resolveRecovery: (
+    issueId: string,
+    body: {
+      actionId?: string;
+      outcome: "restored" | "false_positive" | "blocked" | "cancelled";
+      sourceIssueStatus: "todo" | "done" | "in_review" | "blocked";
+      resolutionNote?: string | null;
+      executionReconciliation?: { runId: string; providerStopped: true; actionOutcome: "completed" | "not_performed" | "mixed"; outcomeEvidence: string };
+    },
+  ) => post(`/issues/${issueId}/recovery-actions/resolve`, body),
+  /** Wake an employee on a specific task (same as the classic "nudge"). */
+  wakeOnIssue: (agentId: string, issueId: string, reason: string) =>
+    post(`/agents/${agentId}/wakeup`, { source: "on_demand", triggerDetail: "manual", reason, payload: { issueId }, forceFreshSession: false }),
   issueBlockers: (issueId: string) =>
     get<{
       diagnosis: string | null;
