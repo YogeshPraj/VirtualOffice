@@ -17,6 +17,7 @@ import { WorkProducts } from "./WorkProducts";
 import { LastShift } from "./LastShift";
 import { TaskHistory } from "./TaskHistory";
 import { TaskMap } from "./TaskMap";
+import { MAX_FOCUS, useFocus } from "../lib/focus";
 import { driftFor, useSources } from "../lib/drift";
 import { linkMentions } from "../lib/mentions";
 import { MentionTextarea } from "../ui/MentionTextarea";
@@ -39,6 +40,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
   const interactions = useInteractions(issueId);
   const [draft, setDraft, clearDraft, restoredDraft] = useDraft(`comment:${issueId}`);
   const links = useOfficeLinks();
+  const focus = useFocus();
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: keys.issues(company.id) });
@@ -116,6 +118,14 @@ export function IssuePanel({ issueId }: { issueId: string }) {
               <option key={a.id} value={a.id}>@{a.name}</option>
             ))}
           </select>
+          <button
+            className={`px-btn small ${focus.ids.includes(issue.id) ? "primary" : ""}`}
+            aria-pressed={focus.ids.includes(issue.id)}
+            title="Pin as one of your priorities"
+            onClick={() => focus.toggle(issue.id) || toast(`Your focus list holds ${MAX_FOCUS} tasks; unpin one first.`)}
+          >
+            {focus.ids.includes(issue.id) ? "★ Focus" : "☆ Focus"}
+          </button>
           <ClassicLink path={`/${company.issuePrefix}/issues/${issue.identifier}`}>Classic ↗</ClassicLink>
         </div>
       </div>

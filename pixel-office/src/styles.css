@@ -639,3 +639,8 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .score-grid small { font-size: 13px; line-height: 1.1; display: block; }
 .chat-line .bubble { min-width: 0; } .chat-line .bubble .md pre, .chat-line .bubble .md table { max-width: 100%; }
 .toast-undo { margin-left: 12px; vertical-align: middle; }
+
+.focus-notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.focus-note { display: flex; align-items: flex-start; gap: 2px; box-shadow: 0 0 0 2px var(--ink); padding: 4px 6px; font-size: 15px; min-width: 0; }
+.focus-note .link-btn { white-space: normal; }
+.focus-note .chip-x { border: 0; background: transparent; cursor: pointer; font: inherit; }

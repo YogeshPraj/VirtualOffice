@@ -5,6 +5,8 @@ import type { Issue } from "../api/types";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { cycleSummary, fmtDuration } from "../lib/stats";
+import { useFocus } from "../lib/focus";
+import { FocusStrip } from "./FocusStrip";
 
 export type Day = "today" | "yesterday" | "week" | "lastweek";
 
@@ -115,6 +117,8 @@ export function ReportPanel() {
 
   const who = (i: Issue) => agentById(i.assigneeAgentId)?.name ?? "unassigned";
   const { data: issueActivity } = useQuery({ queryKey: ["issue-activity-all", company.id], queryFn: () => api.companyIssueActivity(company.id), staleTime: 300_000 });
+  const { ids: focusIds } = useFocus();
+  const focused = focusIds.map((id) => issues.find((i) => i.id === id)).filter((i): i is Issue => !!i);
   const cycle = cycleSummary(issues, range[0], range[1], issueActivity ?? []);
   const label = PERIOD_LABEL[day];
   const dateText = isWeek(day)
@@ -131,6 +135,7 @@ export function ReportPanel() {
     return [
       `${company.name}: ${label.toLowerCase()} at the office (${dateText})`,
       "",
+      ...(focused.length ? [`Focus (${focused.filter((i) => i.status === "done").length}/${focused.length} done):`, ...focused.map((i) => `  - ${i.identifier} ${i.title} [${i.status.replace("_", " ")}] (${who(i)})`)] : []),
       `Done (${report.done.length}):`,
       list(report.done),
       `In progress (${report.doing.length}):`,
@@ -220,6 +225,7 @@ export function ReportPanel() {
         )}
       </div>
 
+      <FocusStrip compact />
       {attention.length > 0 && (
         <div className="px-card" style={{ borderLeft: "8px solid var(--bad)" }}>
           <h4>☎ WAITING ON YOU <span className="muted">{attention.length}</span></h4>

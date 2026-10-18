@@ -12,6 +12,7 @@ import { driftFor, useSources, type SourceState } from "../lib/drift";
 import { TemplateEditor } from "./TemplateEditor";
 import { BulkBar } from "./BulkBar";
 import { SavedViews } from "./SavedViews";
+import { FocusStrip } from "./FocusStrip";
 import { awayBaseline } from "../ui/SinceAway";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 import { useDraft } from "../lib/useDraft";
@@ -215,6 +216,7 @@ export function MeetingPanel() {
       </div>
       {editing && <TemplateEditor onClose={() => setEditing(false)} />}
 
+      <FocusStrip />
       <SavedViews
         filter={filter}
         questions={showQuestions}

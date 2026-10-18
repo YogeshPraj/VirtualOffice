@@ -87,7 +87,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P1) Hiring presets.** Ready-made roles (QA, backend, frontend, docs writer, reviewer) with sensible
   instructions, title and capabilities: one click to post the job.
 - [x] **(P2) Undo.** After moving, reassigning or cancelling a task, an Undo button for a few seconds.
-- [ ] **(P2) Focus list.** Pin up to five tasks as your priorities; they lead the board and the Today report.
+- [x] **(P2) Focus list.** Pin up to five tasks as your priorities; they lead the board and the Today report.
 - [ ] **(P2) Share a task.** Copy or download a task (details, thread, documents, links) as Markdown.
 - [ ] **(P2) Budget alerts.** A desktop alert when an employee passes 80% of their monthly budget.
 - [ ] **(P3) Keyboard board.** Move between sticky notes with the arrow keys, Enter to open, and visible focus.

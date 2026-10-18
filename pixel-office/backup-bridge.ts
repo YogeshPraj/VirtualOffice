@@ -24,6 +24,7 @@ const OFFICE_BACKUP = join(COMPANY, "office-settings");
 const SETTINGS: Record<string, (data: unknown) => unknown> = {
   "templates.json": (d) => d,
   "views.json": (d) => d,
+  "focus.json": (d) => d,
   "working-hours.json": (d) => ({ settings: (d as { settings?: unknown })?.settings ?? d }),
   // Only the definitions: pending matches and dismissals are per-machine state.
   "watches.json": (d) =>
