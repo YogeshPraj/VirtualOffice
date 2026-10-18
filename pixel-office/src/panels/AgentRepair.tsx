@@ -8,6 +8,9 @@ import { useOfficeData } from "../state/officeData";
 /** Plain-language next step for errors we recognise; `provider` is the employee's brain provider. */
 export function errorHint(reason: string | null | undefined, provider = "their AI provider"): string | null {
   if (!reason) return null;
+  if (/blocked by unresolved blockers/i.test(reason)) {
+    return "Harmless: Paperclip woke them on a task that is still waiting for other tasks, so the run didn't start. Nothing was lost. Click \"Fixed it\" to clear the flag.";
+  }
   if (/quota|rate limit|usage limit|credits?/i.test(reason)) return `${provider} hit its usage limit. They'll retry when it resets, or pick a smaller brain.`;
   if (/not logged in|not signed in|authenticat|login|unauthori[sz]ed/i.test(reason)) return `${provider} isn't signed in on this PC. See the checks below for the exact step.`;
   if (/ENOENT|not found|is not recognized/i.test(reason)) return "A program they need isn't installed. See the checks below, or test it in B1 → Generator room.";

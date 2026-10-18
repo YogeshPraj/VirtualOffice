@@ -66,7 +66,15 @@ export function InteractionDialog({ interaction }: { interaction: Interaction })
     );
   }
 
-  const ready = questions.every((q) => !q.required || (picked[q.id]?.length ?? 0) > 0);
+  // A question whose only option is "type an answer" is a plain text question: show the box.
+  const textOnly = (q: (typeof questions)[number]) => q.options.length === 1 && !!q.options[0].freeText;
+  const answered = (q: (typeof questions)[number]) => {
+    const chosen = q.options.filter((o) => picked[q.id]?.includes(o.id));
+    if (chosen.length === 0) return false;
+    // A free-text choice needs the text itself.
+    return chosen.every((o) => !o.freeText || !!other[q.id]?.trim());
+  };
+  const ready = questions.every((q) => !q.required || answered(q));
 
   return (
     <div className="rpg-box">
@@ -75,7 +83,21 @@ export function InteractionDialog({ interaction }: { interaction: Interaction })
         <div key={q.id} style={{ marginBottom: 10 }}>
           <div style={{ marginBottom: 6 }}>{q.prompt}</div>
           {q.helpText && <div className="muted" style={{ color: "#bbb" }}>{q.helpText}</div>}
-          {q.options.map((o) => {
+          {textOnly(q) && (
+            <textarea
+              className="px-textarea"
+              aria-label={`Your answer to ${speaker}`}
+              placeholder="Type your answer…"
+              value={other[q.id] ?? ""}
+              onChange={(e) => {
+                const text = e.target.value;
+                setOther((s) => ({ ...s, [q.id]: text }));
+                setPicked((p) => ({ ...p, [q.id]: [q.options[0].id] }));
+              }}
+              style={{ color: "#1e1a24", minHeight: 110 }}
+            />
+          )}
+          {!textOnly(q) && q.options.map((o) => {
             const sel = picked[q.id]?.includes(o.id) ?? false;
             return (
               <div key={o.id}>
