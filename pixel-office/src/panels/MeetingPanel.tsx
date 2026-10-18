@@ -7,6 +7,8 @@ import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { extractSources, SOURCE_ICON } from "../lib/links";
 import { isQuestion } from "./AskEmployee";
+import { TemplateEditor } from "./TemplateEditor";
+import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 
 export const NOTE_COLORS: Record<IssueStatus, string> = {
   backlog: "#e0e0e0",
@@ -68,6 +70,19 @@ export function MeetingPanel() {
   const [dragOver, setDragOver] = useState<string | null>(null);
   const [allDone, setAllDone] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
+  const [priority, setPriority] = useState<Issue["priority"]>("medium");
+  const [editing, setEditing] = useState(false);
+  const { data: templates = [] } = useTemplates();
+  const applyTemplate = (id: string) => {
+    const t = templates.find((x) => x.id === id);
+    if (!t) return;
+    // Whatever was typed in the title becomes the {what}.
+    const what = title.trim();
+    setTitle(fill(t.title, what));
+    setDesc(fill(t.description, what));
+    setPriority(t.priority);
+    setAssignee(resolveAssignee(t, agents) ?? "");
+  };
 
   const setFilter = (patch: Partial<BoardFilter>) =>
     setFilterState((f) => {
@@ -87,11 +102,13 @@ export function MeetingPanel() {
         description: desc.trim() || undefined,
         assigneeAgentId: assignee || null,
         status: "todo",
+        priority,
       }),
     onSuccess: (issue) => {
       toast(`Pinned ${issue.identifier} to the board.`);
       setTitle("");
       setDesc("");
+      setPriority("medium");
       qc.invalidateQueries({ queryKey: keys.issues(company.id) });
     },
     onError: (e: Error) => toast(e.message),
@@ -132,8 +149,19 @@ export function MeetingPanel() {
   return (
     <>
       <div className="px-card">
-        <h4>NEW STICKY NOTE</h4>
-        <input className="px-input" aria-label="Task title" placeholder="What needs doing?" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <div className="row">
+          <h4 style={{ flex: 1, margin: 0 }}>NEW STICKY NOTE</h4>
+          <select className="px-select" style={{ width: "auto", margin: 0 }} aria-label="Start from a template" value="" onChange={(e) => applyTemplate(e.target.value)}>
+            <option value="">🧩 From a template…</option>
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>{t.icon} {t.name}</option>
+            ))}
+          </select>
+          <button className="px-btn small" title="Edit templates" aria-label="Edit templates" onClick={() => setEditing((v) => !v)}>
+            ✎
+          </button>
+        </div>
+        <input className="px-input" aria-label="Task title" placeholder="What needs doing? (pick a template after typing to fill it in)" value={title} onChange={(e) => setTitle(e.target.value)} />
         <textarea className="px-textarea" aria-label="Details" placeholder="Details, acceptance criteria, links…" value={desc} onChange={(e) => setDesc(e.target.value)} />
         <div className="row">
           <select className="px-select" style={{ flex: 1, margin: 0 }} aria-label="Assign to" value={assignee} onChange={(e) => setAssignee(e.target.value)}>
@@ -142,11 +170,17 @@ export function MeetingPanel() {
               <option key={a.id} value={a.id}>→ {a.name}</option>
             ))}
           </select>
+          <select className="px-select" style={{ width: "auto", margin: 0 }} aria-label="Priority" value={priority} onChange={(e) => setPriority(e.target.value as Issue["priority"])}>
+            {Object.keys(PRIORITY_RANK).map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
           <button className="px-btn primary" disabled={!title.trim() || create.isPending} onClick={() => create.mutate()}>
             📌 Pin it
           </button>
         </div>
       </div>
+      {editing && <TemplateEditor onClose={() => setEditing(false)} />}
 
       <div className="row board-filters">
         <input

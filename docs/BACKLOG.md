@@ -44,7 +44,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   sprint") or a GitHub issue search URL; preview every match and bring in the ones you tick.
 - [x] **(P1) @mentions.** Autocomplete `@Name` in task comments; the mentioned employee is woken on that task.
 - [x] **(P1) Ask an employee.** A quick question from the employee's panel that doesn't become a work task.
-- [ ] **(P2) Task templates.** Saved blueprints (bug fix, PR review, spike, docs) that prefill title, details,
+- [x] **(P2) Task templates.** Saved blueprints (bug fix, PR review, spike, docs) that prefill title, details,
   assignee and priority on the board and intake desk.
 - [ ] **(P2) Back up now.** Run the company export from Building status and show when the last backup was.
 - [ ] **(P2) Finance: usage per employee.** Shifts, failures and tokens per employee over 24h / 7 days.

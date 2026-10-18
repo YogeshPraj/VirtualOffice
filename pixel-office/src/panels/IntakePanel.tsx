@@ -5,6 +5,7 @@ import { keys, useProjects } from "../api/hooks";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { QueryIntake } from "./QueryIntake";
+import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 
 /** Mirrors IntakeItem in ../../intake-bridge.ts (server side). */
 interface IntakeItem {
@@ -61,6 +62,7 @@ export function IntakePanel() {
   // Default to the team lead (nobody above them), so the Manager triages and delegates.
   const lead = staff.find((a) => !a.reportsTo && ["general", "pm", "ceo", "cto"].includes(a.role)) ?? staff.find((a) => !a.reportsTo);
 
+  const { data: templates = [] } = useTemplates();
   const [text, setText] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<IntakeItem[] | null>(null);
@@ -145,7 +147,28 @@ export function IntakePanel() {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        <label className="px-label" htmlFor="intake-notes">INSTRUCTIONS FOR THE TEAM (OPTIONAL)</label>
+        <div className="row" style={{ alignItems: "flex-end" }}>
+          <label className="px-label" htmlFor="intake-notes" style={{ flex: 1 }}>INSTRUCTIONS FOR THE TEAM (OPTIONAL)</label>
+          <select
+            className="px-select"
+            style={{ width: "auto", margin: 0 }}
+            aria-label="Use a template"
+            value=""
+            onChange={(e) => {
+              const t = templates.find((x) => x.id === e.target.value);
+              if (!t) return;
+              setNotes(fill(t.description, "the linked item"));
+              setPriority(t.priority);
+              const who = resolveAssignee(t, agents);
+              if (who) setAssignee(who);
+            }}
+          >
+            <option value="">🧩 Template…</option>
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>{t.icon} {t.name}</option>
+            ))}
+          </select>
+        </div>
         <textarea
           id="intake-notes"
           className="px-textarea"
