@@ -1,0 +1,14 @@
+{
+  "name": "paperclip-adapter-copilot-local",
+  "version": "0.1.0",
+  "description": "Paperclip adapter that runs employees on the GitHub Copilot CLI",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.js",
+    "./server": "./src/server/index.js"
+  },
+  "dependencies": {
+    "@paperclipai/adapter-utils": "2026.1012.0"
+  }
+}

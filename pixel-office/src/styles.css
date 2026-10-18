@@ -1,0 +1,510 @@
+@import "@fontsource/press-start-2p/400.css";
+@import "@fontsource/vt323/400.css";
+
+:root {
+  --ink: #1e1a24;
+  --paper: #f5e6c8;
+  --paper-2: #ead6ae;
+  --wood: #5a4636;
+  --wood-dark: #3a2a1e;
+  --accent: #f5c542;
+  --good: #1d9e75;
+  --bad: #e24b4a;
+  --info: #378add;
+  --muted: #7a6a5a;
+  --sky: #2a2438;
+  --font-title: "Press Start 2P", monospace;
+  --font-body: "VT323", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--sky);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 20px;
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(255, 255, 255, 0.03) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(255, 255, 255, 0.03) 31px 32px),
+    var(--sky);
+}
+
+.office-svg {
+  width: 100%;
+  height: 100%;
+  max-height: calc(100vh - 80px);
+  box-shadow: 0 0 0 4px var(--wood-dark), 0 10px 0 4px rgba(0, 0, 0, 0.35);
+  background: #3a2a1e;
+  user-select: none;
+}
+
+.room-hit {
+  cursor: pointer;
+}
+.room-hit:hover {
+  fill: rgba(255, 240, 180, 0.12);
+}
+/* The open floor is a button for keyboard/screen-reader users, but mouse clicks there
+   should not feel like a room hotspot (desks and people sit on top of it). */
+.room-hit-floor,
+.room-hit-floor:hover {
+  cursor: default;
+  fill: transparent;
+}
+.room-hit:focus,
+.agent-figure:focus {
+  outline: none;
+}
+.room-hit:focus-visible {
+  fill: rgba(245, 197, 66, 0.18);
+  stroke: #f5c542;
+  stroke-width: 4;
+}
+.agent-figure:focus-visible .nametag rect {
+  fill: #f5c542;
+}
+.agent-figure:focus-visible .nametag text {
+  fill: var(--ink);
+}
+.agent-figure:hover .nametag rect {
+  fill: rgba(245, 197, 66, 0.95);
+}
+.agent-figure:hover .nametag text {
+  fill: var(--ink);
+}
+
+/* ── HUD ────────────────────────────────────────────────── */
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--wood-dark);
+  color: var(--paper);
+  border-bottom: 4px solid #000;
+  flex-wrap: wrap;
+}
+.hud .brand {
+  font-family: var(--font-title);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.hud .stat {
+  font-size: 20px;
+}
+.hud .spacer {
+  flex: 1;
+}
+.brain-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 50;
+  min-width: 280px;
+  padding: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 0 0 3px #000;
+}
+.brain-menu .brain-limit {
+  background: #2a1010;
+  color: #ffb0b0;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-size: 17px;
+}
+.brain-menu .rpg-option:disabled {
+  opacity: 0.6;
+}
+.live-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  background: var(--bad);
+}
+.live-dot.on {
+  background: #4ae04a;
+  animation: blink 1.2s steps(2) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ── Pixel controls ─────────────────────────────────────── */
+.px-btn {
+  font-family: var(--font-title);
+  font-size: 10px;
+  padding: 10px 14px;
+  border: none;
+  cursor: pointer;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow:
+    inset -3px -3px 0 rgba(0, 0, 0, 0.25),
+    inset 3px 3px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 3px var(--ink);
+  margin: 3px;
+}
+.px-btn:hover {
+  filter: brightness(1.08);
+}
+.px-btn:active {
+  box-shadow:
+    inset 3px 3px 0 rgba(0, 0, 0, 0.25),
+    0 0 0 3px var(--ink);
+}
+.px-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.px-btn.primary {
+  background: var(--accent);
+}
+.px-btn.good {
+  background: var(--good);
+  color: #fff;
+}
+.px-btn.bad {
+  background: var(--bad);
+  color: #fff;
+}
+.px-btn.small {
+  font-size: 8px;
+  padding: 6px 8px;
+}
+
+.px-input,
+.px-select,
+.px-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  background: #fffaf0;
+  border: none;
+  box-shadow: inset 3px 3px 0 rgba(0, 0, 0, 0.15), 0 0 0 3px var(--ink);
+  font-size: 20px;
+  margin: 3px 0 12px;
+}
+.px-textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.px-label {
+  font-family: var(--font-title);
+  font-size: 9px;
+  display: block;
+  margin-top: 4px;
+}
+
+/* ── Windows / dialogs ──────────────────────────────────── */
+.px-window {
+  background: var(--paper);
+  box-shadow:
+    0 0 0 4px var(--ink),
+    0 0 0 8px var(--paper-2),
+    0 0 0 12px var(--ink),
+    10px 14px 0 12px rgba(0, 0, 0, 0.35);
+}
+.px-window .titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--wood);
+  color: var(--paper);
+  font-family: var(--font-title);
+  font-size: 11px;
+}
+.px-window .titlebar .grow {
+  flex: 1;
+}
+.px-window .close {
+  background: var(--bad);
+  color: #fff;
+  border: none;
+  width: 26px;
+  height: 26px;
+  font-family: var(--font-title);
+  font-size: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.px-window .body {
+  padding: 14px 16px;
+  overflow: auto;
+}
+
+.panel-dock {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  bottom: 24px;
+  width: min(520px, calc(100% - 48px));
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+.panel-dock .px-window {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+
+/* RPG dialogue box (questions from agents) */
+.rpg-box {
+  background: #1e1a2e;
+  color: #fff;
+  padding: 14px 16px;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1e1a2e;
+  margin: 10px 4px 18px;
+}
+.rpg-box .speaker {
+  font-family: var(--font-title);
+  font-size: 9px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.rpg-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px 6px 22px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  position: relative;
+  font-size: 20px;
+}
+.rpg-option:hover,
+.rpg-option.selected {
+  background: rgba(245, 197, 66, 0.18);
+}
+.rpg-option.selected::before,
+.rpg-option:hover::before {
+  content: "▶";
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+  font-size: 14px;
+  top: 9px;
+}
+.rpg-option small {
+  display: block;
+  color: #bbb;
+  font-size: 17px;
+}
+
+/* Lists, cards, notes */
+.px-card {
+  background: #fffaf0;
+  box-shadow: 0 0 0 3px var(--ink);
+  padding: 10px 12px;
+  margin: 10px 3px 14px;
+}
+.px-card h4 {
+  font-family: var(--font-title);
+  font-size: 9px;
+  margin: 0 0 6px;
+}
+.muted {
+  color: var(--muted);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tag {
+  display: inline-block;
+  font-family: var(--font-title);
+  font-size: 7px;
+  padding: 3px 5px;
+  background: var(--ink);
+  color: var(--paper);
+}
+.tag.running {
+  background: var(--good);
+}
+.tag.error {
+  background: var(--bad);
+}
+.tag.paused {
+  background: #4a6aaa;
+}
+.tag.idle {
+  background: var(--muted);
+}
+.tag.pending_approval {
+  background: #c8a030;
+}
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.kanban .col h5 {
+  font-family: var(--font-title);
+  font-size: 8px;
+  margin: 4px 0 8px;
+}
+.sticky {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  padding: 6px 7px 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.25);
+  transform: rotate(-0.6deg);
+}
+.sticky:nth-child(2n) {
+  transform: rotate(0.8deg);
+}
+.sticky .id {
+  font-family: var(--font-title);
+  font-size: 6px;
+  opacity: 0.7;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.chat-line {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+  align-items: flex-start;
+}
+.chat-line .avatar {
+  flex: none;
+  width: 32px;
+  height: 40px;
+}
+.chat-line .bubble {
+  background: #fffaf0;
+  padding: 6px 10px;
+  box-shadow: 0 0 0 2px var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex: 1;
+  font-size: 18px;
+  line-height: 1.05;
+}
+.chat-line .who {
+  font-family: var(--font-title);
+  font-size: 7px;
+  display: block;
+  margin-bottom: 4px;
+}
+.chat-line.me .bubble {
+  background: #fff3c4;
+}
+
+.meter {
+  height: 14px;
+  background: #fffaf0;
+  box-shadow: 0 0 0 2px var(--ink);
+  margin: 4px 0 10px;
+}
+.meter > div {
+  height: 100%;
+  background: var(--good);
+}
+
+.error-bar {
+  background: #5a1414;
+  color: #ffe0e0;
+  padding: 6px 16px;
+  border-bottom: 3px solid #000;
+  font-size: 19px;
+}
+.error-bar .row + .row {
+  margin-top: 4px;
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 20;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 16px;
+  box-shadow: 0 0 0 3px var(--accent);
+  font-size: 20px;
+}
+
+/* Onboarding: building exterior */
+.exterior {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 16px;
+}
+.exterior .px-window {
+  width: min(560px, 100%);
+}
+.exterior svg {
+  width: 100%;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .panel-dock {
+    top: auto;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    height: 70%;
+  }
+  .kanban {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

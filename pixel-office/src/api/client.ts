@@ -1,0 +1,213 @@
+import type {
+  ActivityEntry,
+  AdapterInfo,
+  AgentSkillSnapshot,
+  CatalogSkill,
+  CompanySkill,
+  EnvironmentTestResult,
+  GalleryApp,
+  OrgNode,
+  Project,
+  Routine,
+  Secret,
+  ToolConnection,
+  Agent,
+  Approval,
+  AttentionFeed,
+  Company,
+  Dashboard,
+  Interaction,
+  Issue,
+  IssueComment,
+  IssueStatus,
+} from "./types";
+
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    method,
+    credentials: "include",
+    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!res.ok) throw new ApiError(res.status, data?.error ?? `${method} ${path} failed (${res.status})`);
+  return data as T;
+}
+
+const get = <T>(path: string) => request<T>("GET", path);
+const post = <T>(path: string, body: unknown = {}) => request<T>("POST", path, body);
+const patch = <T>(path: string, body: unknown) => request<T>("PATCH", path, body);
+const del = <T>(path: string) => request<T>("DELETE", path);
+
+export interface HirePayload {
+  name: string;
+  role: string;
+  title?: string;
+  capabilities?: string;
+  reportsTo?: string | null;
+  adapterType: string;
+  adapterConfig: Record<string, unknown>;
+  runtimeConfig: Record<string, unknown>;
+  budgetMonthlyCents: number;
+  applyStoredClaudeLogin?: boolean;
+}
+
+export const api = {
+  companies: () => get<Company[]>("/companies"),
+  createCompany: (body: { name: string; description?: string }) => post<Company>("/companies", body),
+
+  agents: (companyId: string) => get<Agent[]>(`/companies/${companyId}/agents`),
+  models: (companyId: string, adapterType: string) =>
+    get<{ id: string; label: string }[]>(`/companies/${companyId}/adapters/${adapterType}/models`),
+  adapterSchema: (adapterType: string) =>
+    get<{ fields: { key: string; default?: unknown }[] }>(`/adapters/${adapterType}/config-schema`).catch(() => ({ fields: [] })),
+  terminateAgent: (agentId: string) => post(`/agents/${agentId}/terminate`, {}),
+  hire: (companyId: string, body: HirePayload) =>
+    post<{ agent: Agent; approval: Approval | null }>(`/companies/${companyId}/agent-hires`, body),
+  wakeAgent: (agentId: string) => post(`/agents/${agentId}/wakeup`, {}),
+  pauseAgent: (agentId: string) => post(`/agents/${agentId}/pause`, {}),
+  resumeAgent: (agentId: string) => post(`/agents/${agentId}/resume`, {}),
+  clearAgentError: (agentId: string) => post<Agent>(`/agents/${agentId}/clear-error`, {}),
+  /** Empty string = Paperclip's default model. adapterConfig patches merge shallowly. */
+  setAgentModel: (agentId: string, model: string) => patch<Agent>(`/agents/${agentId}`, { adapterConfig: { model } }),
+  switchAgentProvider: async (
+    agentId: string,
+    adapterType: string,
+    adapterConfig: Record<string, unknown>,
+    runtimeConfig: Record<string, unknown>,
+  ) => {
+    const body = { adapterType, adapterConfig, runtimeConfig, replaceAdapterConfig: true };
+    try {
+      return await patch<Agent>(`/agents/${agentId}`, body);
+    } catch (e) {
+      // Paperclip keeps re-applying the old vendor sign-in, which the new provider can't use.
+      if (!(e instanceof ApiError) || e.status !== 422 || !/AI connection compatible/i.test(e.message)) throw e;
+      const res = await fetch("/office-admin/detach-ai-connection", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ agentId }),
+      });
+      if (!res.ok) throw new Error(`Could not detach the old sign-in: ${(await res.json().catch(() => null))?.error ?? res.status}`);
+      return patch<Agent>(`/agents/${agentId}`, body);
+    }
+  },
+
+  issues: (companyId: string) => get<Issue[]>(`/companies/${companyId}/issues`),
+  issue: (issueId: string) => get<Issue>(`/issues/${issueId}`),
+  issueBlockers: (issueId: string) =>
+    get<{
+      diagnosis: string | null;
+      blockers: { id: string; identifier: string; title: string; status: string; assigneeAgentId: string | null }[];
+    }>(`/issues/${issueId}/diagnostics/blockers`),
+  createIssue: (
+    companyId: string,
+    body: { title: string; description?: string; assigneeAgentId?: string | null; status?: IssueStatus; priority?: string },
+  ) => post<Issue>(`/companies/${companyId}/issues`, body),
+  updateIssue: (issueId: string, body: Partial<Pick<Issue, "status" | "assigneeAgentId" | "title" | "priority">>) =>
+    patch<Issue>(`/issues/${issueId}`, body),
+  comments: (issueId: string) => get<IssueComment[]>(`/issues/${issueId}/comments`),
+  addComment: (issueId: string, body: string) => post<IssueComment>(`/issues/${issueId}/comments`, { body }),
+
+  interactions: (issueId: string) => get<Interaction[]>(`/issues/${issueId}/interactions`),
+  respond: (
+    issueId: string,
+    interactionId: string,
+    answers: { questionId: string; optionIds: string[]; otherText?: string | null }[],
+  ) => post(`/issues/${issueId}/interactions/${interactionId}/respond`, { answers }),
+
+  /** An agent asked for a connection (e.g. "Connect Anthropic"): give it an existing one. */
+  adoptAiConnection: (companyId: string, agentId: string, interactionId: string, connectionId: string) =>
+    post(`/agents/${agentId}/connection-intents/${interactionId}/adopt?companyId=${encodeURIComponent(companyId)}`, { connectionId }),
+  connectionIntentOptions: (interactionId: string) =>
+    get<{
+      aiConnectionRequiresAdoption?: { connectionId?: string } | string | null;
+      aiRepair?: { connection?: { id: string; name: string; status: string } | null } | null;
+      existingConnections?: { id: string; name: string; status: string; enabled: boolean }[];
+    }>(`/connection-intents/${interactionId}/setup-options`),
+  completeConnectionIntent: (interactionId: string, connectionId: string) =>
+    post(`/connection-intents/${interactionId}/complete`, { connectionId }),
+  declineConnectionIntent: (interactionId: string) => post(`/connection-intents/${interactionId}/decline`, {}),
+  acceptInteraction: (issueId: string, interactionId: string, selectedOptionIds?: string[]) =>
+    post(`/issues/${issueId}/interactions/${interactionId}/accept`, selectedOptionIds ? { selectedOptionIds } : {}),
+  rejectInteraction: (issueId: string, interactionId: string, reason?: string) =>
+    post(`/issues/${issueId}/interactions/${interactionId}/reject`, reason ? { reason } : {}),
+
+  attention: (companyId: string) => get<AttentionFeed>(`/companies/${companyId}/attention`),
+  approval: (id: string) => get<Approval>(`/approvals/${id}`),
+  approve: (id: string) => post(`/approvals/${id}/approve`, {}),
+  reject: (id: string) => post(`/approvals/${id}/reject`, {}),
+
+  goals: (companyId: string) => get<{ id: string; title: string; description: string | null; level: string; status: string }[]>(`/companies/${companyId}/goals`),
+  createGoal: (companyId: string, body: { title: string; description?: string; level?: string; status?: string }) =>
+    post(`/companies/${companyId}/goals`, body),
+  costsSummary: (companyId: string) => get<Record<string, unknown>>(`/companies/${companyId}/costs/summary`),
+
+  dashboard: (companyId: string) => get<Dashboard>(`/companies/${companyId}/dashboard`),
+  activity: (companyId: string) => get<ActivityEntry[]>(`/companies/${companyId}/activity`),
+
+  // ── Basement (B1) ─────────────────────────────────────────────────────
+  updateCompany: (
+    companyId: string,
+    body: Partial<{ name: string; description: string; budgetMonthlyCents: number; requireBoardApprovalForNewAgents: boolean; status: "active" | "paused" }>,
+  ) => patch<Company>(`/companies/${companyId}`, body),
+
+  org: (companyId: string) => get<OrgNode[]>(`/companies/${companyId}/org`),
+  updateAgent: (agentId: string, body: { reportsTo?: string | null; title?: string; capabilities?: string; budgetMonthlyCents?: number }) =>
+    patch<Agent>(`/agents/${agentId}`, body),
+
+  companySkills: (companyId: string) => get<CompanySkill[]>(`/companies/${companyId}/skills`),
+  skillFile: (companyId: string, skillId: string, path: string) =>
+    get<{ path: string; content: string }>(`/companies/${companyId}/skills/${skillId}/files?path=${encodeURIComponent(path)}`),
+  saveSkillFile: (companyId: string, skillId: string, path: string, content: string) =>
+    patch(`/companies/${companyId}/skills/${skillId}/files`, { path, content }),
+  skillCatalog: () => get<CatalogSkill[]>(`/skills/catalog`),
+  installCatalogSkill: (companyId: string, catalogSkillId: string) =>
+    post<{ action: string; skill: CompanySkill; warnings: string[] }>(`/companies/${companyId}/skills/install-catalog`, { catalogSkillId }),
+  agentSkills: (agentId: string) => get<AgentSkillSnapshot>(`/agents/${agentId}/skills`),
+  syncAgentSkills: (agentId: string, desiredSkills: string[]) =>
+    post<AgentSkillSnapshot>(`/agents/${agentId}/skills/sync`, { mode: "replace", desiredSkills }),
+
+  routines: (companyId: string) => get<Routine[]>(`/companies/${companyId}/routines`),
+  createRoutine: (companyId: string, body: { title: string; description?: string; assigneeAgentId?: string | null; status?: string }) =>
+    post<Routine>(`/companies/${companyId}/routines`, body),
+  addScheduleTrigger: (routineId: string, cronExpression: string, timezone: string, label?: string) =>
+    post(`/routines/${routineId}/triggers`, { kind: "schedule", cronExpression, timezone, label, enabled: true }),
+  updateRoutine: (routineId: string, body: Partial<{ status: string; assigneeAgentId: string | null; title: string }>) =>
+    patch<Routine>(`/routines/${routineId}`, body),
+  runRoutine: (routineId: string) => post(`/routines/${routineId}/run`, { source: "manual" }),
+
+  projects: (companyId: string) => get<Project[]>(`/companies/${companyId}/projects`),
+  createProject: (
+    companyId: string,
+    body: {
+      name: string;
+      description?: string;
+      leadAgentId?: string | null;
+      status?: string;
+      workspace?: { name?: string; sourceType: "local_path" | "git_repo"; cwd?: string; repoUrl?: string; isPrimary?: boolean };
+    },
+  ) => post<Project>(`/companies/${companyId}/projects`, body),
+  updateProject: (projectId: string, body: Partial<{ status: string; leadAgentId: string | null; name: string; description: string }>) =>
+    patch<Project>(`/projects/${projectId}`, body),
+
+  toolConnections: (companyId: string) => get<{ connections: ToolConnection[] }>(`/companies/${companyId}/tools/connections`),
+  toolGallery: (companyId: string) => get<{ apps: GalleryApp[] }>(`/companies/${companyId}/tools/gallery`),
+
+  secrets: (companyId: string) => get<Secret[]>(`/companies/${companyId}/secrets`),
+  createSecret: (companyId: string, body: { name: string; key?: string; value: string; description?: string }) =>
+    post<Secret>(`/companies/${companyId}/secrets`, { ...body, provider: "local_encrypted", managedMode: "paperclip_managed" }),
+  rotateSecret: (secretId: string, value: string) => post<Secret>(`/secrets/${secretId}/rotate`, { value }),
+  deleteSecret: (secretId: string) => del(`/secrets/${secretId}`),
+
+  adapters: () => get<AdapterInfo[]>(`/adapters`),
+  setAdapterDisabled: (type: string, disabled: boolean) => patch(`/adapters/${type}`, { disabled }),
+  testAdapter: (companyId: string, type: string) =>
+    post<EnvironmentTestResult>(`/companies/${companyId}/adapters/${type}/test-environment`, {}),
+};

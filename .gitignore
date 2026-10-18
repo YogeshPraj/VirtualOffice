@@ -1,0 +1,35 @@
+# ── Never commit: local data and credentials ─────────────────────────────
+# Paperclip instance: company database, agent files, backups, secrets master key.
+.paperclip/
+# Second-brain access tokens.
+.brain/
+# Anything that looks like a credential.
+*.token
+*.key
+*.pem
+.env
+.env.*
+
+# ── Downloaded tools (re-created by setup, see README) ──────────────────────
+.tools/
+# Reference clones of upstream projects (Paperclip, gstack, agent-virtual-office).
+vendor/
+
+# ── Build output, dependencies, logs ───────────────────────────────────────
+node_modules/
+dist/
+*.tsbuildinfo
+*.log
+.paperclip-run.log
+.office-run.log
+.brain-run.log
+
+# gstack QA reports and screenshots written into the pixel office by QA runs.
+pixel-office/.gstack/
+
+# Machine-specific: Claude Code preview config (absolute paths) and Windows shortcuts.
+.claude/
+*.lnk
+
+# Your company's private data lives in its own (private) git repo, checked out here.
+company/
