@@ -11,6 +11,7 @@ import { isQuestion } from "./AskEmployee";
 import { driftFor, useSources, type SourceState } from "../lib/drift";
 import { TemplateEditor } from "./TemplateEditor";
 import { BulkBar } from "./BulkBar";
+import { awayBaseline } from "../ui/SinceAway";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 
 export const NOTE_COLORS: Record<IssueStatus, string> = {
@@ -92,6 +93,7 @@ export function MeetingPanel() {
   }, []);
   const { data: templates = [] } = useTemplates();
   const { data: sources } = useSources();
+  const [since] = useState(awayBaseline);
   const applyTemplate = (id: string) => {
     const t = templates.find((x) => x.id === id);
     if (!t) return;
@@ -291,6 +293,7 @@ export function MeetingPanel() {
                   sources={sources}
                   assignee={agentById(i.assigneeAgentId)?.name}
                   selected={selecting ? selected.has(i.id) : undefined}
+                  changed={!!since && Date.parse(i.updatedAt) > since}
                   onOpen={() => (selecting ? toggle(i.id) : open({ kind: "issue", issueId: i.id }))}
                 />
               ))}
@@ -316,6 +319,7 @@ function StickyNote({
   onOpen,
   sources,
   selected,
+  changed,
 }: {
   issue: Issue;
   assignee?: string;
@@ -323,12 +327,14 @@ function StickyNote({
   sources?: Record<string, SourceState>;
   /** undefined = not in select mode */
   selected?: boolean;
+  /** Changed since the CEO was last here. */
+  changed?: boolean;
 }) {
   const source = extractSources(issue.description)[0];
   const drift = driftFor(issue, sources);
   return (
     <button
-      className={`sticky ${selected ? "selected" : ""}`}
+      className={`sticky ${selected ? "selected" : ""} ${changed ? "changed" : ""}`}
       aria-pressed={selected}
       style={{ background: NOTE_COLORS[issue.status] }}
       onClick={onOpen}

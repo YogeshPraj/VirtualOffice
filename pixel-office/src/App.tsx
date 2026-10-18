@@ -14,6 +14,7 @@ import { ErrorBar } from "./ui/ErrorBar";
 import { CommandPalette } from "./ui/CommandPalette";
 import { Tour } from "./ui/Tour";
 import { Shortcuts } from "./ui/Shortcuts";
+import { SinceAway } from "./ui/SinceAway";
 import { useOfficeMood } from "./office/mood";
 import { useWatchAlerts } from "./ui/useWatchAlerts";
 
@@ -101,6 +102,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
         <CommandPalette />
         <Tour />
         <Shortcuts />
+        <SinceAway />
       </div>
     </OfficeDataProvider>
   );

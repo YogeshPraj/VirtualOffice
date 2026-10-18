@@ -626,3 +626,5 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .link-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .link-btn:hover { text-decoration: underline; }
 .goal { margin: 6px 0 10px; }
+.sticky.changed { box-shadow: 0 0 0 3px var(--accent), 0 0 10px 2px rgba(245, 197, 66, 0.8); }
+.sticky.changed .id::after { content: " · NEW"; color: #8a5a00; }
