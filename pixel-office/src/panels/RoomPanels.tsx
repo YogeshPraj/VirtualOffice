@@ -8,6 +8,7 @@ import { useOffice } from "../state/officeStore";
 import { Avatar } from "../ui/Avatar";
 import { ClassicLink } from "../ui/Window";
 import { UsageCard } from "./UsageCard";
+import { Workload } from "./Workload";
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -182,24 +183,5 @@ export function LobbyPanel() {
 
 /** Main floor: who's in today. */
 export function FloorPanel() {
-  const { agents, issues } = useOfficeData();
-  const open = useOffice((s) => s.open);
-  const staff = agents.filter((a) => a.status !== "terminated");
-  return (
-    <>
-      {staff.map((a) => {
-        const task = issues.find((i) => i.assigneeAgentId === a.id && i.status === "in_progress");
-        return (
-          <button key={a.id} className="rpg-option" style={{ color: "var(--ink)", display: "flex", gap: 10, alignItems: "center" }} onClick={() => open({ kind: "agent", agentId: a.id })}>
-            <Avatar agent={a} size={24} />
-            <span style={{ flex: 1 }}>
-              {a.name}
-              <small style={{ color: "var(--muted)" }}>{task ? `${task.identifier} · ${task.title}` : "no active task"}</small>
-            </span>
-            <span className={`tag ${a.status}`}>{a.status.replace("_", " ")}</span>
-          </button>
-        );
-      })}
-    </>
-  );
+  return <Workload />;
 }

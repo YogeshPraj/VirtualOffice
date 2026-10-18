@@ -621,3 +621,7 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .bulk-bar .muted { color: #c9bfa8; }
 .sticky.selected { outline: 4px solid var(--info); outline-offset: 1px; }
 .sticky .pick { float: right; font-size: 16px; }
+.workload { margin: 8px 3px; }
+.work-row { margin: 2px 0; font-size: 16px; }
+.link-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.link-btn:hover { text-decoration: underline; }
