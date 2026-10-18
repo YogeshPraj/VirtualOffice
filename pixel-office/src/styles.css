@@ -553,3 +553,10 @@ textarea {
 .kanban .col { min-height: 120px; padding: 2px; }
 .kanban .col.drag-over { outline: 3px dashed var(--info); outline-offset: -2px; background: rgba(55, 138, 221, 0.08); }
 .sticky[draggable="true"] { cursor: grab; }
+
+/* Ctrl+K command palette */
+.palette-backdrop { position: fixed; inset: 0; background: rgba(16, 20, 26, 0.45); z-index: 200; display: flex; justify-content: center; align-items: flex-start; padding: 12vh 16px 0; }
+.palette { background: var(--paper, #f4e9d4); box-shadow: 0 0 0 3px var(--ink), 6px 6px 0 rgba(0, 0, 0, 0.35); padding: 10px; width: min(560px, 100%); }
+.palette-list { max-height: 50vh; overflow-y: auto; margin-top: 6px; }
+.palette-item { display: flex; gap: 8px; align-items: center; width: 100%; text-align: left; border: 0; background: transparent; padding: 4px 6px; font: inherit; font-size: 18px; cursor: pointer; color: var(--ink); }
+.palette-item.on { background: #fff3c4; box-shadow: 0 0 0 2px var(--ink); }

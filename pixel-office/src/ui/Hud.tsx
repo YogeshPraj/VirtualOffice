@@ -62,6 +62,9 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
         </a>
       )}
       <span className="spacer" />
+      <button className="px-btn small" onClick={() => window.dispatchEvent(new Event("pixel-office:palette"))} title="Jump anywhere (Ctrl+K)">
+        🔎 Ctrl+K
+      </button>
       <BrainSwitcher />
       {notify.supported && (
         <button

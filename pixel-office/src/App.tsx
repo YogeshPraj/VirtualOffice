@@ -11,6 +11,7 @@ import { Hud } from "./ui/Hud";
 import { PxWindow } from "./ui/Window";
 import { useOfficeNotifications } from "./ui/useNotifications";
 import { ErrorBar } from "./ui/ErrorBar";
+import { CommandPalette } from "./ui/CommandPalette";
 
 const COMPANY_KEY = "pixel-office:company";
 
@@ -85,6 +86,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
           )}
           <PanelDock />
         </main>
+        <CommandPalette />
       </div>
     </OfficeDataProvider>
   );

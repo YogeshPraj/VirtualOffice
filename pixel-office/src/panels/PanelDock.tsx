@@ -22,7 +22,7 @@ import {
   VaultPanel,
 } from "./BasementPanels";
 
-const ROOM_TITLES: Record<RoomId, string> = {
+export const ROOM_TITLES: Record<RoomId, string> = {
   lobby: "LOBBY",
   hr: "HR · HIRING",
   floor: "MAIN FLOOR",
