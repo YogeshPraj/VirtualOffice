@@ -12,6 +12,7 @@ export const GO_KEYS: Record<string, { room: RoomId; label: string }> = {
   f: { room: "finance", label: "Finance" },
   l: { room: "lounge", label: "Lounge (#general)" },
   u: { room: "status", label: "Building status" },
+  r: { room: "review", label: "Review room" },
 };
 
 export const FOCUS_NEW_TASK = "pixel-office:new-task";
@@ -72,7 +73,7 @@ export function Shortcuts() {
 
   return (
     <>
-      {pendingG && <div className="key-hint">g … (b board, i inbox, t today, d intake, s study, h HR, f finance, l lounge, u status)</div>}
+      {pendingG && <div className="key-hint">g … (b board, i inbox, r review, t today, d intake, s study, h HR, f finance, l lounge, u status)</div>}
       {help && (
         <div className="palette-backdrop" onMouseDown={() => setHelp(false)}>
           <div className="palette" role="dialog" aria-label="Keyboard shortcuts" onMouseDown={(e) => e.stopPropagation()}>

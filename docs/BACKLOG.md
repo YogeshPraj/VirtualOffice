@@ -82,7 +82,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P3) Office sounds.** Optional soft typing while someone works and a chime when a task is done.
 
 ## Wave 5: deciding faster
-- [ ] **(P1) Review queue.** Everything ready for your review in one place: tasks in review with their work
+- [x] **(P1) Review queue.** Everything ready for your review in one place: tasks in review with their work
   products, documents and latest update; approve (done), send back with a note, or open. Keys j/k, a, s.
 - [ ] **(P1) Hiring presets.** Ready-made roles (QA, backend, frontend, docs writer, reviewer) with sensible
   instructions, title and capabilities: one click to post the job.

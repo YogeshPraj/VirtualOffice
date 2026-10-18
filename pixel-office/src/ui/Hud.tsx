@@ -7,6 +7,8 @@ import { BrainSwitcher } from "./BrainSwitcher";
 import { useNotificationPref } from "./useNotifications";
 import { useSoundPref } from "./useOfficeSounds";
 import { pendingTotal, useWatches } from "../lib/watches";
+import { useOfficeData } from "../state/officeData";
+import { reviewQueue } from "../panels/ReviewPanel";
 import { LEVEL_ICON, useBuildingStatus, worstLevel } from "../panels/StatusPanel";
 
 export function Hud({ company, attentionCount, companies, onSwitch }: {
@@ -25,6 +27,8 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
   const brokenAi = conns?.find((c) => c.connectionPurpose === "ai" && c.enabled && c.healthStatus === "error");
   const notify = useNotificationPref();
   const sounds = useSoundPref();
+  const { issues } = useOfficeData();
+  const toReview = reviewQueue(issues).length;
   const { data: watches } = useWatches();
   const newWork = pendingTotal(watches);
   const building = useBuildingStatus();
@@ -119,6 +123,11 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
       <button data-tour="inbox" className={`px-btn small ${attentionCount ? "bad" : ""}`} onClick={() => open({ kind: "room", room: "ceo" })}>
         ☎ {attentionCount ? `${attentionCount} NEED YOU` : "INBOX"}
       </button>
+      {toReview > 0 && (
+        <button className="px-btn small" onClick={() => open({ kind: "room", room: "review" })} title="Tasks waiting for your review (g r)">
+          🔍 {toReview} TO REVIEW
+        </button>
+      )}
       <button data-tour="intake" className="px-btn small" onClick={() => open({ kind: "room", room: "intake" })} title="Bring in work: ADO, GitHub or any link">
         📥 INTAKE{newWork ? ` · ${newWork} NEW` : ""}
       </button>
