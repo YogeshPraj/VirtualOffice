@@ -548,3 +548,8 @@ textarea {
 .doc-view { background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 6px 10px; margin: 4px 0 10px; font-size: 18px; max-height: 480px; overflow-y: auto; }
 
 .stat-chip { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 1px 6px; margin: 3px; font-size: 16px; }
+
+.board-filters { flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.kanban .col { min-height: 120px; padding: 2px; }
+.kanban .col.drag-over { outline: 3px dashed var(--info); outline-offset: -2px; background: rgba(55, 138, 221, 0.08); }
+.sticky[draggable="true"] { cursor: grab; }
