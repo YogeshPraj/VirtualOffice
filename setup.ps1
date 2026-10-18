@@ -38,7 +38,10 @@ function Have([string]$cmd) { [bool](Get-Command $cmd -ErrorAction SilentlyConti
 
 function Get-Verified([string]$url, [string]$sumsUrl, [string]$fileName, [string]$dest) {
     Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
-    $line = (Invoke-WebRequest -Uri $sumsUrl -UseBasicParsing).Content -split "`n" | Where-Object { $_ -match "\s\*?$([regex]::Escape($fileName))\s*$" } | Select-Object -First 1
+    # GitHub serves release assets as application/octet-stream, so Content can be bytes.
+    $sums = (Invoke-WebRequest -Uri $sumsUrl -UseBasicParsing).Content
+    if ($sums -is [byte[]]) { $sums = [System.Text.Encoding]::UTF8.GetString($sums) }
+    $line = $sums -split "`n" | Where-Object { $_ -match "\s\*?$([regex]::Escape($fileName))\s*$" } | Select-Object -First 1
     if (-not $line) { throw "No checksum published for $fileName" }
     $expected = ($line -split "\s+")[0].ToLower()
     $actual = (Get-FileHash $dest -Algorithm SHA256).Hash.ToLower()
@@ -106,9 +109,9 @@ Step "npm packages (pixel-office, adapters\copilot-local)" {
         $installed = Join-Path $path "node_modules\.package-lock.json"
         # Up to date when npm's own record of the install is newer than the lockfile.
         if ((Test-Path $installed) -and (Get-Item $installed).LastWriteTime -ge (Get-Item $lock).LastWriteTime) { continue }
-        # npm ci deletes node_modules first; a running office keeps esbuild.exe locked, so the
-        # install would fail halfway and leave the office broken. Refuse instead.
-        if (Get-NetTCPConnection -LocalPort 5180 -State Listen -ErrorAction SilentlyContinue) {
+        # npm ci deletes node_modules first; a running office keeps esbuild.exe locked, so
+        # reinstalling over a live install would fail halfway and break it. Refuse instead.
+        if ((Test-Path (Join-Path $path "node_modules")) -and (Get-NetTCPConnection -LocalPort 5180 -State Listen -ErrorAction SilentlyContinue)) {
             throw "The Virtual Office is running. Double-click 'Stop Virtual Office' (in this folder), then re-run setup.ps1."
         }
         Push-Location $path

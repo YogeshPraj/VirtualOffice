@@ -35,14 +35,29 @@ The live databases (`.paperclip/`, `~/.gbrain`) are never committed anywhere; ba
 
 ## Setup on a new machine (Windows)
 
-1. Portable runtimes in `.tools/`: Node 24.11+ in `.tools/node`, Bun 1.4+ in `.tools/bun` (also copy `bun.exe` to `bunx.exe`).
-2. `cd pixel-office && npm install`; `cd adapters/copilot-local && npm install`.
-3. Claude Code CLI signed in (`claude auth login`); optional GitHub Copilot CLI signed in.
-4. gstack: `git clone --depth 1 https://github.com/garrytan/gstack ~/.claude/skills/gstack` then `./setup --host claude --no-plan-tune-hooks --no-timeline-stop-hook` with `.tools/bun` on PATH.
-5. GBrain: `bun install -g github:garrytan/gbrain`, `gbrain init --pglite --no-embedding`, mint tokens into `.brain/` (`gbrain auth create employees --scopes read,write`, same for `ceo-office`), then register `http://127.0.0.1:3131/mcp` with `claude mcp add --transport http --scope user …` and `copilot mcp add --transport http …`.
-6. Double-click `launch-office.ps1` (or a shortcut to it). First run: create the company in the pixel office, hire in HR.
-7. Write your handbook from the template and `python scripts/handbook_sync.py push <file>`.
-8. `python scripts/brain_equip.py` after hiring; `python scripts/gstack_equip.py <name>` per employee.
+Needs Git for Windows and PowerShell 7 (`pwsh`). Claude Code CLI and/or GitHub Copilot CLI for the employees.
+
+```powershell
+git clone https://github.com/YogeshPraj/VirtualOffice.git
+cd VirtualOffice
+pwsh -ExecutionPolicy Bypass -File .\setup.ps1
+```
+
+`setup.ps1` is safe to re-run; finished steps are skipped. It:
+
+1. downloads portable Node 24 and Bun into `.tools\` (checksum-verified; system Node/Bun untouched),
+2. installs the npm packages,
+3. installs gstack into `~\.claude\skills\gstack` (no changes to your global Claude settings),
+4. installs GBrain, creates a local brain in `~\.gbrain` and mints its tokens into `.brain\`,
+5. connects the brain to Claude Code and Copilot CLI (user-level MCP),
+6. puts a **Virtual Office** icon on the desktop.
+
+Then sign in once (`claude auth login` and/or `copilot login`) and double-click the icon. The
+first start takes a minute or two. Create a company in the pixel office, or import yours from
+your private company repo (`company/`). Write your handbook from the template, publish it with
+`python scripts\handbook_sync.py push <file>`, then run `python scriptsrain_equip.py`.
+
+`-SkipGlobal` sets up only this folder (runtimes and packages) without touching your profile.
 
 Paperclip's version is pinned in `start-paperclip.ps1`; upgrade on purpose.
 
