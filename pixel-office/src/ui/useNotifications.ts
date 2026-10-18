@@ -131,3 +131,16 @@ export function useOfficeNotifications(attention: AttentionItem[], agents: Agent
     if (pref.sound) chime();
   }, [attention, agents, issues, ready, pref, open]);
 }
+
+/** Raise one desktop alert if the CEO turned alerts on (used by features outside the main watcher). */
+export function notifyCeo(title: string, body: string, onClick?: () => void, tag?: string) {
+  const pref = readPref();
+  if (!pref.on || typeof Notification === "undefined" || Notification.permission !== "granted") return;
+  const n = new Notification(title, { body, tag, icon: "/favicon.svg" });
+  n.onclick = () => {
+    window.focus();
+    onClick?.();
+    n.close();
+  };
+  if (pref.sound) chime();
+}

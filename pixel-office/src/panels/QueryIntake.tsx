@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useOfficeData } from "../state/officeData";
+import { toDef, useWatchActions, useWatches } from "../lib/watches";
 
 interface QueryHit {
   url: string;
@@ -33,6 +34,17 @@ export function QueryIntake({ onAdd, existing }: { onAdd: (urls: string[]) => vo
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [meta, setMeta] = useState<{ total: number; truncated: boolean } | null>(null);
 
+  const { data: watches = [] } = useWatches();
+  const { save: saveWatches } = useWatchActions();
+  const watchThis = () => {
+    const suggested = mine ? "My open ADO items" : query.replace(/^https?:\/\//, "").slice(0, 60);
+    const name = prompt("Name this watch (new matches will wait on the intake desk):", suggested);
+    if (!name?.trim()) return;
+    saveWatches.mutate(
+      [...watches.map(toDef), { id: "", name: name.trim(), query: mine ? "" : query.trim(), project: project.trim(), mine, everyMin: 15 }],
+      { onSuccess: () => toast(`Watching "${name.trim()}" every 15 min.`), onError: (e) => toast((e as Error).message) },
+    );
+  };
   const isWiql = /^\s*select\b/i.test(query);
   const needsProject = mine || isWiql;
 
@@ -115,6 +127,9 @@ export function QueryIntake({ onAdd, existing }: { onAdd: (urls: string[]) => vo
       )}
       <button className="px-btn small primary" disabled={run.isPending || (!mine && !query.trim()) || (needsProject && !project.trim())} onClick={() => run.mutate()}>
         {run.isPending ? "Running…" : "▶ Run"}
+      </button>
+      <button className="px-btn small" disabled={saveWatches.isPending || (!mine && !query.trim()) || (needsProject && !project.trim())} onClick={watchThis} title="Check this query every few minutes and collect new matches">
+        👀 Watch it
       </button>
       {run.error && <div style={{ color: "var(--bad)", marginTop: 6 }}>{(run.error as Error).message}</div>}
 

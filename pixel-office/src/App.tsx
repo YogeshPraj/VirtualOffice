@@ -15,6 +15,7 @@ import { CommandPalette } from "./ui/CommandPalette";
 import { Tour } from "./ui/Tour";
 import { Shortcuts } from "./ui/Shortcuts";
 import { useOfficeMood } from "./office/mood";
+import { useWatchAlerts } from "./ui/useWatchAlerts";
 
 const COMPANY_KEY = "pixel-office:company";
 
@@ -75,6 +76,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
     attention: attention.data?.items ?? [],
   };
   const mood = useOfficeMood(company);
+  useWatchAlerts();
   useOfficeNotifications(value.attention, value.agents, value.issues, !!(agents.data && issues.data && attention.data));
 
   return (

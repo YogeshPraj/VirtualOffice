@@ -55,7 +55,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P3) Night mode.** The office art dims when the company is closed or after hours.
 
 ## Wave 3: running the team day to day
-- [ ] **(P1) Watched queries.** Save an ADO query or GitHub search; the office checks it every few minutes and
+- [x] **(P1) Watched queries.** Save an ADO query or GitHub search; the office checks it every few minutes and
   puts new matches on the intake desk (with an alert), so new work assigned to you shows up by itself.
 - [ ] **(P1) Source drift.** When a linked ADO/GitHub item is closed, reopened or reassigned outside the office,
   flag it on the task and the board.

@@ -6,6 +6,7 @@ import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { QueryIntake } from "./QueryIntake";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
+import { WatchesCard } from "./WatchesCard";
 
 /** Mirrors IntakeItem in ../../intake-bridge.ts (server side). */
 interface IntakeItem {
@@ -129,6 +130,13 @@ export function IntakePanel() {
         Paste Azure DevOps work items, GitHub issues or PRs, or any link. Details are fetched with your own sign-ins (az, gh) and
         become tasks the team can start on.
       </p>
+      <WatchesCard
+        onAdd={(urls) => {
+          const next = [text.trim(), ...urls].filter(Boolean).join("\n");
+          setText(next);
+          lookup.mutate(next);
+        }}
+      />
       <QueryIntake
         existing={(url) => issues.find((i) => i.status !== "cancelled" && i.description?.includes(url))?.identifier}
         onAdd={(urls) => {

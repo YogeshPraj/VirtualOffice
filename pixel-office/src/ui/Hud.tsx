@@ -5,6 +5,7 @@ import { useOffice } from "../state/officeStore";
 import { CLASSIC_UI } from "./Window";
 import { BrainSwitcher } from "./BrainSwitcher";
 import { useNotificationPref } from "./useNotifications";
+import { pendingTotal, useWatches } from "../lib/watches";
 import { LEVEL_ICON, useBuildingStatus, worstLevel } from "../panels/StatusPanel";
 
 export function Hud({ company, attentionCount, companies, onSwitch }: {
@@ -22,6 +23,8 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
   const { data: conns } = useToolConnections(company.id);
   const brokenAi = conns?.find((c) => c.connectionPurpose === "ai" && c.enabled && c.healthStatus === "error");
   const notify = useNotificationPref();
+  const { data: watches } = useWatches();
+  const newWork = pendingTotal(watches);
   const building = useBuildingStatus();
   const worst = worstLevel(building.data?.checks);
   const problems = building.data?.checks.filter((c) => c.level !== "ok").length ?? 0;
@@ -107,7 +110,7 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
         ☎ {attentionCount ? `${attentionCount} NEED YOU` : "INBOX"}
       </button>
       <button data-tour="intake" className="px-btn small" onClick={() => open({ kind: "room", room: "intake" })} title="Bring in work: ADO, GitHub or any link">
-        📥 INTAKE
+        📥 INTAKE{newWork ? ` · ${newWork} NEW` : ""}
       </button>
       <button data-tour="today" className="px-btn small" onClick={() => open({ kind: "room", room: "report" })} title="Today at the office: a stand-up summary">
         📰 TODAY
