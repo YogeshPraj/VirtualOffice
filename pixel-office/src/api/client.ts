@@ -218,9 +218,9 @@ export const api = {
   /** Paperclip's full-text search: titles, descriptions, comments and documents, with snippets. */
   search: (companyId: string, q: string, limit = 12) =>
     get<{ results: SearchHit[]; hasMore: boolean }>(`/companies/${companyId}/search?q=${encodeURIComponent(q)}&limit=${limit}`),
-  costsByAgent: (companyId: string, from?: string) =>
+  costsByAgent: (companyId: string, from?: string, to?: string) =>
     get<{ agentId: string; agentName: string; costCents: number; inputTokens: number; cachedInputTokens: number; outputTokens: number; subscriptionRunCount: number; apiRunCount: number }[]>(
-      `/companies/${companyId}/costs/by-agent${from ? `?from=${encodeURIComponent(from)}` : ""}`,
+      `/companies/${companyId}/costs/by-agent?${new URLSearchParams({ ...(from ? { from } : {}), ...(to ? { to } : {}) })}`,
     ),
   windowSpend: (companyId: string) => get<WindowSpend[]>(`/companies/${companyId}/costs/window-spend`),
   recentRuns: (companyId: string, limit = 100) => get<HeartbeatRun[]>(`/companies/${companyId}/heartbeat-runs?limit=${limit}`),

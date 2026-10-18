@@ -600,3 +600,8 @@ textarea {
 .key-hint { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 250; background: var(--ink); color: var(--paper); padding: 4px 10px; font-size: 16px; max-width: calc(100vw - 32px); }
 kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 0 5px; font: inherit; font-size: 15px; margin: 0 1px; }
 .keys-table td { text-align: left !important; white-space: normal; }
+
+.week-bars { display: flex; gap: 6px; align-items: flex-end; height: 90px; margin-top: 8px; }
+.week-bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+.week-bar .fill { width: 100%; background: var(--good); box-shadow: 0 0 0 2px var(--ink); min-height: 2px; }
+.week-bar small { font-size: 13px; line-height: 1.1; }

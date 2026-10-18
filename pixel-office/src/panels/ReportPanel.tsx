@@ -5,16 +5,29 @@ import type { Issue } from "../api/types";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 
-type Day = "today" | "yesterday";
+export type Day = "today" | "yesterday" | "week" | "lastweek";
 
-function dayRange(day: Day): [number, number] {
-  const start = new Date();
+const PERIOD_LABEL: Record<Day, string> = { today: "Today", yesterday: "Yesterday", week: "This week", lastweek: "Last week" };
+
+/** [start, end) of the period; weeks start on Monday. */
+export function dayRange(day: Day, now = new Date()): [number, number] {
+  const start = new Date(now);
   start.setHours(0, 0, 0, 0);
-  if (day === "yesterday") start.setDate(start.getDate() - 1);
   const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+  if (day === "today" || day === "yesterday") {
+    if (day === "yesterday") start.setDate(start.getDate() - 1);
+    end.setTime(start.getTime());
+    end.setDate(end.getDate() + 1);
+  } else {
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7)); // back to Monday
+    if (day === "lastweek") start.setDate(start.getDate() - 7);
+    end.setTime(start.getTime());
+    end.setDate(end.getDate() + 7);
+  }
   return [start.getTime(), end.getTime()];
 }
+
+const isWeek = (d: Day) => d === "week" || d === "lastweek";
 
 const within = (iso: string | null | undefined, [a, b]: [number, number]) => {
   if (!iso) return false;
@@ -31,7 +44,13 @@ export function ReportPanel() {
   const [day, setDay] = useState<Day>("today");
   const range = dayRange(day);
   const { data: spend } = useQuery({ queryKey: ["window-spend", company.id], queryFn: () => api.windowSpend(company.id), refetchInterval: 120_000 });
-  const { data: runs } = useQuery({ queryKey: ["runs-recent", company.id], queryFn: () => api.recentRuns(company.id, 200), refetchInterval: 120_000 });
+  const { data: runs } = useQuery({ queryKey: ["runs-recent", company.id, 500], queryFn: () => api.recentRuns(company.id, 500), refetchInterval: 120_000 });
+  // Week views report the week's own token use rather than the last 24h.
+  const { data: weekCosts } = useQuery({
+    queryKey: ["costs-by-agent-range", company.id, range[0]],
+    queryFn: () => api.costsByAgent(company.id, new Date(range[0]).toISOString(), new Date(range[1]).toISOString()),
+    enabled: isWeek(day),
+  });
 
   const report = useMemo(() => {
     const live = issues.filter((i) => !i.hiddenAt && i.workMode !== "ask");
@@ -52,7 +71,15 @@ export function ReportPanel() {
         now: doing.filter((i) => i.assigneeAgentId === a.id),
       }))
       .filter((x) => x.done || x.shifts || x.now.length);
-    return { done, started, doing, review, blocked, created, shifts, failed, perAgent };
+    // Done per day, for the week's little bar chart.
+    const perDay: { label: string; done: number }[] = [];
+    if (isWeek(day)) {
+      for (let d = 0; d < 7; d++) {
+        const a = range[0] + d * 86_400_000;
+        perDay.push({ label: new Date(a).toLocaleDateString([], { weekday: "short" }), done: done.filter((i) => within(i.completedAt ?? i.updatedAt, [a, a + 86_400_000])).length });
+      }
+    }
+    return { done, started, doing, review, blocked, created, shifts, failed, perAgent, perDay };
   }, [issues, agents, runs, range[0]]);
 
   const tokens24 = spend?.filter((s) => s.window === "24h") ?? [];
@@ -60,8 +87,15 @@ export function ReportPanel() {
   const tok24 = tokens24.reduce((n, s) => n + (s.inputTokens ?? 0) + (s.outputTokens ?? 0), 0);
 
   const who = (i: Issue) => agentById(i.assigneeAgentId)?.name ?? "unassigned";
-  const label = day === "today" ? "Today" : "Yesterday";
-  const dateText = new Date(range[0]).toLocaleDateString([], { weekday: "long", day: "numeric", month: "short" });
+  const label = PERIOD_LABEL[day];
+  const dateText = isWeek(day)
+    ? `${new Date(range[0]).toLocaleDateString([], { day: "numeric", month: "short" })} – ${new Date(range[1] - 1).toLocaleDateString([], { day: "numeric", month: "short" })}`
+    : new Date(range[0]).toLocaleDateString([], { weekday: "long", day: "numeric", month: "short" });
+  const weekTok = (weekCosts ?? []).reduce((n, c) => n + c.inputTokens + c.outputTokens, 0);
+  const weekCents = (weekCosts ?? []).reduce((n, c) => n + c.costCents, 0);
+  const usageText = isWeek(day)
+    ? `${fmtTokens(weekTok)} tokens ${day === "week" ? "so far this week" : "last week"}${weekCents ? ` · $${(weekCents / 100).toFixed(2)}` : ""}`
+    : `${fmtTokens(tok24)} tokens / 24h${cents24 ? ` · $${(cents24 / 100).toFixed(2)}` : ""}`;
 
   const asText = () => {
     const list = (items: Issue[]) => (items.length ? items.map((i) => `  - ${i.identifier} ${i.title} (${who(i)})`).join("\n") : "  - none");
@@ -80,7 +114,8 @@ export function ReportPanel() {
       attention.length ? attention.map((a) => `  - ${a.subject.identifier ?? ""} ${a.subject.title}`.trimEnd()).join("\n") : "  - none",
       "",
       `New tasks: ${report.created.length} · Shifts worked: ${report.shifts.length}${report.failed.length ? ` (${report.failed.length} failed)` : ""}`,
-      `Last 24h usage: ${fmtTokens(tok24)} tokens${cents24 ? ` · $${(cents24 / 100).toFixed(2)}` : ""}`,
+      `Usage: ${usageText}`,
+      ...(isWeek(day) ? ["", "Who did what:", ...report.perAgent.map((x) => `  - ${x.agent.name}: ${x.done} done, ${x.shifts} shifts`)] : []),
     ].join("\n");
   };
 
@@ -107,8 +142,10 @@ export function ReportPanel() {
           <select className="px-select" style={{ width: "auto", margin: 0 }} aria-label="Day" value={day} onChange={(e) => setDay(e.target.value as Day)}>
             <option value="today">Today</option>
             <option value="yesterday">Yesterday</option>
+            <option value="week">This week</option>
+            <option value="lastweek">Last week</option>
           </select>
-          <button className="px-btn small primary" onClick={() => navigator.clipboard?.writeText(asText()).then(() => toast("Copied for your stand-up."))}>
+          <button className="px-btn small primary" onClick={() => navigator.clipboard?.writeText(asText()).then(() => toast(isWeek(day) ? "Copied for your weekly update." : "Copied for your stand-up."))}>
             ⧉ Copy as text
           </button>
         </div>
@@ -120,8 +157,22 @@ export function ReportPanel() {
           <span className="stat-chip" style={attention.length ? { color: "var(--bad)" } : undefined}>☎ {attention.length} waiting on you</span>
           <span className="stat-chip">📌 {report.created.length} new</span>
           <span className="stat-chip">🕒 {report.shifts.length} shifts{report.failed.length ? ` (${report.failed.length} failed)` : ""}</span>
-          <span className="stat-chip" title="Tokens used in the last 24 hours">🪙 {fmtTokens(tok24)} tokens / 24h{cents24 ? ` · $${(cents24 / 100).toFixed(2)}` : ""}</span>
+          <span className="stat-chip" title={isWeek(day) ? "Tokens used in this period" : "Tokens used in the last 24 hours"}>🪙 {usageText}</span>
         </div>
+        {report.perDay.length > 0 && (
+          <div className="week-bars" aria-label="Tasks done per day">
+            {report.perDay.map((d, i) => {
+              const max = Math.max(1, ...report.perDay.map((x) => x.done));
+              return (
+                <div key={i} className="week-bar" title={`${d.label}: ${d.done} done`}>
+                  <div className="fill" style={{ height: `${(d.done / max) * 100}%` }} />
+                  <small>{d.done || ""}</small>
+                  <small className="muted">{d.label}</small>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {attention.length > 0 && (
