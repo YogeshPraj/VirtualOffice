@@ -22,6 +22,8 @@ import type {
   IssueComment,
   IssueStatus,
   HeartbeatRun,
+  IssueDocument,
+  DocumentRevision,
 } from "./types";
 
 export class ApiError extends Error {
@@ -103,6 +105,11 @@ export const api = {
 
   issues: (companyId: string) => get<Issue[]>(`/companies/${companyId}/issues`),
   issue: (issueId: string) => get<Issue>(`/issues/${issueId}`),
+  issueDocuments: (issueId: string) => get<IssueDocument[]>(`/issues/${issueId}/documents`),
+  documentRevisions: (issueId: string, key: string) =>
+    get<DocumentRevision[] | { items: DocumentRevision[] }>(`/issues/${issueId}/documents/${encodeURIComponent(key)}/revisions`).then((r) => (Array.isArray(r) ? r : r.items)),
+  restoreRevision: (issueId: string, key: string, revisionId: string) =>
+    post<IssueDocument>(`/issues/${issueId}/documents/${encodeURIComponent(key)}/revisions/${revisionId}/restore`, {}),
   recoveryActions: (issueId: string) =>
     get<RecoveryAction[] | { actions?: RecoveryAction[]; items?: RecoveryAction[] }>(`/issues/${issueId}/recovery-actions`).then((r) =>
       Array.isArray(r) ? r : (r.actions ?? r.items ?? []),

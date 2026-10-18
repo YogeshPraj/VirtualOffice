@@ -528,3 +528,21 @@ textarea {
 .shoulder-log .muted {
   color: #7f8b99;
 }
+
+/* Agent-written Markdown (task descriptions, documents, comments). */
+.md > :first-child { margin-top: 0; }
+.md > :last-child { margin-bottom: 0; }
+.md p, .md ul, .md ol, .md blockquote, .md pre, .md table { margin: 6px 0; }
+.md ul, .md ol { padding-left: 22px; }
+.md h3, .md h4 { font-family: var(--font-title); font-size: 9px; margin: 10px 0 4px; line-height: 1.5; }
+.md h4 { font-size: 8px; }
+.md { overflow-wrap: anywhere; }
+.md code { background: rgba(0, 0, 0, 0.08); padding: 0 3px; word-break: break-all; }
+.md pre { background: #10141a; color: #d7f5d0; padding: 6px 8px; overflow-x: auto; font-size: 15px; white-space: pre; }
+.md blockquote { border-left: 4px solid var(--muted); padding-left: 8px; color: var(--muted); }
+.md table { border-collapse: collapse; font-size: 15px; display: block; overflow-x: auto; }
+.md th, .md td { border: 2px solid var(--ink); padding: 2px 6px; text-align: left; vertical-align: top; }
+.md hr { border: 0; border-top: 2px dashed var(--muted); }
+.md a { color: var(--info); }
+.chat-line .bubble .md { white-space: normal; }
+.doc-view { background: #fffaf0; box-shadow: 0 0 0 2px var(--ink); padding: 6px 10px; margin: 4px 0 10px; font-size: 18px; max-height: 480px; overflow-y: auto; }

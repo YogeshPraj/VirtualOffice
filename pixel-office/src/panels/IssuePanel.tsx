@@ -10,6 +10,8 @@ import { ClassicLink } from "../ui/Window";
 import { InteractionDialog } from "./InteractionDialog";
 import { NOTE_COLORS } from "./MeetingPanel";
 import { extractSources, SOURCE_ICON } from "../lib/links";
+import { Markdown } from "../lib/markdown";
+import { TaskDocuments, useOfficeLinks } from "./TaskDocuments";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
 
@@ -26,6 +28,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
   const comments = useComments(issueId);
   const interactions = useInteractions(issueId);
   const [draft, setDraft] = useState("");
+  const links = useOfficeLinks();
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: keys.issues(company.id) });
@@ -53,7 +56,11 @@ export function IssuePanel({ issueId }: { issueId: string }) {
       <div className="px-card" style={{ background: NOTE_COLORS[issue.status as IssueStatus] }}>
         <h4>{issue.identifier}</h4>
         <div style={{ fontSize: 22 }}>{issue.title}</div>
-        {issue.description && <p style={{ whiteSpace: "pre-wrap", fontSize: 18 }}>{issue.description}</p>}
+        {issue.description && (
+          <div style={{ fontSize: 18 }}>
+            <Markdown text={issue.description} links={links} />
+          </div>
+        )}
         <div className="row">
           <select className="px-select" style={{ width: "auto", margin: 0 }} aria-label="Status" value={issue.status} onChange={(e) => update.mutate({ status: e.target.value as IssueStatus })}>
             {STATUSES.map((s) => (
@@ -78,6 +85,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
 
       <LinkedWork description={issue.description} done={issue.status === "done"} latestAgentComment={[...(comments.data ?? [])].reverse().find((c) => c.authorAgentId)?.body ?? null} />
       {issue.status === "blocked" && <BlockedBy issueId={issueId} />}
+      <TaskDocuments issueId={issueId} />
 
       {pending.map((i) => (
         <InteractionDialog key={i.id} interaction={i} />
@@ -95,7 +103,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
               <span className="who">
                 {author?.name ?? "YOU"} · {new Date(c.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </span>
-              {c.body}
+              <Markdown text={c.body} links={links} />
             </div>
           </div>
         );

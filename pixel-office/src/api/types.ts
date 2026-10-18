@@ -331,3 +331,34 @@ export interface HeartbeatRun {
   logBytes: number | null;
   contextSnapshot?: { issueId?: string } | null;
 }
+
+export interface IssueDocument {
+  id: string;
+  issueId: string;
+  key: string;
+  title: string | null;
+  format: string;
+  body: string;
+  latestRevisionId: string | null;
+  latestRevisionNumber: number;
+  createdByAgentId: string | null;
+  updatedByAgentId: string | null;
+  updatedByUserId: string | null;
+  lockedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DocumentRevision {
+  id: string;
+  documentId: string;
+  key: string;
+  revisionNumber: number;
+  title: string | null;
+  format: string;
+  body: string;
+  changeSummary: string | null;
+  createdByAgentId: string | null;
+  createdByUserId: string | null;
+  createdAt: string;
+}
