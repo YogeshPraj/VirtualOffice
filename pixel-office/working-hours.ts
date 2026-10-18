@@ -145,9 +145,13 @@ export function workingHours(): Plugin {
   return {
     name: "pixel-office-working-hours",
     configureServer(server) {
-      const timer = setInterval(tick, TICK_MS);
-      server.httpServer?.once("close", () => clearInterval(timer));
-      setTimeout(tick, 5_000);
+      // Only the real office server keeps the clock: never test runs (vitest loads this config too).
+      if (!process.env.VITEST && server.httpServer) {
+        const timer = setInterval(tick, TICK_MS);
+        timer.unref();
+        server.httpServer.once("close", () => clearInterval(timer));
+        setTimeout(tick, 5_000).unref();
+      }
 
       server.middlewares.use("/office-admin/working-hours", async (req, res) => {
         res.setHeader("content-type", "application/json");
