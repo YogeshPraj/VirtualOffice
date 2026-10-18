@@ -22,6 +22,7 @@ import type {
   IssueComment,
   IssueStatus,
   HeartbeatRun,
+  Attachment,
   WindowSpend,
   IssueDocument,
   DocumentRevision,
@@ -106,6 +107,15 @@ export const api = {
 
   issues: (companyId: string) => get<Issue[]>(`/companies/${companyId}/issues`),
   issue: (issueId: string) => get<Issue>(`/issues/${issueId}`),
+  attachments: (issueId: string) => get<Attachment[]>(`/issues/${issueId}/attachments`),
+  uploadAttachment: async (companyId: string, issueId: string, file: File) => {
+    const form = new FormData();
+    form.append("file", file, file.name);
+    const res = await fetch(`/api/companies/${companyId}/issues/${issueId}/attachments`, { method: "POST", credentials: "include", body: form });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new ApiError(res.status, data?.error ?? `Upload failed (${res.status})`);
+    return data as Attachment;
+  },
   issueDocuments: (issueId: string) => get<IssueDocument[]>(`/issues/${issueId}/documents`),
   documentRevisions: (issueId: string, key: string) =>
     get<DocumentRevision[] | { items: DocumentRevision[] }>(`/issues/${issueId}/documents/${encodeURIComponent(key)}/revisions`).then((r) => (Array.isArray(r) ? r : r.items)),
@@ -150,9 +160,12 @@ export const api = {
     }>(`/issues/${issueId}/diagnostics/blockers`),
   createIssue: (
     companyId: string,
-    body: { title: string; description?: string; assigneeAgentId?: string | null; status?: IssueStatus; priority?: string; projectId?: string | null },
+    body: { title: string; description?: string; assigneeAgentId?: string | null; status?: IssueStatus; priority?: string; projectId?: string | null; parentId?: string | null },
   ) => post<Issue>(`/companies/${companyId}/issues`, body),
-  updateIssue: (issueId: string, body: Partial<Pick<Issue, "status" | "assigneeAgentId" | "title" | "priority">>) =>
+  updateIssue: (
+    issueId: string,
+    body: Partial<Pick<Issue, "status" | "assigneeAgentId" | "title" | "priority" | "projectId" | "parentId">> & { blockedByIssueIds?: string[] },
+  ) =>
     patch<Issue>(`/issues/${issueId}`, body),
   comments: (issueId: string) => get<IssueComment[]>(`/issues/${issueId}/comments`),
   addComment: (issueId: string, body: string) => post<IssueComment>(`/issues/${issueId}/comments`, { body }),

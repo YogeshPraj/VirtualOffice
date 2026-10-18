@@ -80,8 +80,19 @@ export interface Issue {
   startedAt?: string | null;
   completedAt?: string | null;
   hiddenAt?: string | null;
+  /** Only on a single-issue fetch. */
+  blockedBy?: IssueRef[];
+  blocks?: IssueRef[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface IssueRef {
+  id: string;
+  identifier: string;
+  title: string;
+  status: string;
+  assigneeAgentId?: string | null;
 }
 
 export interface IssueComment {
@@ -375,4 +386,15 @@ export interface WindowSpend {
   inputTokens: number;
   cachedInputTokens: number;
   outputTokens: number;
+}
+
+export interface Attachment {
+  id: string;
+  issueId: string;
+  contentType: string;
+  byteSize: number;
+  originalFilename: string | null;
+  createdByAgentId: string | null;
+  createdByUserId: string | null;
+  createdAt: string;
 }

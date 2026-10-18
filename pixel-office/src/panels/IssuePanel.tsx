@@ -12,6 +12,7 @@ import { NOTE_COLORS } from "./MeetingPanel";
 import { extractSources, SOURCE_ICON } from "../lib/links";
 import { Markdown } from "../lib/markdown";
 import { TaskDocuments, useOfficeLinks } from "./TaskDocuments";
+import { TaskDetails } from "./TaskDetails";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
 
@@ -85,6 +86,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
 
       <LinkedWork description={issue.description} done={issue.status === "done"} latestAgentComment={[...(comments.data ?? [])].reverse().find((c) => c.authorAgentId)?.body ?? null} />
       {issue.status === "blocked" && <BlockedBy issueId={issueId} />}
+      <TaskDetails issue={issue} />
       <TaskDocuments issueId={issueId} />
 
       {pending.map((i) => (
