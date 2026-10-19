@@ -63,8 +63,10 @@ pwsh -ExecutionPolicy Bypass -File .\setup.ps1
 6. puts a **Virtual Office** icon on the desktop.
 
 Then sign in once (`claude auth login` and/or `copilot login`) and double-click the icon. The
-first start takes a minute or two. Create a company in the pixel office, or import yours from
-your private company repo (`company/`). Write your handbook from the template, publish it with
+first start takes a minute or two. Create a company in the pixel office, or bring yours along:
+clone your private company repo into `company/` first, and the first-run screen offers to import
+`company/paperclip-export/` (employees, projects and skills; secrets go back in the vault by hand).
+Building status has a **Setup check** that lists anything still missing on the machine. Write your handbook from the template, publish it with
 `python scripts\handbook_sync.py push <file>`, then run `python scripts\brain_equip.py`.
 
 `-SkipGlobal` sets up only this folder (runtimes and packages) without touching your profile.

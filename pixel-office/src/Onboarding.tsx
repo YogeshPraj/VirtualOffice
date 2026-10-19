@@ -4,6 +4,7 @@ import { api } from "./api/client";
 import type { Company } from "./api/types";
 import { keys } from "./api/hooks";
 import { PxWindow } from "./ui/Window";
+import { ImportCompany } from "./ui/ImportCompany";
 
 /** First run: an empty building waiting for a name on its sign. */
 export function Onboarding({ onCreated }: { onCreated: (c: Company) => void }) {
@@ -59,6 +60,7 @@ export function Onboarding({ onCreated }: { onCreated: (c: Company) => void }) {
         <button className="px-btn primary" disabled={!name.trim() || create.isPending} onClick={() => create.mutate()}>
           ✂ Cut the ribbon
         </button>
+        <ImportCompany onImported={onCreated} />
       </PxWindow>
     </div>
   );

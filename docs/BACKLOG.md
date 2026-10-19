@@ -140,7 +140,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 ## Wave 10: moving in
 - [x] **(P1) Setup check.** Building status checks the machine: Claude Code / Copilot CLI installed and
   signed in, gstack, the brain, PowerShell, free ports. Each problem says how to fix it.
-- [ ] **(P1) Bring your company.** On a fresh office, import the company from the private repo's
+- [x] **(P1) Bring your company.** On a fresh office, import the company from the private repo's
   `company/paperclip-export/` (preview what comes in, then apply).
 - [ ] **(P2) Task cost.** What a task's shifts have cost so far, on its panel.
 - [ ] **(P2) Unblocked.** When a blocking task is done, say which tasks it freed up.
