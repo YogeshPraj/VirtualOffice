@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { SearchHit } from "../api/types";
+import { brainApi } from "../api/brain";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { keys } from "../api/hooks";
@@ -129,6 +130,28 @@ export function CommandPalette() {
     enabled: shown && deepQ.length >= 3,
     staleTime: 30_000,
   });
+  // The second brain's memory: facts, decisions and preferences that mention the words.
+  const brain = useQuery({
+    queryKey: ["brain-ask", deepQ],
+    queryFn: () => brainApi.ask(deepQ),
+    enabled: shown && deepQ.length >= 3,
+    staleTime: 60_000,
+    retry: false,
+  });
+  const brainCommands = useMemo<Command[]>(
+    () =>
+      !deepQ || deepQ !== q
+        ? []
+        : (brain.data ?? []).slice(0, 5).map((f) => ({
+            id: `brain:${f.id}`,
+            icon: "🧠",
+            label: f.fact.length > 90 ? `${f.fact.slice(0, 88)}…` : f.fact,
+            hint: f.kind,
+            detail: f.entity_slug ? <>about {f.entity_slug}</> : undefined,
+            run: () => open({ kind: "room", room: "study" }),
+          })),
+    [brain.data, deepQ, q, open],
+  );
   const deepCommands = useMemo<Command[]>(() => {
     if (!deepQ || deepQ !== q) return [];
     return (deep.data?.results ?? []).map((h) => {
@@ -157,8 +180,8 @@ export function CommandPalette() {
     // Title hits first, then matches inside threads and documents (minus tasks already listed).
     const shownIssues = new Set(hits.filter((c) => c.id.startsWith("issue:")).map((c) => c.label.split(" ")[0]));
     const deeper = deepCommands.filter((c) => !shownIssues.has(c.label.split(" ")[0]) || c.hint !== "title");
-    return [...hits, ...deeper.slice(0, 10), pin];
-  }, [all, q, create, deepCommands]);
+    return [...hits, ...deeper.slice(0, 10), ...brainCommands, pin];
+  }, [all, q, create, deepCommands, brainCommands]);
 
   if (!shown) return null;
   const pick = (c: Command | undefined) => {
@@ -217,7 +240,7 @@ export function CommandPalette() {
           ))}
         </div>
         <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>
-          ↑↓ to move · Enter to open · Esc to close{deep.isFetching ? " · searching threads and documents…" : q.length >= 3 ? " · threads and documents included" : ""}
+          ↑↓ to move · Enter to open · Esc to close{deep.isFetching || brain.isFetching ? " · searching threads, documents and the brain…" : q.length >= 3 ? " · threads, documents and the brain included" : ""}
         </div>
       </div>
     </div>

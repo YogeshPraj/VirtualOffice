@@ -110,7 +110,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P1) Gone quiet.** Open tasks with no activity for too long (in progress 1 day, in review 1 day, blocked
   2 days, to do 3 days) listed in Today, with a one-click nudge.
 - [x] **(P2) Speech bubbles.** Employees in the office show a short bubble of what they're doing right now.
-- [ ] **(P2) Brain in Ctrl+K.** The palette also searches the second brain's memory.
+- [x] **(P2) Brain in Ctrl+K.** The palette also searches the second brain's memory.
 - [ ] **(P2) Per-item assignee at intake.** When bringing in several items, choose who gets each one.
 - [ ] **(P2) Checklist progress.** "- [ ]" checklists in a task's details show as a progress bar on its note.
 - [ ] **(P2) Shift timeline.** Today's shifts per employee as a timeline in the security room.

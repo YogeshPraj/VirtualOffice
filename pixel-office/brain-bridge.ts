@@ -80,6 +80,24 @@ export const SECRET_PATTERNS = [
   /\b(password|passwd|pwd|secret|api[_-]?key|token)\s*[:=]\s*\S{6,}/i,
 ];
 
+/** Facts that mention the query's words, best first (all words beat some; whole words beat parts). */
+export function rankFacts<T extends { fact: string; entity_slug?: string | null }>(facts: T[], query: string): T[] {
+  const words = query.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w.length > 1);
+  if (!words.length) return [];
+  const scored = facts.map((f) => {
+    const hay = `${f.fact} ${f.entity_slug ?? ""}`.toLowerCase();
+    let score = 0;
+    let matched = 0;
+    for (const w of words) {
+      if (!hay.includes(w)) continue;
+      matched++;
+      score += new RegExp(`(^|[^\\p{L}\\p{N}])${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^\\p{L}\\p{N}])`, "u").test(hay) ? 2 : 1;
+    }
+    return { f, score: matched === words.length ? score + 10 : score };
+  });
+  return scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score).map((s) => s.f);
+}
+
 // ---- Bulk import: a folder of Markdown / text notes becomes brain pages ----
 
 const MAX_FILES = 300;
@@ -206,7 +224,9 @@ export function brainBridge(): Plugin {
           if (req.method === "GET" && url.pathname === "/ask") {
             const q = (url.searchParams.get("q") ?? "").slice(0, 500);
             if (!q.trim()) return send(res, 400, { error: "Ask something." });
-            return send(res, 200, await callTool("recall", { question: q, limit: 30 }));
+            // recall doesn't search facts by text (it lists the newest), so rank the memory here.
+            const all = (await callTool("recall", { since: "3650 days ago", limit: 500 })) as { facts?: { fact: string; entity_slug?: string | null }[] } | null;
+            return send(res, 200, { facts: rankFacts(all?.facts ?? [], q).slice(0, 30) });
           }
           if (req.method === "POST" && url.pathname === "/remember") {
             const body = await readBody(req);
