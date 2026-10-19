@@ -143,6 +143,6 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P1) Bring your company.** On a fresh office, import the company from the private repo's
   `company/paperclip-export/` (preview what comes in, then apply).
 - [x] **(P2) Task cost.** What a task's shifts have cost so far, on its panel.
-- [ ] **(P2) Unblocked.** When a blocking task is done, say which tasks it freed up.
+- [x] **(P2) Unblocked.** When a blocking task is done, say which tasks it freed up.
 - [ ] **(P2) Stale notes.** Sticky notes nobody has touched for a week turn yellow and curl at the corner.
 - [ ] **(P3) Pin a comment.** Keep the key decision at the top of a long thread.

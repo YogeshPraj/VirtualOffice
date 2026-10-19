@@ -18,6 +18,7 @@ import { Shortcuts } from "./ui/Shortcuts";
 import { SinceAway } from "./ui/SinceAway";
 import { BudgetAlerts } from "./ui/useBudgetAlerts";
 import { DueAlerts } from "./ui/useDueAlerts";
+import { UnblockedAlerts } from "./ui/UnblockedAlerts";
 import { WatchdogAlerts } from "./ui/Watchdog";
 import { WhatsNew } from "./ui/WhatsNew";
 import { StandupReminder } from "./ui/StandupReminder";
@@ -119,6 +120,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
         <SinceAway />
         <BudgetAlerts />
         <DueAlerts />
+        <UnblockedAlerts />
         <WatchdogAlerts />
         <WhatsNew />
         <StandupReminder />
