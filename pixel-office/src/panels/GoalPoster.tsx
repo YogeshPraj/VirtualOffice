@@ -5,6 +5,7 @@ import { keys } from "../api/hooks";
 import type { Issue } from "../api/types";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
+import { celebrate } from "../ui/Confetti";
 
 export interface GoalProgress {
   done: number;
@@ -57,7 +58,10 @@ export function GoalPoster() {
   });
   const setStatus = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => api.updateGoal(id, { status }),
-    onSuccess: refresh,
+    onSuccess: (_d, v) => {
+      refresh();
+      if (v.status === "achieved") celebrate(`Goal achieved: ${(goals ?? []).find((g) => g.id === v.id)?.title ?? "well done"}`);
+    },
     onError: (e: Error) => toast(e.message),
   });
   const link = useMutation({

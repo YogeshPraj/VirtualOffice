@@ -20,6 +20,8 @@ import { DueAlerts } from "./ui/useDueAlerts";
 import { WatchdogAlerts } from "./ui/Watchdog";
 import { WhatsNew } from "./ui/WhatsNew";
 import { StandupReminder } from "./ui/StandupReminder";
+import { Confetti } from "./ui/Confetti";
+import { FocusCelebration } from "./ui/FocusCelebration";
 import { splitSnoozed, useSnooze } from "./lib/snooze";
 import { useOfficeMood } from "./office/mood";
 import { useWatchAlerts } from "./ui/useWatchAlerts";
@@ -118,6 +120,8 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
         <WatchdogAlerts />
         <WhatsNew />
         <StandupReminder />
+        <FocusCelebration />
+        <Confetti />
       </div>
     </OfficeDataProvider>
   );

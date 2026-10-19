@@ -125,4 +125,4 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Paste screenshots.** Paste an image into a comment; it's attached to the task and shown inline.
 - [x] **(P2) Long threads.** Older comments fold away; filter to updates from employees only.
 - [x] **(P2) Board to CSV.** Export the board (or the filtered view) as a spreadsheet.
-- [ ] **(P3) Celebrate.** A little confetti when a goal is achieved or the focus list is all done.
+- [x] **(P3) Celebrate.** A little confetti when a goal is achieved or the focus list is all done.
