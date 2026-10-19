@@ -18,6 +18,7 @@ import { readRecent, rememberPanel } from "../lib/recent";
 import { MOVE_IN_EVENT } from "../panels/MoveInCard";
 import { askOffice } from "./AskOffice";
 import { WEEKLY_EVENT } from "./WeeklyReview";
+import { useDecorPref } from "../office/SeasonalDecor";
 
 interface Command {
   id: string;
@@ -116,6 +117,7 @@ export function CommandPalette() {
   const text = useTextSize();
   const alerts = useNotificationPref();
   const sounds = useSoundPref();
+  const decor = useDecorPref();
   const { data: templates = [] } = useTemplates();
   const closed = company.status === "paused";
   const actions = useMemo<Command[]>(() => {
@@ -146,6 +148,7 @@ export function CommandPalette() {
         setTimeout(() => window.dispatchEvent(new Event(MOVE_IN_EVENT)), 0);
       }),
       act("weekly", "🗓", "Weekly review (what shipped, what's stuck, next week)", () => window.dispatchEvent(new Event(WEEKLY_EVENT))),
+      act("decor", "🎃", decor.on ? "Seasonal decorations off" : "Seasonal decorations on", decor.toggle, "decor"),
       act("theme-dark", "🌙", "Dark panels", () => theme.set("dark"), "theme"),
       act("theme-light", "☀", "Light panels", () => theme.set("light"), "theme"),
       act("theme-auto", "🖥", "Panels follow Windows light/dark", () => theme.set("auto"), "theme"),
@@ -155,7 +158,7 @@ export function CommandPalette() {
       act("sounds", sounds.on ? "🔈" : "🎵", sounds.on ? "Turn office sounds off" : "Turn office sounds on", sounds.toggle, "sounds"),
       ...templates.map((t) => act(`tpl-${t.id}`, t.icon, `New task from template: ${t.name}`, () => open({ kind: "room", room: "meeting" }), "template")),
     ];
-  }, [company.id, closed, theme, text, alerts, sounds, templates, open, qc, toast]);
+  }, [company.id, closed, theme, text, alerts, sounds, decor, templates, open, qc, toast]);
 
   const all = useMemo<Command[]>(() => {
     // Rooms live on a floor: walk there first. Tasks and people open wherever you are.

@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { SeasonalDecor } from "./SeasonalDecor";
 import { useProviderName } from "../api/hooks";
 import { createPortal } from "react-dom";
 import { buttonProps } from "./a11y";
@@ -153,6 +154,7 @@ export function OfficeScene({ company, agents, issues, attention }: Props) {
 
       <Walls />
       <RoomFurniture company={company} frame={frame} attentionCount={attention.length} boardNotes={boardNotes} />
+      <SeasonalDecor />
 
       {/* Room click areas sit below people so agents stay clickable */}
       {ROOMS.map((r) => (

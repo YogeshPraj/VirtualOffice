@@ -156,4 +156,4 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Time off.** Send an employee on leave until a date: no new shifts, back on schedule by itself.
 - [x] **(P2) Weekly review.** A Friday walkthrough: shipped, stale, waiting for review, goals, time spent.
 - [x] **(P2) Blocker lines.** Waiting chains on the board: what waits on what across the company, and which task frees the most.
-- [ ] **(P3) Seasonal décor.** The pixel office dresses up for the time of year.
+- [x] **(P3) Seasonal décor.** The pixel office dresses up for the time of year.
