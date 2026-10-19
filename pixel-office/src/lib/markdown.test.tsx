@@ -25,3 +25,13 @@ describe("Markdown", () => {
     expect(out).toContain('<a href="#">@QA</a>');
   });
 });
+
+describe("Markdown images", () => {
+  it("shows the office's own attachment images inline, never remote ones", () => {
+    const own = html("![shot](/api/attachments/0e47f572-3f95-42f4-8e54-9c53bc725370/content)");
+    expect(own).toContain('<img class="md-img" src="/api/attachments/0e47f572-3f95-42f4-8e54-9c53bc725370/content"');
+    const remote = html("![pixel](https://tracker.example.com/p.gif)");
+    expect(remote).not.toContain("<img");
+    expect(remote).toContain("🖼 pixel");
+  });
+});

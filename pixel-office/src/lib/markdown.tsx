@@ -9,6 +9,9 @@ export interface MdLinks {
   agent?: (agentId: string) => void;
 }
 
+/** Images the office stores itself (task attachments); remote images are never loaded. */
+export const isOfficeImage = (src: string) => /^\/api\/attachments\/[0-9a-f-]{36}\/content$/i.test(src);
+
 const INLINE = /(`[^`]+`)|(\*\*[^*]+\*\*)|(\*[^*\s][^*]*\*|_[^_\s][^_]*_)|(!?\[[^\]]*\]\([^)\s]+\))|(https?:\/\/[^\s)>\]]+)/g;
 
 function inline(text: string, links: MdLinks, key: string): ReactNode[] {
@@ -25,7 +28,8 @@ function inline(text: string, links: MdLinks, key: string): ReactNode[] {
     else if (m[3]) out.push(<i key={k}>{inline(tok.slice(1, -1), links, k)}</i>);
     else if (m[4]) {
       const lm = tok.match(/^(!?)\[([^\]]*)\]\(([^)\s]+)\)$/);
-      if (lm) out.push(link(lm[3], lm[1] ? `🖼 ${lm[2] || "image"}` : lm[2] || lm[3], links, k));
+      if (lm && lm[1] && isOfficeImage(lm[3])) out.push(<img key={k} className="md-img" src={lm[3]} alt={lm[2] || "image"} loading="lazy" />);
+      else if (lm) out.push(link(lm[3], lm[1] ? `🖼 ${lm[2] || "image"}` : lm[2] || lm[3], links, k));
     } else if (m[5]) out.push(link(tok, tok, links, k));
     last = at + tok.length;
   }

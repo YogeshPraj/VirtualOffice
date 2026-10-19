@@ -693,3 +693,4 @@ kbd { display: inline-block; background: var(--card); box-shadow: 0 0 0 2px var(
 .board-filters .px-select { min-width: 110px; }
 .note-card { color: var(--note-ink); --ink: #1e1a24; --muted: #5f5446; --info: #1f5fa8; }
 .note-card .md code { background: rgba(0, 0, 0, 0.08); }
+.md-img { display: block; max-width: 100%; max-height: 320px; margin: 4px 0; box-shadow: 0 0 0 2px var(--ink); image-rendering: auto; }

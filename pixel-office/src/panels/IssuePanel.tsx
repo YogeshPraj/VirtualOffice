@@ -65,6 +65,24 @@ export function IssuePanel({ issueId }: { issueId: string }) {
     onError: (e: Error) => toast(e.message),
   });
   const people = agents.filter((a) => a.status !== "terminated" && a.status !== "pending_approval");
+  const [pasting, setPasting] = useState(false);
+  /** Upload a pasted screenshot as a task attachment and reference it in the comment being written. */
+  const pasteImage = async (file: File) => {
+    if (file.size > 20 * 1024 * 1024) return toast("That image is over 20 MB.");
+    setPasting(true);
+    try {
+      const ext = file.type.split("/")[1]?.replace("jpeg", "jpg") || "png";
+      const named = new File([file], `screenshot-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.${ext}`, { type: file.type });
+      const a = await api.uploadAttachment(company.id, issueId, named);
+      const ref = `![${named.name}](/api/attachments/${a.id}/content)`;
+      setDraft(draft.trim() ? `${draft.trimEnd()}\n\n${ref}\n` : `${ref}\n`);
+      qc.invalidateQueries({ queryKey: ["attachments", issueId] });
+    } catch (e) {
+      toast(`Couldn't attach the screenshot: ${(e as Error).message}`);
+    } finally {
+      setPasting(false);
+    }
+  };
   const comment = useMutation({
     mutationFn: async () => {
       // "@Ada" becomes Paperclip's mention link, and whoever is mentioned is woken on this task.
@@ -169,12 +187,19 @@ export function IssuePanel({ issueId }: { issueId: string }) {
       <MentionTextarea
         className="px-textarea"
         aria-label="Write a comment"
-        placeholder="Say something to the team… type @ to mention someone (Ctrl+Enter posts)"
+        placeholder="Say something to the team… @ mentions someone, paste a screenshot to attach it (Ctrl+Enter posts)"
         value={draft}
         onChange={setDraft}
         people={people}
         onSubmit={() => draft.trim() && !comment.isPending && comment.mutate()}
+        onPaste={(e) => {
+          const file = [...e.clipboardData.files].find((f) => f.type.startsWith("image/"));
+          if (!file) return;
+          e.preventDefault();
+          void pasteImage(file);
+        }}
       />
+      {pasting && <div className="muted" style={{ fontSize: 14 }}>📎 Attaching the screenshot…</div>}
       <QuickReplies value={draft} onChange={setDraft} />
       {restoredDraft && <div className="muted" style={{ fontSize: 14 }}>📝 Your unsent comment was kept.</div>}
       <button className="px-btn primary" disabled={!draft.trim() || comment.isPending} onClick={() => comment.mutate()}>
