@@ -25,3 +25,17 @@ describe("ask the office", () => {
     expect(p).not.toMatch(/Gone/);
   });
 });
+
+import { taskFromTurn } from "./AskOffice";
+describe("ask, then act", () => {
+  it("makes a task from a question and its answer", () => {
+    expect(taskFromTurn({ q: "Who should fix the flaky Redis test?", a: "QA found it in YOG-17." })).toEqual({
+      title: "Who should fix the flaky Redis test",
+      description: 'QA found it in YOG-17.\n\n_From Ask the office: "Who should fix the flaky Redis test?"_',
+    });
+  });
+  it("carries earlier turns into the prompt", () => {
+    const p = buildPrompt({ question: "And who is free?", company: "Lab", agents: [], issues: [], threads: [], facts: [], history: [{ q: "What is blocked?", a: "YOG-3 waits on YOG-2." }] });
+    expect(p).toMatch(/EARLIER IN THIS CONVERSATION[\s\S]*CEO: What is blocked\?\nYou: YOG-3 waits on YOG-2\.[\s\S]*QUESTION: And who is free\?/);
+  });
+});

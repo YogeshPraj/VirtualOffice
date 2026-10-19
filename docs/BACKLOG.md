@@ -163,7 +163,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   overnight, waiting for you, at risk.
 - [x] **(P1) Phone view.** A narrow-screen layout for the review queue and questions, reachable from your phone
   only over your own private network, and off until you turn it on.
-- [ ] **(P2) Ask, then act.** Ask the office becomes a conversation, and an answer can become a task or a brain note.
+- [x] **(P2) Ask, then act.** Ask the office becomes a conversation, and an answer can become a task or a brain note.
 - [ ] **(P2) Recurring tasks.** Tasks made from a template on a schedule (every Monday, the 1st of the month).
 - [ ] **(P2) Handover notes.** Sending someone on leave drafts a handover for each of their open tasks.
 - [ ] **(P2) Size vs actual.** Tag tasks S / M / L and compare with the time actually worked.
