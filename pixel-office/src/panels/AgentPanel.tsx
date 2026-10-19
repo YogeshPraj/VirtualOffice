@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { TimeOff } from "./TimeOff";
 import { api } from "../api/client";
 import { keys } from "../api/hooks";
 import { useOfficeData } from "../state/officeData";
@@ -64,6 +65,7 @@ export function AgentPanel({ agentId }: { agentId: string }) {
       </div>
 
       <AgentRepair agent={agent} />
+      <TimeOff agent={agent} />
       <Scorecard agent={agent} />
       <OverShoulder agent={agent} />
       <AskEmployee agent={agent} />
