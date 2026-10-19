@@ -161,7 +161,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 ## Wave 12: the office runs itself a bit more
 - [x] **(P1) Morning briefing.** The first time you open the office each day, Claude writes a short briefing:
   overnight, waiting for you, at risk.
-- [ ] **(P1) Phone view.** A narrow-screen layout for the review queue and questions, reachable from your phone
+- [x] **(P1) Phone view.** A narrow-screen layout for the review queue and questions, reachable from your phone
   only over your own private network, and off until you turn it on.
 - [ ] **(P2) Ask, then act.** Ask the office becomes a conversation, and an answer can become a task or a brain note.
 - [ ] **(P2) Recurring tasks.** Tasks made from a template on a schedule (every Monday, the 1st of the month).
