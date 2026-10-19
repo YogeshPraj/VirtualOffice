@@ -6,6 +6,7 @@ import { BackupCard } from "./BackupCard";
 import { UpdateCard } from "./UpdateCard";
 import { WatchdogCard } from "../ui/Watchdog";
 import { AutostartCard } from "./AutostartCard";
+import { SetupCheckCard } from "./SetupCheckCard";
 import { LeakWatchCard } from "./LeakWatchCard";
 
 export interface StatusCheck {
@@ -91,6 +92,7 @@ export function StatusPanel() {
         </div>
       ))}
 
+      <SetupCheckCard />
       <WatchdogCard />
       <AutostartCard />
       <LeakWatchCard />
