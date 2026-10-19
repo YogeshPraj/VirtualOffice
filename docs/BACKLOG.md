@@ -100,7 +100,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P1) Self-healing services.** If Paperclip or the brain stops (sleep, crash), the office server restarts
   it by itself and tells you.
 - [x] **(P2) Snooze.**** Put an inbox item off until later today, tomorrow morning or next week.
-- [ ] **(P2) Quick replies.** One-click answers ("Go ahead", "Ship it", "Hold until I review") in threads
+- [x] **(P2) Quick replies.** One-click answers ("Go ahead", "Ship it", "Hold until I review") in threads
   and the review room; editable.
 - [ ] **(P2) What's new.** After an update, a short list of what changed in the office.
 - [ ] **(P2) Stand-up reminder.** At the start of the working day, an alert that today's report is ready.

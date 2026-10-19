@@ -23,6 +23,7 @@ import { downloadText, slug } from "../lib/download";
 import { driftFor, useSources } from "../lib/drift";
 import { linkMentions } from "../lib/mentions";
 import { MentionTextarea } from "../ui/MentionTextarea";
+import { QuickReplies } from "../ui/QuickReplies";
 import { useDraft } from "../lib/useDraft";
 import { describeChange, inverseOf, isEmpty } from "../lib/undo";
 
@@ -174,6 +175,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
         people={people}
         onSubmit={() => draft.trim() && !comment.isPending && comment.mutate()}
       />
+      <QuickReplies value={draft} onChange={setDraft} />
       {restoredDraft && <div className="muted" style={{ fontSize: 14 }}>📝 Your unsent comment was kept.</div>}
       <button className="px-btn primary" disabled={!draft.trim() || comment.isPending} onClick={() => comment.mutate()}>
         💬 Post

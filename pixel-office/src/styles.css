@@ -652,3 +652,6 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 .due-badge.due-overdue { background: #ff8a8a; font-weight: bold; }
 .due-badge.due-today { background: #ffd479; font-weight: bold; }
 .due-badge.due-soon { background: #ffe9b0; }
+.quick-replies { flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+.reply-chip { border: 0; box-shadow: 0 0 0 2px var(--ink); background: #fffaf0; font: inherit; font-size: 15px; padding: 1px 7px; cursor: pointer; color: var(--ink); }
+.reply-chip:hover { background: var(--accent); }

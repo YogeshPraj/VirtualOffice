@@ -8,6 +8,7 @@ import { useOffice } from "../state/officeStore";
 import { Markdown } from "../lib/markdown";
 import { useOfficeLinks } from "./TaskDocuments";
 import { isQuestion } from "./AskEmployee";
+import { QuickReplies } from "../ui/QuickReplies";
 
 /** Tasks waiting for the CEO's review, oldest first. */
 export const reviewQueue = (issues: Issue[]) =>
@@ -178,6 +179,7 @@ function ReviewItem({ issue, onDone }: { issue: Issue; onDone: () => void }) {
         value={note}
         onChange={(e) => setNote(e.target.value)}
       />
+      <QuickReplies value={note} onChange={setNote} />
       <div className="row">
         <button className="px-btn good" disabled={approve.isPending || sendBack.isPending} onClick={() => confirm(`Approve ${issue.identifier} and mark it done?`) && approve.mutate()}>
           ✔ Approve
