@@ -20,6 +20,8 @@ export interface IntakeItem {
   state?: string;
   body?: string; // markdown-ish text for the task description
   fields?: Record<string, string>;
+  /** YYYY-MM-DD, when the source item has a deadline. */
+  due?: string;
   error?: string; // could not fetch details; the task still gets the link
   fix?: string; // how to make fetching work next time
 }
@@ -132,8 +134,13 @@ async function resolveAdo(p: NonNullable<ReturnType<typeof parseLink>>): Promise
     if (s(key)) fields[label] = s(key);
   }
   if (person("System.AssignedTo")) fields["Assigned to (ADO)"] = person("System.AssignedTo");
+  // ADO keeps deadlines in Due Date (tasks/bugs) or Target Date (features/epics).
+  const dueRaw = s("Microsoft.VSTS.Scheduling.DueDate") || s("Microsoft.VSTS.Scheduling.TargetDate");
+  const due = /^\d{4}-\d{2}-\d{2}/.test(dueRaw) ? dueRaw.slice(0, 10) : undefined;
+  if (due) fields.Due = due;
   return {
     ...base,
+    due,
     title: s("System.Title") || base.title,
     type: s("System.WorkItemType") || undefined,
     state: s("System.State") || undefined,

@@ -95,9 +95,11 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 ## Wave 6: keeping up
 - [x] **(P1) Office updates.** The office checks GitHub for a newer version and updates itself in one click
   (fast-forward only), saying when setup.ps1 must run again.
-- [ ] **(P1) Due dates.** Give a task a due date (or take it from the ADO item); overdue and due-soon badges on
+- [x] **(P1) Due dates.** Give a task a due date (or take it from the ADO item); overdue and due-soon badges on
   the board, and an alert the day before.
-- [ ] **(P2) Snooze.** Put an inbox item off until later today, tomorrow morning or next week.
+- [ ] **(P1) Self-healing services.** If Paperclip or the brain stops (sleep, crash), the office server restarts
+  it by itself and tells you.
+- [ ] **(P2) Snooze.**** Put an inbox item off until later today, tomorrow morning or next week.
 - [ ] **(P2) Quick replies.** One-click answers ("Go ahead", "Ship it", "Hold until I review") in threads
   and the review room; editable.
 - [ ] **(P2) What's new.** After an update, a short list of what changed in the office.

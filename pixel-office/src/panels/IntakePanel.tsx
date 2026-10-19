@@ -8,6 +8,7 @@ import { QueryIntake } from "./QueryIntake";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 import { WatchesCard } from "./WatchesCard";
 import { useDraft } from "../lib/useDraft";
+import { useDue } from "../lib/due";
 
 /** Mirrors IntakeItem in ../../intake-bridge.ts (server side). */
 interface IntakeItem {
@@ -19,6 +20,7 @@ interface IntakeItem {
   state?: string;
   body?: string;
   fields?: Record<string, string>;
+  due?: string;
   error?: string;
   fix?: string;
 }
@@ -65,6 +67,7 @@ export function IntakePanel() {
   const lead = staff.find((a) => !a.reportsTo && ["general", "pm", "ceo", "cto"].includes(a.role)) ?? staff.find((a) => !a.reportsTo);
 
   const { data: templates = [] } = useTemplates();
+  const dueDates = useDue();
   const [text, setText, clearText] = useDraft("intake:links");
   const [notes, setNotes, clearNotes] = useDraft("intake:notes");
   const [items, setItems] = useState<IntakeItem[] | null>(null);
@@ -106,10 +109,20 @@ export function IntakePanel() {
       const common = { assigneeAgentId: who || null, projectId: project || null, priority, status: "todo" as const };
       if (mode === "one") {
         const description = chosen.map((it, n) => `## ${n + 1}. ${taskTitle(it)}\n${itemMarkdown(it)}`).join("\n\n") + instructions + footer;
-        return [await api.createIssue(company.id, { ...common, title: groupTitle.trim(), description })];
+        const one = await api.createIssue(company.id, { ...common, title: groupTitle.trim(), description });
+        // A combined task is due when its earliest item is.
+        const earliest = chosen.map((it) => it.due).filter(Boolean).sort()[0];
+        if (earliest) await dueDates.setMany({ [one.id]: earliest }).catch(() => undefined);
+        return [one];
       }
       const out = [];
-      for (const it of chosen) out.push(await api.createIssue(company.id, { ...common, title: taskTitle(it), description: itemMarkdown(it) + instructions + footer }));
+      const dues: Record<string, string> = {};
+      for (const it of chosen) {
+        const made = await api.createIssue(company.id, { ...common, title: taskTitle(it), description: itemMarkdown(it) + instructions + footer });
+        if (it.due) dues[made.id] = it.due;
+        out.push(made);
+      }
+      if (Object.keys(dues).length) await dueDates.setMany(dues).catch(() => undefined);
       return out;
     },
     onSuccess: (created) => {

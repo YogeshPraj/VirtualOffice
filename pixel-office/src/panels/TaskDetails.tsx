@@ -7,6 +7,7 @@ import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { NOTE_COLORS } from "./MeetingPanel";
 import { defaultGoalId, useGoals } from "./GoalPoster";
+import { DUE_ICON, dueLabel, dueState, useDue } from "../lib/due";
 import { describeChange, inverseOf, isEmpty } from "../lib/undo";
 
 const PRIORITIES: Issue["priority"][] = ["critical", "high", "medium", "low"];
@@ -21,6 +22,8 @@ export function TaskDetails({ issue }: { issue: Issue }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects(company.id);
   const { data: goals } = useGoals(company.id);
+  const dueDates = useDue();
+  const due = dueDates.due[issue.id] ?? "";
   const { data: full } = useQuery({ queryKey: ["issue", issue.id, issue.updatedAt], queryFn: () => api.issue(issue.id) });
   const [subTitle, setSubTitle] = useState("");
 
@@ -106,6 +109,28 @@ export function TaskDetails({ issue }: { issue: Issue }) {
             <option key={p.id} value={p.id}>{p.name}</option>
           ))}
         </select>
+
+        <label>Due</label>
+        <div className="row" style={{ margin: 0 }}>
+          <input
+            type="date"
+            className="px-input"
+            style={{ width: "auto", margin: 0 }}
+            aria-label="Due date"
+            value={due}
+            onChange={(e) => dueDates.set(issue.id, e.target.value || null).catch((err) => toast((err as Error).message))}
+          />
+          {due && (
+            <>
+              <span className={`due-badge due-${dueState(due)}`} style={{ margin: 0 }}>
+                {DUE_ICON[dueState(due)]} {dueLabel(due)}
+              </span>
+              <button className="px-btn small" aria-label="Clear the due date" onClick={() => dueDates.set(issue.id, null)}>
+                ×
+              </button>
+            </>
+          )}
+        </div>
 
         <label>Goal</label>
         <select className="px-select" aria-label="Goal" value={issue.goalId && issue.goalId !== defaultGoalId(goals) ? issue.goalId : ""} onChange={(e) => update.mutate({ goalId: e.target.value || null })}>

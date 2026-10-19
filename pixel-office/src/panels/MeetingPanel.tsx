@@ -13,6 +13,7 @@ import { TemplateEditor } from "./TemplateEditor";
 import { BulkBar } from "./BulkBar";
 import { SavedViews } from "./SavedViews";
 import { FocusStrip } from "./FocusStrip";
+import { DUE_ICON, dueLabel, dueState, useDue } from "../lib/due";
 import { awayBaseline } from "../ui/SinceAway";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 import { useDraft } from "../lib/useDraft";
@@ -96,6 +97,7 @@ export function MeetingPanel() {
   }, []);
   const { data: templates = [] } = useTemplates();
   const { data: sources } = useSources();
+  const { due } = useDue();
   const [since] = useState(awayBaseline);
   const applyTemplate = (id: string) => {
     const t = templates.find((x) => x.id === id);
@@ -344,6 +346,7 @@ export function MeetingPanel() {
                 <StickyNote
                   key={i.id}
                   issue={i}
+                  due={due[i.id]}
                   col={colIndex}
                   row={rowIndex}
                   sources={sources}
@@ -378,6 +381,7 @@ function StickyNote({
   changed,
   col,
   row,
+  due,
 }: {
   issue: Issue;
   assignee?: string;
@@ -389,6 +393,7 @@ function StickyNote({
   changed?: boolean;
   col?: number;
   row?: number;
+  due?: string;
 }) {
   const source = extractSources(issue.description)[0];
   const drift = driftFor(issue, sources);
@@ -418,6 +423,11 @@ function StickyNote({
       </span>
       {issue.title}
       {assignee && <div className="muted" style={{ fontSize: 15, marginTop: 4 }}>@{assignee}</div>}
+      {due && issue.status !== "done" && issue.status !== "cancelled" && (
+        <div className={`due-badge due-${dueState(due)}`}>
+          {DUE_ICON[dueState(due)]} {dueLabel(due)}
+        </div>
+      )}
     </button>
   );
 }

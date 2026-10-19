@@ -647,3 +647,8 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 
 .sticky:focus-visible { outline: 4px solid var(--info); outline-offset: 2px; position: relative; z-index: 1; }
 .px-btn:focus-visible, .rpg-option:focus-visible, .link-btn:focus-visible, .palette-item:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+
+.due-badge { display: inline-block; margin-top: 4px; padding: 0 5px; font-size: 14px; box-shadow: 0 0 0 2px var(--ink); background: #fffaf0; }
+.due-badge.due-overdue { background: #ff8a8a; font-weight: bold; }
+.due-badge.due-today { background: #ffd479; font-weight: bold; }
+.due-badge.due-soon { background: #ffe9b0; }
