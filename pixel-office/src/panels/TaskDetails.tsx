@@ -8,6 +8,7 @@ import { useOffice } from "../state/officeStore";
 import { NOTE_COLORS } from "./MeetingPanel";
 import { defaultGoalId, useGoals } from "./GoalPoster";
 import { DUE_ICON, dueLabel, dueState, useDue } from "../lib/due";
+import { SIZE_LABEL, SIZES, useSizes } from "../lib/sizes";
 import { describeChange, inverseOf, isEmpty } from "../lib/undo";
 
 const PRIORITIES: Issue["priority"][] = ["critical", "high", "medium", "low"];
@@ -23,6 +24,7 @@ export function TaskDetails({ issue }: { issue: Issue }) {
   const { data: projects } = useProjects(company.id);
   const { data: goals } = useGoals(company.id);
   const dueDates = useDue();
+  const { sizes, set: setSize } = useSizes();
   const due = dueDates.due[issue.id] ?? "";
   const { data: full } = useQuery({ queryKey: ["issue", issue.id, issue.updatedAt], queryFn: () => api.issue(issue.id) });
   const [subTitle, setSubTitle] = useState("");
@@ -130,6 +132,22 @@ export function TaskDetails({ issue }: { issue: Issue }) {
               </button>
             </>
           )}
+        </div>
+
+        <label>Size</label>
+        <div className="row" style={{ margin: 0 }} role="group" aria-label="Size">
+          {SIZES.map((s) => (
+            <button
+              key={s}
+              className={`reply-chip ${sizes[issue.id] === s ? "on" : ""}`}
+              aria-pressed={sizes[issue.id] === s}
+              title={SIZE_LABEL[s]}
+              onClick={() => setSize(issue.id, sizes[issue.id] === s ? null : s).catch((err) => toast((err as Error).message))}
+            >
+              {s}
+            </button>
+          ))}
+          <span className="muted" style={{ fontSize: 14 }}>{sizes[issue.id] ? SIZE_LABEL[sizes[issue.id]] : "Your guess; the report compares it with the time worked."}</span>
         </div>
 
         <label>Goal</label>

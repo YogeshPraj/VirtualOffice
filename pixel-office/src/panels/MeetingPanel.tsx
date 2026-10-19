@@ -17,6 +17,7 @@ import { DUE_ICON, dueLabel, dueState, useDue } from "../lib/due";
 import { checklist } from "../lib/checklist";
 import { staleDays } from "../lib/stale";
 import { BlockerChains } from "./BlockerChains";
+import { type Size, useSizes } from "../lib/sizes";
 import { toCsv } from "../lib/csv";
 import { downloadText, slug } from "../lib/download";
 import { awayBaseline } from "../ui/SinceAway";
@@ -103,6 +104,7 @@ export function MeetingPanel() {
   const { data: templates = [] } = useTemplates();
   const { data: sources } = useSources();
   const { due } = useDue();
+  const { sizes } = useSizes();
   const [since] = useState(awayBaseline);
   const applyTemplate = (id: string) => {
     const t = templates.find((x) => x.id === id);
@@ -377,6 +379,7 @@ export function MeetingPanel() {
                   key={i.id}
                   issue={i}
                   due={due[i.id]}
+                  size={sizes[i.id]}
                   col={colIndex}
                   row={rowIndex}
                   sources={sources}
@@ -412,6 +415,7 @@ function StickyNote({
   col,
   row,
   due,
+  size,
 }: {
   issue: Issue;
   assignee?: string;
@@ -424,6 +428,7 @@ function StickyNote({
   col?: number;
   row?: number;
   due?: string;
+  size?: Size;
 }) {
   const source = extractSources(issue.description)[0];
   const drift = driftFor(issue, sources);
@@ -449,6 +454,7 @@ function StickyNote({
       {selected !== undefined && <span className="pick">{selected ? "☑" : "☐"}</span>}
       <span className="id">
         {issue.identifier}
+        {size ? ` · ${size}` : ""}
         {issue.status === "blocked" ? " · BLOCKED" : ""}
         {issue.priority === "critical" ? " · ‼" : issue.priority === "high" ? " · !" : ""}
         {source ? ` · ${SOURCE_ICON[source.source]} ${source.key}` : ""}

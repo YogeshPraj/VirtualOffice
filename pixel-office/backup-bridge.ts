@@ -29,6 +29,7 @@ const SETTINGS: Record<string, (data: unknown) => unknown> = {
   "due.json": (d) => d,
   "replies.json": (d) => d,
   "pins.json": (d) => d,
+  "sizes.json": (d) => d,
   "leave.json": (d) => d,
   "working-hours.json": (d) => ({ settings: (d as { settings?: unknown })?.settings ?? d }),
   // Only the definitions: pending matches and dismissals are per-machine state.

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { SizeVsActual } from "./SizeVsActual";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../api/client";
 import type { Issue } from "../api/types";
@@ -280,6 +281,7 @@ export function ReportPanel() {
           </button>
         ))}
       </div>
+      <SizeVsActual />
     </>
   );
 }
