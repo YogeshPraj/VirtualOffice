@@ -91,3 +91,15 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Share a task.** Copy or download a task (details, thread, documents, links) as Markdown.
 - [x] **(P2) Budget alerts.** A desktop alert when an employee passes 80% of their monthly budget.
 - [x] **(P3) Keyboard board.** Move between sticky notes with the arrow keys, Enter to open, and visible focus.
+
+## Wave 6: keeping up
+- [ ] **(P1) Office updates.** The office checks GitHub for a newer version and updates itself in one click
+  (fast-forward only), saying when setup.ps1 must run again.
+- [ ] **(P1) Due dates.** Give a task a due date (or take it from the ADO item); overdue and due-soon badges on
+  the board, and an alert the day before.
+- [ ] **(P2) Snooze.** Put an inbox item off until later today, tomorrow morning or next week.
+- [ ] **(P2) Quick replies.** One-click answers ("Go ahead", "Ship it", "Hold until I review") in threads
+  and the review room; editable.
+- [ ] **(P2) What's new.** After an update, a short list of what changed in the office.
+- [ ] **(P2) Stand-up reminder.** At the start of the working day, an alert that today's report is ready.
+- [ ] **(P3) Text size.** Make the office's text bigger or smaller.
