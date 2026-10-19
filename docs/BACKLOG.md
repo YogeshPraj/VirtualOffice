@@ -115,3 +115,14 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Checklist progress.** "- [ ]" checklists in a task's details show as a progress bar on its note.
 - [x] **(P2) Shift timeline.** Today's shifts per employee as a timeline in the security room.
 - [x] **(P3) Dark panels.** A darker panel theme for evenings (or follow Windows).
+
+## Wave 8: always on, faster hands
+- [ ] **(P1) Office supervisor.** A small background watcher keeps the office server itself running (the
+  in-office self-healing can't restart the server it lives in).
+- [ ] **(P2) Start with Windows.** Optionally open the office when you sign in.
+- [ ] **(P2) Palette actions.** Run office actions from Ctrl+K: back up, check for updates, close or open the
+  office, dark panels, alerts.
+- [ ] **(P2) Paste screenshots.** Paste an image into a comment; it's attached to the task and shown inline.
+- [ ] **(P2) Long threads.** Older comments fold away; filter to updates from employees only.
+- [ ] **(P2) Board to CSV.** Export the board (or the filtered view) as a spreadsheet.
+- [ ] **(P3) Celebrate.** A little confetti when a goal is achieved or the focus list is all done.
