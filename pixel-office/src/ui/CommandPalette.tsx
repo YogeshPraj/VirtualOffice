@@ -15,6 +15,7 @@ import { useOffice, type Panel, type RoomId } from "../state/officeStore";
 import { ROOM_TITLES } from "../panels/PanelDock";
 import { TOUR_EVENT } from "./Tour";
 import { readRecent, rememberPanel } from "../lib/recent";
+import { MOVE_IN_EVENT } from "../panels/MoveInCard";
 
 interface Command {
   id: string;
@@ -137,6 +138,10 @@ export function CommandPalette() {
         await api.updateCompany(company.id, { status: closed ? "active" : "paused" });
         qc.invalidateQueries({ queryKey: keys.companies });
         toast(closed ? "Doors open again." : "Office closed.");
+      }),
+      act("move-in", "🚚", "Move-in checklist (setting up a new machine)", () => {
+        open({ kind: "room", room: "status" });
+        setTimeout(() => window.dispatchEvent(new Event(MOVE_IN_EVENT)), 0);
       }),
       act("theme-dark", "🌙", "Dark panels", () => theme.set("dark"), "theme"),
       act("theme-light", "☀", "Light panels", () => theme.set("light"), "theme"),

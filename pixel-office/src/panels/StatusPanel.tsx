@@ -7,6 +7,7 @@ import { UpdateCard } from "./UpdateCard";
 import { WatchdogCard } from "../ui/Watchdog";
 import { AutostartCard } from "./AutostartCard";
 import { SetupCheckCard } from "./SetupCheckCard";
+import { MoveInCard } from "./MoveInCard";
 import { LeakWatchCard } from "./LeakWatchCard";
 
 export interface StatusCheck {
@@ -57,6 +58,7 @@ export function StatusPanel() {
 
   return (
     <>
+      <MoveInCard />
       <div className="px-card">
         <div className="row">
           <h4 style={{ flex: 1, margin: 0 }}>

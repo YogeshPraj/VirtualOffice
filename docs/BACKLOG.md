@@ -150,7 +150,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 ## Wave 11: two machines, less admin
 - [x] **(P1) Two-machine safety.** The office knows which machine it is, and warns when another machine has
   backed up the company more recently ("pull first"), so the PC and the laptop don't work from stale copies.
-- [ ] **(P1) Move-in checklist.** One guided screen on a new machine: setup check, import the company,
+- [x] **(P1) Move-in checklist.** One guided screen on a new machine: setup check, import the company,
   restore office settings from `company/`, re-enter vault secrets, check the employees.
 - [ ] **(P2) Ask the office.** Ask a question in Ctrl+K; Claude answers from the tasks, threads and the brain.
 - [ ] **(P2) Time off.** Send an employee on leave until a date: no new shifts, back on schedule by itself.

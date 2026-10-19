@@ -27,7 +27,7 @@ export function SetupCheckCard() {
   const bad = checks.some((c) => c.level === "bad");
   const shown = all ? checks : problems;
   return (
-    <div className="px-card" style={bad ? { borderLeft: "8px solid var(--bad)" } : undefined}>
+    <div id="setup-check" className="px-card" style={bad ? { borderLeft: "8px solid var(--bad)" } : undefined}>
       <div className="row">
         <h4 style={{ flex: 1, margin: 0 }}>🧰 SETUP CHECK</h4>
         <button className="px-btn small" disabled={isFetching} onClick={() => void recheck()}>
