@@ -107,7 +107,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P3) Text size.** Make the office's text bigger or smaller.
 
 ## Wave 7: seeing what's going on
-- [ ] **(P1) Gone quiet.** Open tasks with no activity for too long (in progress 1 day, in review 1 day, blocked
+- [x] **(P1) Gone quiet.** Open tasks with no activity for too long (in progress 1 day, in review 1 day, blocked
   2 days, to do 3 days) listed in Today, with a one-click nudge.
 - [ ] **(P2) Speech bubbles.** Employees in the office show a short bubble of what they're doing right now.
 - [ ] **(P2) Brain in Ctrl+K.** The palette also searches the second brain's memory.

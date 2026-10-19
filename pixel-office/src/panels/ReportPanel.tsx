@@ -9,6 +9,7 @@ import { useFocus } from "../lib/focus";
 import { FocusStrip } from "./FocusStrip";
 import { downloadText as download } from "../lib/download";
 import { useStandupPref } from "../ui/StandupReminder";
+import { GoneQuiet, goneQuiet } from "./GoneQuiet";
 
 export type Day = "today" | "yesterday" | "week" | "lastweek";
 
@@ -144,6 +145,10 @@ export function ReportPanel() {
       "",
       `New tasks: ${report.created.length} · Shifts worked: ${report.shifts.length}${report.failed.length ? ` (${report.failed.length} failed)` : ""}`,
       `Usage: ${usageText}`,
+      ...(() => {
+        const q = goneQuiet(issues);
+        return q.length ? [`Gone quiet (${q.length}): ${q.slice(0, 5).map((x) => x.issue.identifier).join(", ")}`] : [];
+      })(),
       ...(cycle.count
         ? [`Typical time to finish: ${fmtDuration(cycle.medianMs)} (${cycle.count} task${cycle.count === 1 ? "" : "s"}); slowest: ${cycle.slowest.map((x) => `${x.issue.identifier} ${fmtDuration(x.ms)}`).join(", ")}`]
         : []),
@@ -229,6 +234,7 @@ export function ReportPanel() {
       </div>
 
       <FocusStrip compact />
+      <GoneQuiet />
       {attention.length > 0 && (
         <div className="px-card" style={{ borderLeft: "8px solid var(--bad)" }}>
           <h4>☎ WAITING ON YOU <span className="muted">{attention.length}</span></h4>

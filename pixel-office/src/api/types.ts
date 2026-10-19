@@ -82,6 +82,7 @@ export interface Issue {
   startedAt?: string | null;
   completedAt?: string | null;
   hiddenAt?: string | null;
+  lastActivityAt?: string | null;
   /** Only on a single-issue fetch. */
   blockedBy?: IssueRef[];
   blocks?: IssueRef[];
