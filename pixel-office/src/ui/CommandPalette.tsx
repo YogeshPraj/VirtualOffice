@@ -14,6 +14,7 @@ import { useOfficeData } from "../state/officeData";
 import { useOffice, type Panel, type RoomId } from "../state/officeStore";
 import { ROOM_TITLES } from "../panels/PanelDock";
 import { TOUR_EVENT } from "./Tour";
+import { readRecent, rememberPanel } from "../lib/recent";
 
 interface Command {
   id: string;
@@ -67,6 +68,10 @@ export function CommandPalette() {
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const input = useRef<HTMLInputElement>(null);
+  const [recent, setRecent] = useState<string[]>([]);
+
+  // Remember what the CEO looks at, so the palette can offer it first.
+  useEffect(() => useOffice.subscribe((s, prev) => void (s.panel !== prev.panel && rememberPanel(s.panel))), []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -88,6 +93,7 @@ export function CommandPalette() {
     if (shown) {
       setQuery("");
       setCursor(0);
+      setRecent(readRecent());
       setTimeout(() => input.current?.focus(), 0);
     }
   }, [shown]);
@@ -215,7 +221,17 @@ export function CommandPalette() {
   }, [deep.data, deepQ, q, issues, open, toast]);
 
   const results = useMemo(() => {
-    if (!q) return all.filter((c) => !c.id.startsWith("issue:") && !c.id.startsWith("act:")).concat(all.filter((c) => c.id.startsWith("issue:")).slice(0, 5));
+    if (!q) {
+      // Recently viewed first, then rooms and people, then the latest tasks.
+      const byId = new Map(all.map((c) => [c.id, c]));
+      const recents = recent.flatMap((id) => {
+        const c = byId.get(id);
+        return c ? [{ ...c, id: `recent:${id}`, icon: "🕘", hint: c.hint ? `recent · ${c.hint}` : "recent" }] : [];
+      });
+      const seen = new Set(recent);
+      const rest = all.filter((c) => !seen.has(c.id));
+      return [...recents, ...rest.filter((c) => !c.id.startsWith("issue:") && !c.id.startsWith("act:")), ...rest.filter((c) => c.id.startsWith("issue:")).slice(0, 5)];
+    }
     const hits = all
       .map((c) => ({ c, s: score(c.label, q) }))
       .filter((x) => x.s >= 0)
@@ -227,7 +243,7 @@ export function CommandPalette() {
     const shownIssues = new Set(hits.filter((c) => c.id.startsWith("issue:")).map((c) => c.label.split(" ")[0]));
     const deeper = deepCommands.filter((c) => !shownIssues.has(c.label.split(" ")[0]) || c.hint !== "title");
     return [...hits, ...deeper.slice(0, 10), ...brainCommands, pin];
-  }, [all, q, create, deepCommands, brainCommands]);
+  }, [all, q, create, deepCommands, brainCommands, recent]);
 
   if (!shown) return null;
   const pick = (c: Command | undefined) => {
