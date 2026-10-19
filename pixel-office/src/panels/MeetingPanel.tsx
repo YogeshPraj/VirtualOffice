@@ -15,6 +15,7 @@ import { SavedViews } from "./SavedViews";
 import { FocusStrip } from "./FocusStrip";
 import { DUE_ICON, dueLabel, dueState, useDue } from "../lib/due";
 import { checklist } from "../lib/checklist";
+import { staleDays } from "../lib/stale";
 import { toCsv } from "../lib/csv";
 import { downloadText, slug } from "../lib/download";
 import { awayBaseline } from "../ui/SinceAway";
@@ -425,16 +426,18 @@ function StickyNote({
   const source = extractSources(issue.description)[0];
   const drift = driftFor(issue, sources);
   const list = checklist(issue.description);
+  const stale = staleDays(issue);
+  const tip = [source ? `From ${source.key}` : null, stale ? `Nobody has touched this for ${stale} days` : null].filter(Boolean).join(" · ");
   return (
     <button
-      className={`sticky ${selected ? "selected" : ""} ${changed ? "changed" : ""}`}
+      className={`sticky ${selected ? "selected" : ""} ${changed ? "changed" : ""} ${stale ? "stale" : ""}`}
       aria-pressed={selected}
       data-id={issue.id}
       data-col={col}
       data-row={row}
       style={{ background: NOTE_COLORS[issue.status] }}
       onClick={onOpen}
-      title={source ? `From ${source.key}` : undefined}
+      title={tip || undefined}
       draggable
       onDragStart={(e) => {
         e.dataTransfer.setData("text/x-issue-id", issue.id);

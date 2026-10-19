@@ -646,6 +646,18 @@ kbd { display: inline-block; background: var(--card); box-shadow: 0 0 0 2px var(
 .link-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .link-btn:hover { text-decoration: underline; }
 .goal { margin: 6px 0 10px; }
+/* Untouched for a week: yellowed paper with a curling corner. */
+.sticky.stale { position: relative; filter: sepia(0.55) saturate(0.85); }
+.sticky.stale::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.28) 0 50%, var(--paper) 50% 100%);
+  box-shadow: -1px -1px 0 rgba(0, 0, 0, 0.2);
+}
 .sticky.changed { box-shadow: 0 0 0 3px var(--accent), 0 0 10px 2px rgba(245, 197, 66, 0.8); }
 .sticky.changed .id::after { content: " · NEW"; color: #8a5a00; }
 .saved-views { flex-wrap: wrap; gap: 6px; margin: 4px 0; }
