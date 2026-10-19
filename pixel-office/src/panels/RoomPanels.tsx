@@ -8,6 +8,7 @@ import { ClassicLink } from "../ui/Window";
 import { UsageCard } from "./UsageCard";
 import { Workload } from "./Workload";
 import { GoalPoster } from "./GoalPoster";
+import { ShiftTimeline } from "./ShiftTimeline";
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -115,6 +116,7 @@ export function SecurityPanel() {
   const rows = (data ?? []).filter((a: ActivityEntry) => !filter || a.action.includes(filter));
   return (
     <>
+      <ShiftTimeline />
       <input className="px-input" aria-label="Filter" placeholder="filter: issue, agent, approval…" value={filter} onChange={(e) => setFilter(e.target.value)} />
       <div style={{ background: "#0e1a12", color: "#7cf07c", padding: 10, boxShadow: "0 0 0 3px #000", fontSize: 18 }}>
         {rows.slice(0, 120).map((a) => {
