@@ -1,5 +1,6 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { SeasonalDecor } from "./SeasonalDecor";
+import { OfficeCat } from "./OfficeCat";
 import { useProviderName } from "../api/hooks";
 import { createPortal } from "react-dom";
 import { buttonProps } from "./a11y";
@@ -201,6 +202,7 @@ export function OfficeScene({ company, agents, issues, attention }: Props) {
         </g>
       ))}
       <g ref={setLayer(rowYs.length)} />
+      <OfficeCat desks={desks} busy={desks.map((_, i) => staff[i]?.status === "running")} />
 
       <CeoCharacter ringing={attention.length > 0} />
       {staff.map((agent, i) => (

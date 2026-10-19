@@ -747,3 +747,8 @@ kbd { display: inline-block; background: var(--card); box-shadow: 0 0 0 2px var(
 @media (prefers-reduced-motion: reduce) {
   .decor-blink, .decor-blink-alt, .decor-flicker, .decor-snow { animation: none; }
 }
+
+/* The office cat */
+@keyframes cat-zzz { 0%, 100% { opacity: 0.2; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+.office-cat .cat-zzz { animation: cat-zzz 2.4s steps(4) infinite; }
+@media (prefers-reduced-motion: reduce) { .office-cat .cat-zzz { animation: none; } }
