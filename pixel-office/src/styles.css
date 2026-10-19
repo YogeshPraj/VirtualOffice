@@ -659,3 +659,6 @@ kbd { display: inline-block; background: #fffaf0; box-shadow: 0 0 0 2px var(--in
 
 /* Text size (HUD control): reading surfaces scale; the office scene doesn't. */
 .px-window, .hud, .palette, .toast, .key-hint, .tour-card { zoom: var(--ui-zoom, 1); }
+.note-checklist { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 13px; }
+.note-checklist .bar { flex: 1; height: 5px; background: rgba(0, 0, 0, 0.15); box-shadow: 0 0 0 1px var(--ink); }
+.note-checklist .bar > span { display: block; height: 100%; background: var(--good); }

@@ -14,6 +14,7 @@ import { BulkBar } from "./BulkBar";
 import { SavedViews } from "./SavedViews";
 import { FocusStrip } from "./FocusStrip";
 import { DUE_ICON, dueLabel, dueState, useDue } from "../lib/due";
+import { checklist } from "../lib/checklist";
 import { awayBaseline } from "../ui/SinceAway";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 import { useDraft } from "../lib/useDraft";
@@ -397,6 +398,7 @@ function StickyNote({
 }) {
   const source = extractSources(issue.description)[0];
   const drift = driftFor(issue, sources);
+  const list = checklist(issue.description);
   return (
     <button
       className={`sticky ${selected ? "selected" : ""} ${changed ? "changed" : ""}`}
@@ -423,6 +425,14 @@ function StickyNote({
       </span>
       {issue.title}
       {assignee && <div className="muted" style={{ fontSize: 15, marginTop: 4 }}>@{assignee}</div>}
+      {list.total > 0 && (
+        <div className="note-checklist" title={`${list.done} of ${list.total} checklist items done`}>
+          <span>☑ {list.done}/{list.total}</span>
+          <span className="bar">
+            <span style={{ width: `${(list.done / list.total) * 100}%` }} />
+          </span>
+        </div>
+      )}
       {due && issue.status !== "done" && issue.status !== "cancelled" && (
         <div className={`due-badge due-${dueState(due)}`}>
           {DUE_ICON[dueState(due)]} {dueLabel(due)}
