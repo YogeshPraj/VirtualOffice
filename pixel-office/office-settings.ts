@@ -19,6 +19,7 @@ const ALLOWED = new Map<string, number>([
   ["views", 64 * 1024],
   ["focus", 16 * 1024],
   ["due", 128 * 1024],
+  ["snooze", 64 * 1024],
 ]);
 
 async function readBody(req: IncomingMessage, max: number): Promise<string> {

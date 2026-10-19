@@ -10,18 +10,43 @@ import { InteractionDialog } from "./InteractionDialog";
 import { AgentRepair } from "./AgentRepair";
 import { RecoveryCard, StaleBlockerCard } from "./RecoveryCards";
 import { logDecision } from "../api/brain";
+import { useAttention } from "../api/hooks";
+import { attentionKey, snoozeUntil, splitSnoozed, useSnooze, type SnoozeFor } from "../lib/snooze";
 
 const SEVERITY_COLOR: Record<string, string> = { critical: "#E24B4A", high: "#D85A30", medium: "#F5C542", low: "#9BE59B" };
 
 /** Your office: everything that needs a human, as visitors queued at your door. */
 export function CeoPanel() {
-  const { attention } = useOfficeData();
+  const { company, attention } = useOfficeData();
+  const all = useAttention(company.id);
+  const { snooze, wake } = useSnooze();
+  const { asleep } = splitSnoozed(all.data?.items ?? [], snooze);
+  const Snoozed = () =>
+    asleep.length ? (
+      <details className="px-card">
+        <summary>💤 {asleep.length} snoozed</summary>
+        {asleep.map((a) => (
+          <div key={attentionKey(a)} className="row" style={{ margin: "4px 0" }}>
+            <span style={{ flex: 1, fontSize: 16 }}>
+              {a.subject.title}
+              <small className="muted" style={{ display: "block", fontSize: 14 }}>
+                back {new Date(snooze[attentionKey(a)]).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })}
+              </small>
+            </span>
+            <button className="px-btn small" onClick={() => wake(attentionKey(a))}>Wake now</button>
+          </div>
+        ))}
+      </details>
+    ) : null;
   if (attention.length === 0) {
     return (
-      <div className="px-card">
-        <h4>ALL QUIET</h4>
-        Nobody is waiting on you. The phone is silent. Enjoy the coffee.
-      </div>
+      <>
+        <div className="px-card">
+          <h4>ALL QUIET</h4>
+          Nobody is waiting on you. The phone is silent. Enjoy the coffee.
+        </div>
+        <Snoozed />
+      </>
     );
   }
   return (
@@ -30,7 +55,36 @@ export function CeoPanel() {
       {attention.map((item) => (
         <AttentionCard key={`${item.sourceKind}:${item.subject.id}`} item={item} />
       ))}
+      <Snoozed />
     </>
+  );
+}
+
+const SNOOZE_LABEL: Record<SnoozeFor, string> = { later: "3 hours", tomorrow: "Tomorrow 9:00", monday: "Monday 9:00" };
+
+function SnoozeButton({ item }: { item: AttentionItem }) {
+  const { toast } = useOfficeData();
+  const { put, wake } = useSnooze();
+  return (
+    <select
+      className="px-select"
+      style={{ width: "auto", margin: 0 }}
+      aria-label="Snooze"
+      value=""
+      onChange={(e) => {
+        const kind = e.target.value as SnoozeFor;
+        if (!kind) return;
+        const until = snoozeUntil(kind);
+        const key = attentionKey(item);
+        put(key, until);
+        toast(`Snoozed until ${until.toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })}.`, { undo: () => wake(key) });
+      }}
+    >
+      <option value="">💤 Snooze…</option>
+      {(Object.keys(SNOOZE_LABEL) as SnoozeFor[]).map((k) => (
+        <option key={k} value={k}>{SNOOZE_LABEL[k]}</option>
+      ))}
+    </select>
   );
 }
 
@@ -59,6 +113,7 @@ function AttentionCard({ item }: { item: AttentionItem }) {
             Open task {item.subject.identifier ?? ""}
           </button>
         )}
+        <SnoozeButton item={item} />
         <ClassicLink path={item.subject.href}>Classic view ↗</ClassicLink>
       </div>
     </div>

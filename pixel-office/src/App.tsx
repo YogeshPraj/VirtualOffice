@@ -18,6 +18,7 @@ import { SinceAway } from "./ui/SinceAway";
 import { BudgetAlerts } from "./ui/useBudgetAlerts";
 import { DueAlerts } from "./ui/useDueAlerts";
 import { WatchdogAlerts } from "./ui/Watchdog";
+import { splitSnoozed, useSnooze } from "./lib/snooze";
 import { useOfficeMood } from "./office/mood";
 import { useWatchAlerts } from "./ui/useWatchAlerts";
 import { useOfficeSounds } from "./ui/useOfficeSounds";
@@ -74,11 +75,13 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
     if (agents.data && agents.data.length === 0) open({ kind: "room", room: "hr" });
   }, [agents.data, open]);
 
+  const { snooze } = useSnooze();
   const value = {
     company,
     agents: agents.data ?? [],
     issues: issues.data ?? [],
-    attention: attention.data?.items ?? [],
+    // Snoozed inbox items stay out of sight (and out of alerts) until their time comes.
+    attention: splitSnoozed(attention.data?.items ?? [], snooze).awake,
   };
   const mood = useOfficeMood(company);
   useWatchAlerts();
