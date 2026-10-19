@@ -16,6 +16,7 @@ import { FocusStrip } from "./FocusStrip";
 import { DUE_ICON, dueLabel, dueState, useDue } from "../lib/due";
 import { checklist } from "../lib/checklist";
 import { staleDays } from "../lib/stale";
+import { BlockerChains } from "./BlockerChains";
 import { toCsv } from "../lib/csv";
 import { downloadText, slug } from "../lib/download";
 import { awayBaseline } from "../ui/SinceAway";
@@ -255,6 +256,7 @@ export function MeetingPanel() {
       {editing && <TemplateEditor onClose={() => setEditing(false)} />}
 
       <FocusStrip />
+      <BlockerChains />
       <SavedViews
         filter={filter}
         questions={showQuestions}
