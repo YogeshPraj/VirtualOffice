@@ -152,7 +152,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   backed up the company more recently ("pull first"), so the PC and the laptop don't work from stale copies.
 - [x] **(P1) Move-in checklist.** One guided screen on a new machine: setup check, import the company,
   restore office settings from `company/`, re-enter vault secrets, check the employees.
-- [ ] **(P2) Ask the office.** Ask a question in Ctrl+K; Claude answers from the tasks, threads and the brain.
+- [x] **(P2) Ask the office.** Ask a question in Ctrl+K; Claude answers from the tasks, threads and the brain.
 - [ ] **(P2) Time off.** Send an employee on leave until a date: no new shifts, back on schedule by itself.
 - [ ] **(P2) Weekly review.** A Friday walkthrough: shipped, stale, waiting for review, goals, time spent.
 - [ ] **(P2) Blocker lines.** Show what waits on what on the task map, so blocked chains stand out.

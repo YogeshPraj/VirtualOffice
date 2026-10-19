@@ -13,6 +13,7 @@ import { useOfficeNotifications } from "./ui/useNotifications";
 import { ErrorBar } from "./ui/ErrorBar";
 import { ConnectionBanner } from "./ui/ConnectionBanner";
 import { MachineBanner } from "./ui/MachineBanner";
+import { AskOffice } from "./ui/AskOffice";
 import { CommandPalette } from "./ui/CommandPalette";
 import { Tour } from "./ui/Tour";
 import { Shortcuts } from "./ui/Shortcuts";
@@ -117,6 +118,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
           <PanelDock />
         </main>
         <CommandPalette />
+        <AskOffice />
         <Tour />
         <Shortcuts />
         <SinceAway />

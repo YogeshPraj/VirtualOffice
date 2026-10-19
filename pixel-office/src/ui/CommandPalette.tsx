@@ -16,6 +16,7 @@ import { ROOM_TITLES } from "../panels/PanelDock";
 import { TOUR_EVENT } from "./Tour";
 import { readRecent, rememberPanel } from "../lib/recent";
 import { MOVE_IN_EVENT } from "../panels/MoveInCard";
+import { askOffice } from "./AskOffice";
 
 interface Command {
   id: string;
@@ -243,11 +244,13 @@ export function CommandPalette() {
       .sort((a, b) => a.s - b.s)
       .slice(0, 12)
       .map((x) => x.c);
+    const askCmd: Command = { id: "ask", icon: "🤖", label: `Ask the office: "${q}"`, hint: "ask", run: () => askOffice(q) };
     const pin: Command = { id: "new", icon: "＋", label: `New task: "${q}"`, hint: "new", run: () => create.mutate(q) };
     // Title hits first, then matches inside threads and documents (minus tasks already listed).
     const shownIssues = new Set(hits.filter((c) => c.id.startsWith("issue:")).map((c) => c.label.split(" ")[0]));
     const deeper = deepCommands.filter((c) => !shownIssues.has(c.label.split(" ")[0]) || c.hint !== "title");
-    return [...hits, ...deeper.slice(0, 10), ...brainCommands, pin];
+    // A question goes to the front desk first; anything else can still be pinned as a task.
+    return /\?\s*$/.test(q) ? [askCmd, ...hits, ...deeper.slice(0, 10), ...brainCommands, pin] : [...hits, ...deeper.slice(0, 10), ...brainCommands, askCmd, pin];
   }, [all, q, create, deepCommands, brainCommands, recent]);
 
   if (!shown) return null;
