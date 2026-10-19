@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import type { Issue, IssueStatus } from "../api/types";
@@ -28,6 +28,17 @@ import { useDraft } from "../lib/useDraft";
 import { describeChange, inverseOf, isEmpty } from "../lib/undo";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
+
+/** Long threads show their latest comments; the rest fold behind "Show N earlier". */
+export const THREAD_TAIL = 6;
+export type ThreadFilter = "all" | "team" | "me";
+
+export function visibleThread<T extends { authorAgentId: string | null }>(comments: T[], filter: ThreadFilter, tail: number) {
+  const matching = comments.filter((c) => (filter === "team" ? !!c.authorAgentId : filter === "me" ? !c.authorAgentId : true));
+  // Don't fold just one or two: only hide when it saves a real scroll.
+  if (matching.length <= tail + 2) return { items: matching, hidden: 0 };
+  return { items: matching.slice(-tail), hidden: matching.length - tail };
+}
 
 export function IssuePanel({ issueId }: { issueId: string }) {
   const { company, issues, agents, agentById, toast } = useOfficeData();
@@ -66,6 +77,10 @@ export function IssuePanel({ issueId }: { issueId: string }) {
   });
   const people = agents.filter((a) => a.status !== "terminated" && a.status !== "pending_approval");
   const [pasting, setPasting] = useState(false);
+  const [threadFilter, setThreadFilter] = useState<ThreadFilter>("all");
+  const [showAll, setShowAll] = useState(false);
+  // Each task opens folded.
+  useEffect(() => setShowAll(false), [issueId]);
   /** Upload a pasted screenshot as a task attachment and reference it in the comment being written. */
   const pasteImage = async (file: File) => {
     if (file.size > 20 * 1024 * 1024) return toast("That image is over 20 MB.");
@@ -166,10 +181,28 @@ export function IssuePanel({ issueId }: { issueId: string }) {
         <InteractionDialog key={i.id} interaction={i} />
       ))}
 
-      <h4 className="px-label" style={{ margin: "14px 4px 4px" }}>THREAD</h4>
+      <div className="row" style={{ margin: "14px 4px 4px" }}>
+        <h4 className="px-label" style={{ margin: 0, flex: 1 }}>
+          THREAD {comments.data?.length ? <span className="muted">{comments.data.length}</span> : null}
+        </h4>
+        {(comments.data?.length ?? 0) > 3 &&
+          (["all", "team", "me"] as const).map((f) => (
+            <button key={f} className={`reply-chip ${threadFilter === f ? "on" : ""}`} aria-pressed={threadFilter === f} onClick={() => setThreadFilter(f)}>
+              {f === "all" ? "All" : f === "team" ? "Employees" : "Mine"}
+            </button>
+          ))}
+      </div>
       {comments.isLoading && <div className="muted">Loading…</div>}
       {comments.data?.length === 0 && <div className="muted">No one has said anything yet.</div>}
-      {comments.data?.map((c) => {
+      {(() => {
+        const shown = visibleThread(comments.data ?? [], threadFilter, showAll ? Infinity : THREAD_TAIL);
+        return shown.hidden > 0 ? (
+          <button className="px-btn small" style={{ margin: "4px 0" }} onClick={() => setShowAll(true)}>
+            ▲ Show {shown.hidden} earlier comment{shown.hidden === 1 ? "" : "s"}
+          </button>
+        ) : null;
+      })()}
+      {visibleThread(comments.data ?? [], threadFilter, showAll ? Infinity : THREAD_TAIL).items.map((c) => {
         const author = agentById(c.authorAgentId);
         return (
           <div key={c.id} className={`chat-line ${author ? "" : "me"}`}>
