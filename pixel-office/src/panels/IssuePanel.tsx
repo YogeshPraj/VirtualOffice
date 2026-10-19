@@ -26,6 +26,7 @@ import { linkMentions } from "../lib/mentions";
 import { MentionTextarea } from "../ui/MentionTextarea";
 import { QuickReplies } from "../ui/QuickReplies";
 import { useDraft } from "../lib/useDraft";
+import { usePins } from "../lib/pins";
 import { describeChange, inverseOf, isEmpty } from "../lib/undo";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
@@ -52,6 +53,8 @@ export function IssuePanel({ issueId }: { issueId: string }) {
   });
   const issue = cached ?? fetched;
   const comments = useComments(issueId);
+  const pins = usePins();
+  const pinned = comments.data?.find((c) => c.id === pins.pins[issueId]);
   const interactions = useInteractions(issueId);
   const [draft, setDraft, clearDraft, restoredDraft] = useDraft(`comment:${issueId}`);
   const links = useOfficeLinks();
@@ -252,6 +255,19 @@ export function IssuePanel({ issueId }: { issueId: string }) {
             </button>
           ))}
       </div>
+      {pinned && (
+        <div className="px-card pinned-comment" aria-label="Pinned comment">
+          <div className="row" style={{ margin: 0 }}>
+            <h5 className="px-label" style={{ flex: 1, margin: 0 }}>
+              📌 PINNED · {agentById(pinned.authorAgentId)?.name ?? "YOU"} · {new Date(pinned.createdAt).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}
+            </h5>
+            <button className="px-btn small" onClick={() => void pins.toggle(issueId, pinned.id).catch((e: Error) => toast(e.message))}>
+              Unpin
+            </button>
+          </div>
+          <Markdown text={pinned.body} links={links} />
+        </div>
+      )}
       {comments.isLoading && <div className="muted">Loading…</div>}
       {comments.data?.length === 0 && <div className="muted">No one has said anything yet.</div>}
       {(() => {
@@ -264,12 +280,21 @@ export function IssuePanel({ issueId }: { issueId: string }) {
       })()}
       {visibleThread(comments.data ?? [], threadFilter, showAll ? Infinity : THREAD_TAIL).items.map((c) => {
         const author = agentById(c.authorAgentId);
+        const isPinned = pinned?.id === c.id;
         return (
           <div key={c.id} className={`chat-line ${author ? "" : "me"}`}>
             <Avatar agent={author} size={28} />
             <div className="bubble">
               <span className="who">
                 {author?.name ?? "YOU"} · {new Date(c.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                <button
+                  className={`pin-btn ${isPinned ? "on" : ""}`}
+                  aria-pressed={isPinned}
+                  title={isPinned ? "Unpin" : "Pin to the top of the thread"}
+                  onClick={() => void pins.toggle(issueId, c.id).catch((e: Error) => toast(e.message))}
+                >
+                  📌
+                </button>
               </span>
               <Markdown text={c.body} links={links} />
             </div>

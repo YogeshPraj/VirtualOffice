@@ -721,8 +721,17 @@ kbd { display: inline-block; background: var(--card); box-shadow: 0 0 0 2px var(
 .board-filters .px-select { min-width: 110px; }
 .note-card { color: var(--note-ink); --ink: #1e1a24; --muted: #5f5446; --info: #1f5fa8; }
 .note-card .md code { background: rgba(0, 0, 0, 0.08); }
+/* The note is light paper even at night, but its buttons and fields keep the dark panel look: light text on them. */
+[data-theme="dark"] .note-card :is(.px-select, .px-input, .px-textarea, .px-btn:not(.primary):not(.good):not(.bad)) { color: #ece4d4; }
 .md-img { display: block; max-width: 100%; max-height: 320px; margin: 4px 0; box-shadow: 0 0 0 2px var(--ink); image-rendering: auto; }
 .reply-chip.on { background: var(--accent); color: var(--note-ink); }
 .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 400; image-rendering: pixelated; }
 .celebrate-msg { position: fixed; top: 18%; left: 50%; transform: translateX(-50%); z-index: 401; background: var(--ink); color: var(--accent); box-shadow: 0 0 0 3px var(--accent); padding: 8px 16px; font-size: 22px; pointer-events: none; max-width: calc(100vw - 32px); text-align: center; }
 .task-edit .px-input { font-size: 20px; }
+
+/* Pinned comments */
+.pin-btn { background: none; border: none; cursor: pointer; font-size: 12px; padding: 0 0 0 6px; opacity: 0.25; }
+.chat-line:hover .pin-btn, .pin-btn:focus-visible { opacity: 0.7; }
+.pin-btn.on { opacity: 1; }
+.pinned-comment { border-left: 8px solid var(--accent); margin: 6px 0; }
+.pinned-comment .md { max-height: 220px; overflow: auto; }

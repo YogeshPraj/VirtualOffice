@@ -145,4 +145,4 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Task cost.** What a task's shifts have cost so far, on its panel.
 - [x] **(P2) Unblocked.** When a blocking task is done, say which tasks it freed up.
 - [x] **(P2) Stale notes.** Sticky notes nobody has touched for a week turn yellow and curl at the corner.
-- [ ] **(P3) Pin a comment.** Keep the key decision at the top of a long thread.
+- [x] **(P3) Pin a comment.** Keep the key decision at the top of a long thread.
