@@ -25,8 +25,17 @@ export function applySize(id: SizeId) {
 }
 
 export function useTextSize() {
-  const [size, setSize] = useState<SizeId>(readSize);
+  const [size, setSizeState] = useState<SizeId>(readSize);
   useEffect(() => applySize(size), [size]);
+  useEffect(() => {
+    const f = () => setSizeState(readSize());
+    window.addEventListener("pixel-office:text-size", f);
+    return () => window.removeEventListener("pixel-office:text-size", f);
+  }, []);
+  const setSize = (id: SizeId) => {
+    setSizeState(id);
+    window.dispatchEvent(new Event("pixel-office:text-size"));
+  };
   return {
     size,
     set: (id: SizeId) => {

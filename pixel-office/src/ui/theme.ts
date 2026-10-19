@@ -25,7 +25,17 @@ export const THEME_ICON: Record<ThemeChoice, string> = { auto: "ðŸ–¥", light: "â
 const NEXT: Record<ThemeChoice, ThemeChoice> = { auto: "light", light: "dark", dark: "auto" };
 
 export function useTheme() {
-  const [choice, setChoice] = useState<ThemeChoice>(readTheme);
+  const [choice, setChoiceState] = useState<ThemeChoice>(readTheme);
+  // Several components show the theme (HUD, palette): keep them in step.
+  useEffect(() => {
+    const f = () => setChoiceState(readTheme());
+    window.addEventListener("pixel-office:theme", f);
+    return () => window.removeEventListener("pixel-office:theme", f);
+  }, []);
+  const setChoice = (c: ThemeChoice) => {
+    setChoiceState(c);
+    window.dispatchEvent(new Event("pixel-office:theme"));
+  };
   useEffect(() => {
     applyTheme(choice);
     if (choice !== "auto" || typeof matchMedia === "undefined") return;
@@ -35,8 +45,17 @@ export function useTheme() {
     mq.addEventListener("change", f);
     return () => mq.removeEventListener("change", f);
   }, [choice]);
+  const set = (next: ThemeChoice) => {
+    try {
+      localStorage.setItem(KEY, next);
+    } catch {
+      /* not kept */
+    }
+    setChoice(next);
+  };
   return {
     choice,
+    set,
     cycle: () => {
       const next = NEXT[choice];
       try {

@@ -2,6 +2,11 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { SearchHit } from "../api/types";
 import { brainApi } from "../api/brain";
+import { useTheme } from "./theme";
+import { useTextSize } from "./textSize";
+import { useNotificationPref } from "./useNotifications";
+import { useSoundPref } from "./useOfficeSounds";
+import { useTemplates } from "../lib/templates";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { keys } from "../api/hooks";
@@ -97,6 +102,47 @@ export function CommandPalette() {
     onError: (e: Error) => toast(e.message),
   });
 
+  // Office actions: things to do, not places to go.
+  const theme = useTheme();
+  const text = useTextSize();
+  const alerts = useNotificationPref();
+  const sounds = useSoundPref();
+  const { data: templates = [] } = useTemplates();
+  const closed = company.status === "paused";
+  const actions = useMemo<Command[]>(() => {
+    const act = (id: string, icon: string, label: string, run: () => void, hint = "action"): Command => ({ id: `act:${id}`, icon, label, hint, run });
+    return [
+      act("backup", "💾", "Back up now (commit and push the company)", async () => {
+        if (!confirm("Back up the company to the private repo now?")) return;
+        toast("Backing up… (about a minute)");
+        const r = await fetch("/office-admin/backup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ companyId: company.id, commit: true, push: true }) })
+          .then((x) => x.json() as Promise<{ steps?: { ok: boolean; step: string; detail: string }[]; error?: string }>)
+          .catch((e: Error) => ({ error: e.message, steps: undefined }));
+        const bad = r.steps?.find((st) => !st.ok);
+        toast(r.error ? `Backup failed: ${r.error}` : bad ? `Backup: ${bad.step} failed (${bad.detail.slice(0, 120)})` : "Backed up.");
+      }),
+      act("updates", "⬆", "Check for office updates", async () => {
+        await fetch("/office-admin/update?force=1").catch(() => undefined);
+        qc.invalidateQueries({ queryKey: ["office-update"] });
+        open({ kind: "room", room: "status" });
+      }),
+      act("office-open", closed ? "🔓" : "🔒", closed ? "Open the office (employees pick up work again)" : "Close the office (no new work is picked up)", async () => {
+        if (!closed && !confirm("Close the office? Employees stop picking up new work.")) return;
+        await api.updateCompany(company.id, { status: closed ? "active" : "paused" });
+        qc.invalidateQueries({ queryKey: keys.companies });
+        toast(closed ? "Doors open again." : "Office closed.");
+      }),
+      act("theme-dark", "🌙", "Dark panels", () => theme.set("dark"), "theme"),
+      act("theme-light", "☀", "Light panels", () => theme.set("light"), "theme"),
+      act("theme-auto", "🖥", "Panels follow Windows light/dark", () => theme.set("auto"), "theme"),
+      act("text-up", "🔠", "Bigger text", () => text.set(text.size === "s" ? "m" : text.size === "m" ? "l" : "xl"), "text"),
+      act("text-down", "🔡", "Smaller text", () => text.set(text.size === "xl" ? "l" : text.size === "l" ? "m" : "s"), "text"),
+      act("alerts", alerts.on ? "🔕" : "🔔", alerts.on ? "Turn desktop alerts off" : "Turn desktop alerts on", () => void alerts.toggle(), "alerts"),
+      act("sounds", sounds.on ? "🔈" : "🎵", sounds.on ? "Turn office sounds off" : "Turn office sounds on", sounds.toggle, "sounds"),
+      ...templates.map((t) => act(`tpl-${t.id}`, t.icon, `New task from template: ${t.name}`, () => open({ kind: "room", room: "meeting" }), "template")),
+    ];
+  }, [company.id, closed, theme, text, alerts, sounds, templates, open, qc, toast]);
+
   const all = useMemo<Command[]>(() => {
     // Rooms live on a floor: walk there first. Tasks and people open wherever you are.
     const go = (panel: Panel, floor?: "ground" | "basement") => () => {
@@ -114,8 +160,8 @@ export function CommandPalette() {
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
       .map((i) => ({ id: `issue:${i.id}`, icon: "📌", label: `${i.identifier} ${i.title}`, hint: i.status.replace("_", " "), run: go({ kind: "issue", issueId: i.id }) }));
     const extras: Command[] = [{ id: "tour", icon: "🗺", label: "Take the office tour", hint: "help", run: () => window.dispatchEvent(new Event(TOUR_EVENT)) }];
-    return [...rooms, ...extras, ...people, ...tasks];
-  }, [agents, issues, open, goFloor]);
+    return [...rooms, ...extras, ...actions, ...people, ...tasks];
+  }, [agents, issues, open, goFloor, actions]);
 
   const q = query.trim();
   // Deep search (threads and documents) once the CEO pauses typing.
@@ -169,7 +215,7 @@ export function CommandPalette() {
   }, [deep.data, deepQ, q, issues, open, toast]);
 
   const results = useMemo(() => {
-    if (!q) return all.filter((c) => !c.id.startsWith("issue:")).concat(all.filter((c) => c.id.startsWith("issue:")).slice(0, 5));
+    if (!q) return all.filter((c) => !c.id.startsWith("issue:") && !c.id.startsWith("act:")).concat(all.filter((c) => c.id.startsWith("issue:")).slice(0, 5));
     const hits = all
       .map((c) => ({ c, s: score(c.label, q) }))
       .filter((x) => x.s >= 0)
