@@ -220,6 +220,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
             {focus.ids.includes(issue.id) ? "★ Focus" : "☆ Focus"}
           </button>
           <ShareTask issue={issue} />
+          <NewFromTask issue={issue} />
           <ClassicLink path={`/${company.issuePrefix}/issues/${issue.identifier}`}>Classic ↗</ClassicLink>
         </div>
       </div>
@@ -512,5 +513,57 @@ function ShareTask({ issue }: { issue: Issue }) {
         ⬇ .md
       </button>
     </>
+  );
+}
+
+/** "Follow-up" (a new task that links back) or "Copy" (same details), opened straight away. */
+export function followUpOf(issue: Pick<Issue, "identifier" | "title" | "description" | "priority" | "projectId" | "assigneeAgentId" | "goalId">, prefix: string, kind: "follow-up" | "copy") {
+  const link = `[${issue.identifier}](/${prefix}/issues/${issue.identifier})`;
+  return {
+    title: kind === "copy" ? `Copy of ${issue.title}` : `Follow-up: ${issue.title}`,
+    description: kind === "copy" ? (issue.description ?? "") : `Follow-up to ${link}.
+
+`,
+    priority: issue.priority,
+    projectId: issue.projectId,
+    assigneeAgentId: issue.assigneeAgentId,
+    status: "todo" as const,
+  };
+}
+
+function NewFromTask({ issue }: { issue: Issue }) {
+  const { company, toast } = useOfficeData();
+  const open = useOffice((s) => s.open);
+  const qc = useQueryClient();
+  const make = useMutation({
+    mutationFn: async (kind: "follow-up" | "copy") => {
+      const base = followUpOf(issue, company.issuePrefix, kind);
+      const title = prompt(kind === "copy" ? "Title for the copy:" : "What's the follow-up?", base.title);
+      if (!title?.trim()) return null;
+      const made = await api.createIssue(company.id, { ...base, title: title.trim() });
+      if (issue.goalId) await api.updateIssue(made.id, { goalId: issue.goalId }).catch(() => undefined);
+      return made;
+    },
+    onSuccess: (made) => {
+      if (!made) return;
+      qc.invalidateQueries({ queryKey: keys.issues(company.id) });
+      toast(`Created ${made.identifier}.`);
+      open({ kind: "issue", issueId: made.id });
+    },
+    onError: (e: Error) => toast(e.message),
+  });
+  return (
+    <select
+      className="px-select"
+      style={{ width: "auto", margin: 0 }}
+      aria-label="New task from this one"
+      value=""
+      disabled={make.isPending}
+      onChange={(e) => e.target.value && make.mutate(e.target.value as "follow-up" | "copy")}
+    >
+      <option value="">➕ New…</option>
+      <option value="follow-up">Follow-up task</option>
+      <option value="copy">Copy of this task</option>
+    </select>
   );
 }

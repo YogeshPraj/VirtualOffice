@@ -13,3 +13,13 @@ describe("long threads", () => {
     expect(visibleThread(thread.slice(0, 8), "all", 6).hidden).toBe(0);
   });
 });
+
+import { followUpOf } from "./IssuePanel";
+
+describe("follow-up tasks", () => {
+  const issue = { identifier: "YOG-3", title: "Fix the lobby", description: "Details", priority: "high", projectId: "p", assigneeAgentId: "a", goalId: null } as never;
+  it("links back from a follow-up and copies everything for a copy", () => {
+    expect(followUpOf(issue, "YOG", "follow-up")).toMatchObject({ title: "Follow-up: Fix the lobby", description: "Follow-up to [YOG-3](/YOG/issues/YOG-3).\n\n", priority: "high", assigneeAgentId: "a" });
+    expect(followUpOf(issue, "YOG", "copy")).toMatchObject({ title: "Copy of Fix the lobby", description: "Details", projectId: "p" });
+  });
+});

@@ -131,7 +131,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P1) Edit tasks in place.** Change a task's title and details from its panel (with a preview).
 - [x] **(P1) Leak watch.** Scan task threads and documents for pasted secrets (tokens, keys, passwords) and
   flag them with where they are, so they can be removed and rotated.
-- [ ] **(P2) Follow-up tasks.** From any task, one click to create a linked follow-up (or a copy).
+- [x] **(P2) Follow-up tasks.** From any task, one click to create a linked follow-up (or a copy).
 - [ ] **(P2) Recently viewed.** Ctrl+K opens with the tasks and rooms you looked at last.
 - [ ] **(P2) Review checklist.** The review room shows the task's checklist, so you can see what's ticked.
 - [ ] **(P2) Connection banner.** A clear banner when Paperclip can't be reached, saying it's being restarted.
