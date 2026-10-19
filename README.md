@@ -43,6 +43,10 @@ instructions, projects) belongs in a **separate private repo** checked out at `c
 
 The live databases (`.paperclip/`, `~/.gbrain`) are never committed anywhere; back them up separately.
 
+Using two machines (say a PC and a laptop)? Each backup is signed with the machine's name (the
+computer name, or `VIRTUAL_OFFICE_MACHINE` if you set it), and the office warns when the other machine
+has backed up more recently, with a one-click pull, so neither works from an old copy.
+
 ## Setup on a new machine (Windows)
 
 Needs Git for Windows and PowerShell 7 (`pwsh`). Claude Code CLI and/or GitHub Copilot CLI for the employees.

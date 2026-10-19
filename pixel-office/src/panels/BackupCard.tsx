@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { MachineState } from "../lib/machine";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useOfficeData } from "../state/officeData";
 
@@ -30,6 +31,7 @@ export function BackupCard() {
     queryFn: async () => (await fetch("/office-admin/backup")).json() as Promise<BackupStatus>,
     refetchInterval: 300_000,
   });
+  const machine = useQuery({ queryKey: ["machine"], queryFn: async () => (await (await fetch("/office-admin/machine")).json()) as MachineState });
   const [commit, setCommit] = useState(true);
   const [push, setPush] = useState(true);
   const backup = useMutation({
@@ -55,6 +57,12 @@ export function BackupCard() {
   return (
     <div className="px-card">
       <h4>💾 BACKUP</h4>
+      {machine.data && (
+        <div className="muted" style={{ fontSize: 15 }}>
+          This machine signs its backups as <b>{machine.data.machine}</b>
+          {machine.data.lastRemote?.machine ? `; the latest backup came from ${machine.data.lastRemote.machine}` : ""}.
+        </div>
+      )}
       {!s && <div className="muted">Checking…</div>}
       {s && !s.repo && (
         <div>

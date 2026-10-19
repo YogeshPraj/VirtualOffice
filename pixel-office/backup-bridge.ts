@@ -9,6 +9,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { join, resolve } from "node:path";
 import type { IncomingMessage } from "node:http";
 import type { Plugin } from "vite";
+import { machineName, TRAILER } from "./machine-sync";
 import { SECRET_PATTERNS } from "./brain-bridge";
 
 const ROOT = resolve(__dirname, "..");
@@ -203,7 +204,7 @@ export async function backupNow(opts: { companyId?: string; commit?: boolean; pu
     steps.push({ step: "Secret check", ok: true, detail: `${pending.length} changed file(s), nothing that looks like a secret.` });
     const add = await git("add", "-A");
     const msg = `Backup from the pixel office, ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC`;
-    const commit = add.ok ? await git("commit", "-q", "-m", msg) : add;
+    const commit = add.ok ? await git("commit", "-q", "-m", msg, "-m", `${TRAILER}: ${machineName()}`) : add;
     steps.push({ step: "Commit", ok: commit.ok, detail: commit.ok ? msg : commit.out.slice(0, 600) });
     if (!commit.ok) return { steps };
   }
