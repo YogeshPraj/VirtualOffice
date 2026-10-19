@@ -4,6 +4,7 @@ import { keys } from "../api/hooks";
 import type { Agent } from "../api/types";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
+import { Handover } from "./Handover";
 
 interface Leave {
   until: string;
@@ -68,9 +69,12 @@ export function TimeOff({ agent }: { agent: Agent }) {
             ))}
           </div>
         )}
-        <button className="px-btn small" disabled={change.isPending} onClick={() => change.mutate(null)}>
-          Bring them back now
-        </button>
+        <div className="row">
+          <Handover agent={agent} />
+          <button className="px-btn small" disabled={change.isPending} onClick={() => change.mutate(null)}>
+            Bring them back now
+          </button>
+        </div>
       </div>
     );
   }

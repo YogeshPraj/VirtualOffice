@@ -165,6 +165,6 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
   only over your own private network, and off until you turn it on.
 - [x] **(P2) Ask, then act.** Ask the office becomes a conversation, and an answer can become a task or a brain note.
 - [x] **(P2) Recurring tasks.** Repeat any task (or one made from a template) on a schedule, as a Paperclip routine.
-- [ ] **(P2) Handover notes.** Sending someone on leave drafts a handover for each of their open tasks.
+- [x] **(P2) Handover notes.** Sending someone on leave drafts a handover for each of their open tasks.
 - [ ] **(P2) Size vs actual.** Tag tasks S / M / L and compare with the time actually worked.
 - [ ] **(P3) Office cat.** A pixel cat wanders the floor and naps on idle desks.
