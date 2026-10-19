@@ -93,7 +93,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P3) Keyboard board.** Move between sticky notes with the arrow keys, Enter to open, and visible focus.
 
 ## Wave 6: keeping up
-- [ ] **(P1) Office updates.** The office checks GitHub for a newer version and updates itself in one click
+- [x] **(P1) Office updates.** The office checks GitHub for a newer version and updates itself in one click
   (fast-forward only), saying when setup.ps1 must run again.
 - [ ] **(P1) Due dates.** Give a task a due date (or take it from the ADO item); overdue and due-soon badges on
   the board, and an alert the day before.

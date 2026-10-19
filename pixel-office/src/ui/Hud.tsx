@@ -9,6 +9,7 @@ import { useSoundPref } from "./useOfficeSounds";
 import { pendingTotal, useWatches } from "../lib/watches";
 import { useOfficeData } from "../state/officeData";
 import { reviewQueue } from "../panels/ReviewPanel";
+import { useUpdateStatus } from "../panels/UpdateCard";
 import { LEVEL_ICON, useBuildingStatus, worstLevel } from "../panels/StatusPanel";
 
 export function Hud({ company, attentionCount, companies, onSwitch }: {
@@ -29,6 +30,7 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
   const sounds = useSoundPref();
   const { issues } = useOfficeData();
   const toReview = reviewQueue(issues).length;
+  const { data: update } = useUpdateStatus();
   const { data: watches } = useWatches();
   const newWork = pendingTotal(watches);
   const building = useBuildingStatus();
@@ -86,7 +88,7 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
         onClick={() => open({ kind: "room", room: "status" })}
         title={worst === "ok" ? "Everything the office needs is running" : `${problems} thing(s) need attention`}
       >
-        {worst ? LEVEL_ICON[worst] : "⏳"} BUILDING
+        {worst ? LEVEL_ICON[worst] : "⏳"} BUILDING{update?.behind ? " · ⬆ UPDATE" : ""}
       </button>
       <button data-tour="palette" className="px-btn small" onClick={() => window.dispatchEvent(new Event("pixel-office:palette"))} title="Jump anywhere (Ctrl+K). Press ? for all shortcuts">
         🔎 Ctrl+K

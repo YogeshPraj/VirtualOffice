@@ -3,6 +3,7 @@ import { api } from "../api/client";
 import type { EnvironmentTestResult } from "../api/types";
 import { useOfficeData } from "../state/officeData";
 import { BackupCard } from "./BackupCard";
+import { UpdateCard } from "./UpdateCard";
 
 export interface StatusCheck {
   id: string;
@@ -87,6 +88,7 @@ export function StatusPanel() {
         </div>
       ))}
 
+      <UpdateCard />
       <BackupCard />
 
       <div className="px-card">
