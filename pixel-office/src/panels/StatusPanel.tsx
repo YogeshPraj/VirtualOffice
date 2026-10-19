@@ -4,6 +4,7 @@ import type { EnvironmentTestResult } from "../api/types";
 import { useOfficeData } from "../state/officeData";
 import { BackupCard } from "./BackupCard";
 import { UpdateCard } from "./UpdateCard";
+import { WatchdogCard } from "../ui/Watchdog";
 
 export interface StatusCheck {
   id: string;
@@ -88,6 +89,7 @@ export function StatusPanel() {
         </div>
       ))}
 
+      <WatchdogCard />
       <UpdateCard />
       <BackupCard />
 

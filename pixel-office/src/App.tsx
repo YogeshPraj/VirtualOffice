@@ -17,6 +17,7 @@ import { Shortcuts } from "./ui/Shortcuts";
 import { SinceAway } from "./ui/SinceAway";
 import { BudgetAlerts } from "./ui/useBudgetAlerts";
 import { DueAlerts } from "./ui/useDueAlerts";
+import { WatchdogAlerts } from "./ui/Watchdog";
 import { useOfficeMood } from "./office/mood";
 import { useWatchAlerts } from "./ui/useWatchAlerts";
 import { useOfficeSounds } from "./ui/useOfficeSounds";
@@ -109,6 +110,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
         <SinceAway />
         <BudgetAlerts />
         <DueAlerts />
+        <WatchdogAlerts />
       </div>
     </OfficeDataProvider>
   );
