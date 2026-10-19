@@ -15,6 +15,8 @@ import { SavedViews } from "./SavedViews";
 import { FocusStrip } from "./FocusStrip";
 import { DUE_ICON, dueLabel, dueState, useDue } from "../lib/due";
 import { checklist } from "../lib/checklist";
+import { toCsv } from "../lib/csv";
+import { downloadText, slug } from "../lib/download";
 import { awayBaseline } from "../ui/SinceAway";
 import { fill, resolveAssignee, useTemplates } from "../lib/templates";
 import { useDraft } from "../lib/useDraft";
@@ -303,6 +305,30 @@ export function MeetingPanel() {
           title="Select several notes to change them together"
         >
           ☑ Select
+        </button>
+        <button
+          className="px-btn small"
+          title="Download the tasks shown (filters included) as a spreadsheet"
+          onClick={() => {
+            const project = (id: string | null) => projects?.find((p) => p.id === id)?.name ?? "";
+            const rows = visible.map((i) => [
+              i.identifier,
+              i.title,
+              i.status.replace("_", " "),
+              i.priority,
+              agentById(i.assigneeAgentId)?.name ?? "",
+              project(i.projectId),
+              due[i.id] ?? "",
+              extractSources(i.description)[0]?.url ?? "",
+              i.createdAt.slice(0, 10),
+              i.updatedAt.slice(0, 10),
+              i.completedAt?.slice(0, 10) ?? "",
+            ]);
+            const day = new Date().toISOString().slice(0, 10);
+            downloadText(`${slug(company.name)}-board-${day}.csv`, toCsv(["Task", "Title", "Status", "Priority", "Assignee", "Project", "Due", "Source", "Created", "Updated", "Done"], rows), "text/csv;charset=utf-8");
+          }}
+        >
+          ⬇ CSV
         </button>
         {filtered && (
           <button className="px-btn small" onClick={() => setFilter(NO_FILTER)}>
