@@ -14,6 +14,7 @@ import { ErrorBar } from "./ui/ErrorBar";
 import { ConnectionBanner } from "./ui/ConnectionBanner";
 import { MachineBanner } from "./ui/MachineBanner";
 import { AskOffice } from "./ui/AskOffice";
+import { WeeklyReview } from "./ui/WeeklyReview";
 import { CommandPalette } from "./ui/CommandPalette";
 import { Tour } from "./ui/Tour";
 import { Shortcuts } from "./ui/Shortcuts";
@@ -119,6 +120,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
         </main>
         <CommandPalette />
         <AskOffice />
+        <WeeklyReview />
         <Tour />
         <Shortcuts />
         <SinceAway />

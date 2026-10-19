@@ -17,6 +17,7 @@ import { TOUR_EVENT } from "./Tour";
 import { readRecent, rememberPanel } from "../lib/recent";
 import { MOVE_IN_EVENT } from "../panels/MoveInCard";
 import { askOffice } from "./AskOffice";
+import { WEEKLY_EVENT } from "./WeeklyReview";
 
 interface Command {
   id: string;
@@ -144,6 +145,7 @@ export function CommandPalette() {
         open({ kind: "room", room: "status" });
         setTimeout(() => window.dispatchEvent(new Event(MOVE_IN_EVENT)), 0);
       }),
+      act("weekly", "🗓", "Weekly review (what shipped, what's stuck, next week)", () => window.dispatchEvent(new Event(WEEKLY_EVENT))),
       act("theme-dark", "🌙", "Dark panels", () => theme.set("dark"), "theme"),
       act("theme-light", "☀", "Light panels", () => theme.set("light"), "theme"),
       act("theme-auto", "🖥", "Panels follow Windows light/dark", () => theme.set("auto"), "theme"),
