@@ -65,7 +65,7 @@ pwsh -ExecutionPolicy Bypass -File .\setup.ps1
 Then sign in once (`claude auth login` and/or `copilot login`) and double-click the icon. The
 first start takes a minute or two. Create a company in the pixel office, or import yours from
 your private company repo (`company/`). Write your handbook from the template, publish it with
-`python scripts\handbook_sync.py push <file>`, then run `python scriptsrain_equip.py`.
+`python scripts\handbook_sync.py push <file>`, then run `python scripts\brain_equip.py`.
 
 `-SkipGlobal` sets up only this folder (runtimes and packages) without touching your profile.
 
