@@ -8,6 +8,7 @@ import { cycleSummary, fmtDuration } from "../lib/stats";
 import { useFocus } from "../lib/focus";
 import { FocusStrip } from "./FocusStrip";
 import { downloadText as download } from "../lib/download";
+import { useStandupPref } from "../ui/StandupReminder";
 
 export type Day = "today" | "yesterday" | "week" | "lastweek";
 
@@ -110,6 +111,7 @@ export function ReportPanel() {
 
   const who = (i: Issue) => agentById(i.assigneeAgentId)?.name ?? "unassigned";
   const { data: issueActivity } = useQuery({ queryKey: ["issue-activity-all", company.id], queryFn: () => api.companyIssueActivity(company.id), staleTime: 300_000 });
+  const standup = useStandupPref();
   const { ids: focusIds } = useFocus();
   const focused = focusIds.map((id) => issues.find((i) => i.id === id)).filter((i): i is Issue => !!i);
   const cycle = cycleSummary(issues, range[0], range[1], issueActivity ?? []);
@@ -190,6 +192,14 @@ export function ReportPanel() {
             }}
           >
             ⬇ .md
+          </button>
+          <button
+            className={`px-btn small ${standup.on ? "primary" : ""}`}
+            aria-pressed={standup.on}
+            onClick={standup.toggle}
+            title={standup.on ? "Each working morning you get an alert that this report is ready. Click to stop." : "Get an alert each working morning that this report is ready"}
+          >
+            {standup.on ? "⏰ Morning alert on" : "⏰ Morning alert off"}
           </button>
         </div>
         <div className="row" style={{ flexWrap: "wrap", marginTop: 6 }}>

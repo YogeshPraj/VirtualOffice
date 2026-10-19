@@ -19,6 +19,7 @@ import { BudgetAlerts } from "./ui/useBudgetAlerts";
 import { DueAlerts } from "./ui/useDueAlerts";
 import { WatchdogAlerts } from "./ui/Watchdog";
 import { WhatsNew } from "./ui/WhatsNew";
+import { StandupReminder } from "./ui/StandupReminder";
 import { splitSnoozed, useSnooze } from "./lib/snooze";
 import { useOfficeMood } from "./office/mood";
 import { useWatchAlerts } from "./ui/useWatchAlerts";
@@ -116,6 +117,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
         <DueAlerts />
         <WatchdogAlerts />
         <WhatsNew />
+        <StandupReminder />
       </div>
     </OfficeDataProvider>
   );
