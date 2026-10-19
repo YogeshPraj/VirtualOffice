@@ -27,6 +27,7 @@ A personal "virtual company" of AI employees, run from a pixel-art office.
 | `scripts/` | `gstack_equip.py`, `brain_equip.py` (equip employees), `handbook_sync.py` (handbook file ⇄ Paperclip), `make_icon.py` (desktop icon) |
 | `launch-office.ps1` | One-click start: brain → Paperclip → pixel office, opens an app window |
 | `start-*.ps1`, `stop-office.ps1` | Start or stop each piece |
+| `office-supervisor.ps1` | Started by the launcher: restarts the office server if it stops (Paperclip and the brain are restarted by the office itself) |
 | `assets/` | Desktop icon |
 
 Not in git (see `.gitignore`): `.paperclip/` (company database), `.brain/` (tokens), `.office/` (office settings), `.tools/` (portable Node and Bun), `vendor/` (reference clones), and `company/`.

@@ -110,6 +110,30 @@ function checkOffice(): StatusCheck {
   return { id: "office", group: "services", label: "Pixel office server", level: "ok", detail: `Node ${process.version}` };
 }
 
+/** The background watcher that restarts the office server (office-supervisor.ps1). */
+function checkSupervisor(): StatusCheck {
+  const label = "Office supervisor";
+  if (process.platform !== "win32") return { id: "supervisor", group: "services", label, level: "ok", detail: "Not needed on this system." };
+  let pid = 0;
+  try {
+    pid = Number(readFileSync(join(REPO, ".office", "supervisor.pid"), "utf8").trim());
+  } catch {
+    /* not running */
+  }
+  let alive = false;
+  if (pid) {
+    try {
+      process.kill(pid, 0);
+      alive = true;
+    } catch {
+      alive = false;
+    }
+  }
+  return alive
+    ? { id: "supervisor", group: "services", label, level: "ok", detail: "Watching: if this server stops, it starts again within a minute." }
+    : { id: "supervisor", group: "services", label, level: "warn", detail: "Not running, so the office won't restart itself if it stops.", fix: "Open the office with the desktop icon (it starts the supervisor)." };
+}
+
 async function checkAdapters(): Promise<StatusCheck[]> {
   try {
     const list = (await getJson(`${PAPERCLIP}/api/adapters`)) as { type: string; label: string; loaded: boolean; disabled: boolean }[];
@@ -189,7 +213,7 @@ function checkGstack(): StatusCheck {
 
 export async function buildingStatus(): Promise<StatusCheck[]> {
   const results = await Promise.all([checkPaperclip(), checkBrain(), checkAdapters(), checkClaude(), checkCopilot(), checkGh(), checkAz()]);
-  return [checkOffice(), ...results.flat(), checkGstack()];
+  return [checkOffice(), checkSupervisor(), ...results.flat(), checkGstack()];
 }
 
 export function statusBridge(): Plugin {

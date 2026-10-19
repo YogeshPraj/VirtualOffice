@@ -20,6 +20,8 @@ function Start-Hidden([string]$script, [string]$log) {
 if (-not (Test-Up $brainUrl)) { Start-Hidden "start-brain.ps1" ".brain-run.log" }
 if (-not (Test-Up $paperclipUrl)) { Start-Hidden "start-paperclip.ps1" ".paperclip-run.log" }
 if (-not (Test-Up $officeUrl)) { Start-Hidden "start-office.ps1" ".office-run.log" }
+# Keep the office server running from now on (one copy only; stop-office.ps1 stops it).
+Start-Hidden "office-supervisor.ps1" ".supervisor-run.log"
 # Once Paperclip is up, make sure this repo's Copilot adapter is registered (no-op after first time).
 Start-Hidden "scripts\ensure-adapters.ps1" ".adapters-run.log"
 
