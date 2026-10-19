@@ -21,6 +21,7 @@ import {
   Whiteboard,
   Window,
 } from "./Furniture";
+import { useLiveSpeech } from "./liveSpeech";
 
 const STATUS_NOTE: Record<string, string> = {
   backlog: "#d0d0d0",
@@ -40,9 +41,10 @@ function useClock(ms: number) {
   return now;
 }
 
-/** agentId → speech text, from recent comment activity (shown for a few seconds). */
+/** agentId → speech text: a comment they just posted, else what they're doing in their live run. */
 function useBubbles() {
   const events = useOffice((s) => s.events);
+  const live = useLiveSpeech();
   const now = useClock(1000);
   return useMemo(() => {
     const out: Record<string, string> = {};
@@ -54,8 +56,9 @@ function useBubbles() {
       const agentId = typeof p.agentId === "string" ? p.agentId : (p.actorId as string);
       if (typeof snippet === "string" && agentId && !out[agentId]) out[agentId] = snippet.replace(/[#*_`>]/g, "").trim();
     }
+    for (const [agentId, text] of Object.entries(live)) if (!out[agentId]) out[agentId] = text;
     return out;
-  }, [events, now]);
+  }, [events, now, live]);
 }
 
 interface Props {
