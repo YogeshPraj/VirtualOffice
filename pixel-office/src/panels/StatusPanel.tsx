@@ -5,6 +5,7 @@ import { useOfficeData } from "../state/officeData";
 import { BackupCard } from "./BackupCard";
 import { UpdateCard } from "./UpdateCard";
 import { WatchdogCard } from "../ui/Watchdog";
+import { AutostartCard } from "./AutostartCard";
 
 export interface StatusCheck {
   id: string;
@@ -90,6 +91,7 @@ export function StatusPanel() {
       ))}
 
       <WatchdogCard />
+      <AutostartCard />
       <UpdateCard />
       <BackupCard />
 

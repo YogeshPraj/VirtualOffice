@@ -119,7 +119,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 ## Wave 8: always on, faster hands
 - [x] **(P1) Office supervisor.** A small background watcher keeps the office server itself running (the
   in-office self-healing can't restart the server it lives in).
-- [ ] **(P2) Start with Windows.** Optionally open the office when you sign in.
+- [x] **(P2) Start with Windows.** Optionally open the office when you sign in.
 - [ ] **(P2) Palette actions.** Run office actions from Ctrl+K: back up, check for updates, close or open the
   office, dark panels, alerts.
 - [ ] **(P2) Paste screenshots.** Paste an image into a comment; it's attached to the task and shown inline.
