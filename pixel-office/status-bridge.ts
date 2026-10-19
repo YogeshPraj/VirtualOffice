@@ -11,6 +11,7 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import type { Plugin } from "vite";
 import { azCommand } from "./intake-bridge";
+import { leakSummary } from "./leak-watch";
 
 export interface StatusCheck {
   id: string;
@@ -213,7 +214,11 @@ function checkGstack(): StatusCheck {
 
 export async function buildingStatus(): Promise<StatusCheck[]> {
   const results = await Promise.all([checkPaperclip(), checkBrain(), checkAdapters(), checkClaude(), checkCopilot(), checkGh(), checkAz()]);
-  return [checkOffice(), checkSupervisor(), ...results.flat(), checkGstack()];
+  const leaks = leakSummary();
+  const leakCheck: StatusCheck = leaks.count
+    ? { id: "leaks", group: "tools", label: "Leak watch", level: "bad", detail: `${leaks.count} possible secret(s) pasted into tasks.`, fix: "See Leak watch below: remove them and rotate the secrets." }
+    : { id: "leaks", group: "tools", label: "Leak watch", level: "ok", detail: leaks.scannedAt ? "No secrets found in tasks." : "First scan runs a minute after the office starts." };
+  return [checkOffice(), checkSupervisor(), ...results.flat(), checkGstack(), leakCheck];
 }
 
 export function statusBridge(): Plugin {
