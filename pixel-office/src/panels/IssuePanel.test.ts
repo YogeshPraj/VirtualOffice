@@ -23,3 +23,13 @@ describe("follow-up tasks", () => {
     expect(followUpOf(issue, "YOG", "copy")).toMatchObject({ title: "Copy of Fix the lobby", description: "Details", projectId: "p" });
   });
 });
+
+import { meetingSpeaker } from "./IssuePanel";
+describe("meeting lines in the thread", () => {
+  it("shows the attendee who spoke, not the office that posted it", () => {
+    const agents = [{ name: "Ada" }, { name: "QA" }];
+    expect(meetingSpeaker("**🗣 Ada · round 2**\n\nUse CSS variables.", agents)).toEqual({ agent: agents[0], round: 2, body: "Use CSS variables." });
+    expect(meetingSpeaker("**🗣 CEO**\n\nShip it.", agents)).toBeNull();
+    expect(meetingSpeaker("**🗣 Nobody · round 1**\n\nx", agents)).toBeNull();
+  });
+});

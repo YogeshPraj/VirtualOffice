@@ -283,14 +283,17 @@ export function IssuePanel({ issueId }: { issueId: string }) {
         ) : null;
       })()}
       {visibleThread(comments.data ?? [], threadFilter, showAll ? Infinity : THREAD_TAIL).items.map((c) => {
-        const author = agentById(c.authorAgentId);
+        // Planning-meeting lines are posted by the office on the speaker's behalf: show the speaker.
+        const spoke = !c.authorAgentId ? meetingSpeaker(c.body, agents) : null;
+        const author = agentById(c.authorAgentId) ?? spoke?.agent;
         const isPinned = pinned?.id === c.id;
         return (
           <div key={c.id} className={`chat-line ${author ? "" : "me"}`}>
             <Avatar agent={author} size={28} />
             <div className="bubble">
               <span className="who">
-                {author?.name ?? "YOU"} · {new Date(c.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {author?.name ?? "YOU"}
+                {spoke ? ` · in the meeting, round ${spoke.round}` : ""} · {new Date(c.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 <button
                   className={`pin-btn ${isPinned ? "on" : ""}`}
                   aria-pressed={isPinned}
@@ -300,7 +303,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
                   📌
                 </button>
               </span>
-              <Markdown text={c.body} links={links} />
+              <Markdown text={spoke ? spoke.body : c.body} links={links} />
             </div>
           </div>
         );
@@ -597,4 +600,12 @@ function NewFromTask({ issue }: { issue: Issue }) {
       <option value="copy">Copy of this task</option>
     </select>
   );
+}
+
+/** "**🗣 Ada · round 2**\n\n…" (posted by the office for a meeting attendee) → who said it, and what. */
+export function meetingSpeaker<A extends { name: string }>(body: string, agents: A[]): { agent: A; round: number; body: string } | null {
+  const m = body.match(/^\*\*🗣 (.+?) · round (\d+)\*\*\s*\n+/);
+  if (!m) return null;
+  const agent = agents.find((a) => a.name === m[1]);
+  return agent ? { agent, round: Number(m[2]), body: body.slice(m[0].length) } : null;
 }
