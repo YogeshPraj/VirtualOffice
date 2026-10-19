@@ -95,7 +95,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
 
   return (
     <>
-      <div className="px-card" style={{ background: NOTE_COLORS[issue.status as IssueStatus] }}>
+      <div className="px-card note-card" style={{ background: NOTE_COLORS[issue.status as IssueStatus] }}>
         <h4>{issue.identifier}</h4>
         <div style={{ fontSize: 22 }}>{issue.title}</div>
         {issue.description && (

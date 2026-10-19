@@ -11,6 +11,7 @@ import { useOfficeData } from "../state/officeData";
 import { reviewQueue } from "../panels/ReviewPanel";
 import { useUpdateStatus } from "../panels/UpdateCard";
 import { SIZES, useTextSize } from "./textSize";
+import { THEME_ICON, useTheme } from "./theme";
 import { LEVEL_ICON, useBuildingStatus, worstLevel } from "../panels/StatusPanel";
 
 export function Hud({ company, attentionCount, companies, onSwitch }: {
@@ -33,6 +34,7 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
   const toReview = reviewQueue(issues).length;
   const { data: update } = useUpdateStatus();
   const text = useTextSize();
+  const theme = useTheme();
   const { data: watches } = useWatches();
   const newWork = pendingTotal(watches);
   const building = useBuildingStatus();
@@ -96,6 +98,14 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
         🔎 Ctrl+K
       </button>
       <BrainSwitcher />
+      <button
+        className="px-btn small"
+        onClick={theme.cycle}
+        aria-label={`Panel theme: ${theme.choice}`}
+        title={theme.choice === "auto" ? "Panels follow Windows light/dark (click for light)" : theme.choice === "light" ? "Light panels (click for dark)" : "Dark panels (click to follow Windows)"}
+      >
+        {THEME_ICON[theme.choice]}
+      </button>
       <select
         className="px-select"
         style={{ width: "auto", margin: 0, padding: "2px 4px" }}

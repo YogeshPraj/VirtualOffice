@@ -5,9 +5,11 @@ import { reportError } from "./ui/ErrorBar";
 import { App } from "./App";
 import "./styles.css";
 import { applySize, readSize } from "./ui/textSize";
+import { applyTheme, readTheme } from "./ui/theme";
 
 // The saved text size, before the first paint.
 applySize(readSize());
+applyTheme(readTheme());
 
 const queryClient = new QueryClient({
   // Any button that fails (hire, answer, connect…) shows a sticky error, not just a fading toast.
