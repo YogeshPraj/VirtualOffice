@@ -78,6 +78,8 @@ export function IntakePanel() {
   const [projectId, setProjectId] = useState<string>("");
   const [priority, setPriority] = useState<(typeof PRIORITIES)[number]>("medium");
   const who = assignee || lead?.id || "";
+  // Per-item assignee (one task per item only); unset items go to `who`.
+  const [itemWho, setItemWho] = useState<Record<string, string>>({});
   const activeProjects = (projects.data ?? []).filter((p) => !p.archivedAt);
   const project = projectId || activeProjects.find((p) => p.leadAgentId === lead?.id)?.id || activeProjects[0]?.id || "";
 
@@ -118,7 +120,12 @@ export function IntakePanel() {
       const out = [];
       const dues: Record<string, string> = {};
       for (const it of chosen) {
-        const made = await api.createIssue(company.id, { ...common, title: taskTitle(it), description: itemMarkdown(it) + instructions + footer });
+        const made = await api.createIssue(company.id, {
+          ...common,
+          assigneeAgentId: itemWho[it.url] || common.assigneeAgentId,
+          title: taskTitle(it),
+          description: itemMarkdown(it) + instructions + footer,
+        });
         if (it.due) dues[made.id] = it.due;
         out.push(made);
       }
@@ -233,6 +240,23 @@ export function IntakePanel() {
                       {it.error ? ` · ⚠ ${it.error}` : ""}
                     </small>
                   </span>
+                  {mode === "each" && !skip.has(it.url) && (
+                    <select
+                      className="px-select"
+                      style={{ width: "auto", margin: 0, fontSize: 14 }}
+                      aria-label={`Assign ${it.key} to`}
+                      value={itemWho[it.url] ?? ""}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => setItemWho((m) => ({ ...m, [it.url]: e.target.value }))}
+                    >
+                      <option value="">→ {staff.find((a) => a.id === who)?.name ?? "default"}</option>
+                      {staff
+                        .filter((a) => a.id !== who)
+                        .map((a) => (
+                          <option key={a.id} value={a.id}>→ {a.name}</option>
+                        ))}
+                    </select>
+                  )}
                 </label>
               );
             })}
