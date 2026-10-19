@@ -18,6 +18,9 @@ import { checklist } from "../lib/checklist";
 import { staleDays } from "../lib/stale";
 import { BlockerChains } from "./BlockerChains";
 import { type Size, useSizes } from "../lib/sizes";
+import { MeetingsBoard, useMeetings } from "./MeetingCard";
+
+const PLANNING = new Set(["needed", "running", "ceo", "drafting", "review"]);
 import { toCsv } from "../lib/csv";
 import { downloadText, slug } from "../lib/download";
 import { awayBaseline } from "../ui/SinceAway";
@@ -105,6 +108,7 @@ export function MeetingPanel() {
   const { data: sources } = useSources();
   const { due } = useDue();
   const { sizes } = useSizes();
+  const { data: meetings } = useMeetings();
   const [since] = useState(awayBaseline);
   const applyTemplate = (id: string) => {
     const t = templates.find((x) => x.id === id);
@@ -258,6 +262,7 @@ export function MeetingPanel() {
       {editing && <TemplateEditor onClose={() => setEditing(false)} />}
 
       <FocusStrip />
+      <MeetingsBoard />
       <BlockerChains />
       <SavedViews
         filter={filter}
@@ -380,6 +385,7 @@ export function MeetingPanel() {
                   issue={i}
                   due={due[i.id]}
                   size={sizes[i.id]}
+                  planning={PLANNING.has(meetings?.meetings[i.id]?.status ?? "")}
                   col={colIndex}
                   row={rowIndex}
                   sources={sources}
@@ -416,6 +422,7 @@ function StickyNote({
   row,
   due,
   size,
+  planning,
 }: {
   issue: Issue;
   assignee?: string;
@@ -429,6 +436,8 @@ function StickyNote({
   row?: number;
   due?: string;
   size?: Size;
+  /** Held for (or in) a planning meeting. */
+  planning?: boolean;
 }) {
   const source = extractSources(issue.description)[0];
   const drift = driftFor(issue, sources);
@@ -455,6 +464,7 @@ function StickyNote({
       <span className="id">
         {issue.identifier}
         {size ? ` · ${size}` : ""}
+        {planning ? " · 🗓 PLANNING" : ""}
         {issue.status === "blocked" ? " · BLOCKED" : ""}
         {issue.priority === "critical" ? " · ‼" : issue.priority === "high" ? " · !" : ""}
         {source ? ` · ${SOURCE_ICON[source.source]} ${source.key}` : ""}

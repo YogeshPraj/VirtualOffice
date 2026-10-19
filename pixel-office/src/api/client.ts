@@ -69,6 +69,19 @@ export interface HirePayload {
   applyStoredClaudeLogin?: boolean;
 }
 
+let holdCache: { at: number; on: boolean } | null = null;
+/** Whether new features wait for a planning meeting (checked at most once a minute). */
+async function holdsNewFeatures(): Promise<boolean> {
+  if (holdCache && Date.now() - holdCache.at < 60_000) return holdCache.on;
+  const on = await fetch("/office-admin/meetings")
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d: { holdNewFeatures?: boolean } | null) => d?.holdNewFeatures !== false && d !== null)
+    .catch(() => false);
+  holdCache = { at: Date.now(), on };
+  return on;
+}
+export const forgetHoldSetting = () => (holdCache = null);
+
 export const api = {
   companies: () => get<Company[]>("/companies"),
   createCompany: (body: { name: string; description?: string }) => post<Company>("/companies", body),
@@ -187,10 +200,26 @@ export const api = {
       diagnosis: string | null;
       blockers: { id: string; identifier: string; title: string; status: string; assigneeAgentId: string | null }[];
     }>(`/issues/${issueId}/diagnostics/blockers`),
-  createIssue: (
+  /**
+   * Create a task. A new top-level feature (no parent, ordinary work) is held for a team planning
+   * meeting when that's switched on: created in the backlog with nobody on it, remembering who and what
+   * it was meant for, so no one starts before the plan is agreed. `noMeeting` skips that.
+   */
+  createIssue: async (
     companyId: string,
     body: { title: string; description?: string; assigneeAgentId?: string | null; status?: IssueStatus; priority?: string; projectId?: string | null; parentId?: string | null; workMode?: "standard" | "ask" | "planning" },
-  ) => post<Issue>(`/companies/${companyId}/issues`, body),
+    opts: { noMeeting?: boolean } = {},
+  ) => {
+    const feature = !body.parentId && (body.workMode ?? "standard") === "standard" && !opts.noMeeting && (await holdsNewFeatures());
+    if (!feature) return post<Issue>(`/companies/${companyId}/issues`, body);
+    const issue = await post<Issue>(`/companies/${companyId}/issues`, { ...body, status: "backlog", assigneeAgentId: null });
+    await fetch(`/office-admin/meetings/${issue.id}/hold`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ planned: { status: body.status && body.status !== "backlog" ? body.status : "todo", assigneeAgentId: body.assigneeAgentId ?? null } }),
+    }).catch(() => undefined);
+    return issue;
+  },
   updateIssue: (
     issueId: string,
     body: Partial<Pick<Issue, "status" | "assigneeAgentId" | "title" | "description" | "priority" | "projectId" | "parentId" | "goalId">> & { blockedByIssueIds?: string[] },

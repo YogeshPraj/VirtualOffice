@@ -40,10 +40,17 @@ export interface BehaviorInput {
   lobbyIndex: number;
   lastOutputAt: number | undefined;
   now: number;
+  /** Seat at the planning meeting this agent is in, else -1. */
+  meetingIndex?: number;
 }
 
-export function decideBehavior({ agent, desk, askingIndex, lobbyIndex, lastOutputAt, now }: BehaviorInput): Behavior {
+export function decideBehavior({ agent, desk, askingIndex, lobbyIndex, lastOutputAt, now, meetingIndex = -1 }: BehaviorInput): Behavior {
   const seat = desk.seat;
+  // In a planning meeting: at the table, thinking aloud when it's their turn.
+  if (meetingIndex >= 0 && agent.status !== "pending_approval" && agent.status !== "paused") {
+    const speaking = agent.status === "running" || (!!lastOutputAt && now - lastOutputAt < RECENT_OUTPUT_MS);
+    return { target: SPOTS.meetingSeat(meetingIndex), activity: speaking ? "asking" : "board", expression: speaking ? "focused" : "normal", facing: "up" };
+  }
   if (agent.status === "pending_approval") {
     return { target: SPOTS.lobbyWait(Math.max(0, lobbyIndex)), activity: "waiting", expression: "normal", facing: "down" };
   }

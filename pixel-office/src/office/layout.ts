@@ -80,6 +80,8 @@ export const SPOTS = {
   ][i % 8],
   boardFront: (i: number): Pt => ({ x: 820 + (i % 4) * 30, y: 230 + Math.floor(i / 4) * 24 }),
   hrDesk: { x: 415, y: 100 },
+  /** Chairs round the meeting-room table, for planning meetings. */
+  meetingSeat: (i: number): Pt => ({ x: 818 + (i % 4) * 30, y: i < 4 ? 336 : 402 }),
 };
 
 // ── Walk network ──────────────────────────────────────────────────────────

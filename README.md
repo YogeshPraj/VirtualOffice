@@ -11,6 +11,7 @@ A personal "virtual company" of AI employees, run from a pixel-art office.
 ## What the office does
 
 - **Bring in work**: the 📥 Intake desk turns Azure DevOps work items, GitHub issues/PRs or any link into tasks for the team lead; tasks keep a live link to the source, and **Report back** posts the team's summary on the ADO/GitHub item (after you confirm).
+- **Plan together first**: every new feature waits for a 🗓 planning meeting. The attendees take turns in one meeting thread (approach, risks, what not to do, proposed work items), over one or two rounds; you add your input; the office drafts the child work items (owner, order, "done when"); once you approve, they're created and everyone works independently. Each turn is one shift for that employee. Tick "No meeting needed" for small things, or switch the hold off on the task board.
 - **Run the work**: a drag-and-drop task board with search and filters; task panels with documents (with revisions), work products (PRs, branches, commits), sub-tasks, blockers and attachments.
 - **Watch the team**: look over an employee's shoulder at their live run (or replay their last shift); 🔔 desktop alerts when someone needs you, a task hits review or an employee errors.
 - **Stay on top**: 📰 Today (a copyable stand-up report), 🟢 Building status (every service and sign-in, with fixes), Ctrl+K to jump anywhere.

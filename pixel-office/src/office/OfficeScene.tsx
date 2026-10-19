@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { SeasonalDecor } from "./SeasonalDecor";
 import { OfficeCat } from "./OfficeCat";
+import { useMeetings } from "../panels/MeetingCard";
 import { useProviderName } from "../api/hooks";
 import { createPortal } from "react-dom";
 import { buttonProps } from "./a11y";
@@ -111,6 +112,12 @@ export function OfficeScene({ company, agents, issues, attention }: Props) {
     }
     return ids;
   }, [attention]);
+  // Everyone in a running planning meeting heads for the meeting room.
+  const { data: meetingData } = useMeetings();
+  const inMeeting = useMemo(
+    () => [...new Set(Object.values(meetingData?.meetings ?? {}).filter((m) => m.status === "running").flatMap((m) => m.attendees))],
+    [meetingData],
+  );
   const lobbyQueue = staff.filter((a) => a.status === "pending_approval").map((a) => a.id);
 
   const behaviors = staff.map((agent, i) =>
@@ -121,6 +128,7 @@ export function OfficeScene({ company, agents, issues, attention }: Props) {
       lobbyIndex: lobbyQueue.indexOf(agent.id),
       lastOutputAt: lastOutputAt[agent.id],
       now,
+      meetingIndex: inMeeting.indexOf(agent.id),
     }),
   );
 

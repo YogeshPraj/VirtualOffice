@@ -168,3 +168,17 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Handover notes.** Sending someone on leave drafts a handover for each of their open tasks.
 - [x] **(P2) Size vs actual.** Tag tasks S / M / L and compare with the time actually worked.
 - [x] **(P3) Office cat.** A pixel cat wanders the floor and naps on idle desks.
+
+## Wave 13: plan together, then build
+- [x] **(P1) Team planning meetings.** Before feature work starts, the team meets in one meeting thread:
+  each attendee is woken in turn and gives their approach, risks, what not to do and proposed work items,
+  over one or two rounds; the CEO adds input; the office drafts the child work items (owner, order,
+  blockers, "done when"); once the CEO approves, the sub-tasks are created and everyone works independently.
+  New top-level features wait in planning until then (a "no meeting needed" tick skips it).
+- [ ] **(P1) AI usage meter.** Count the office's own Claude calls per day, with a daily cap.
+- [ ] **(P1) Office self-test.** One button that checks every office feature read-only.
+- [ ] **(P2) Feature switches.** One card to turn optional features on or off.
+- [ ] **(P2) Lighter on the PC.** Poll less when the window is hidden or nothing changes.
+- [ ] **(P2) Keyboard and screen-reader pass** over the newer windows.
+- [x] **(P2) Changelog from commits** for "What's new". (Already worked: What's new lists the commits since your last visit.)
+- [ ] **(P3) Office postcard.** Save the office scene as a PNG with the date and what shipped.

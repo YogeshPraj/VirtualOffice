@@ -28,6 +28,7 @@ import { QuickReplies } from "../ui/QuickReplies";
 import { useDraft } from "../lib/useDraft";
 import { usePins } from "../lib/pins";
 import { RepeatTask } from "./RepeatTask";
+import { MeetingCard } from "./MeetingCard";
 import { describeChange, inverseOf, isEmpty } from "../lib/undo";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
@@ -231,6 +232,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
         </div>
       </div>
 
+      <MeetingCard issue={issue} />
       <LinkedWork description={issue.description} done={issue.status === "done"} latestAgentComment={[...(comments.data ?? [])].reverse().find((c) => c.authorAgentId)?.body ?? null} />
       <SourceDrift issue={issue} onStatus={(status) => update.mutate({ status })} />
       <TaskCost issueId={issueId} updatedAt={issue.updatedAt} />
