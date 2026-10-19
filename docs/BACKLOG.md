@@ -135,4 +135,4 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Recently viewed.** Ctrl+K opens with the tasks and rooms you looked at last.
 - [x] **(P2) Review checklist.** The review room shows the task's checklist, so you can see what's ticked.
 - [x] **(P2) Connection banner.** A clear banner when Paperclip can't be reached, saying it's being restarted.
-- [ ] **(P3) Employee of the week.** The lobby wall honours whoever finished the most this week.
+- [x] **(P3) Employee of the week.** The lobby wall honours whoever finished the most this week.

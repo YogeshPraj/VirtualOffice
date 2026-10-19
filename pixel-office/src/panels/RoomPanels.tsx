@@ -8,6 +8,7 @@ import { ClassicLink } from "../ui/Window";
 import { UsageCard } from "./UsageCard";
 import { Workload } from "./Workload";
 import { GoalPoster } from "./GoalPoster";
+import { EmployeeOfWeek } from "./EmployeeOfWeek";
 import { ShiftTimeline } from "./ShiftTimeline";
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
@@ -154,6 +155,7 @@ export function LobbyPanel() {
         </button>
       </div>
       <GoalPoster />
+      <EmployeeOfWeek />
     </>
   );
 }
