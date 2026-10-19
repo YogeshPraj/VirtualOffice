@@ -9,6 +9,7 @@ import { Markdown } from "../lib/markdown";
 import { useOfficeLinks } from "./TaskDocuments";
 import { isQuestion } from "./AskEmployee";
 import { QuickReplies } from "../ui/QuickReplies";
+import { checklistItems } from "../lib/checklist";
 
 /** Tasks waiting for the CEO's review, oldest first. */
 export const reviewQueue = (issues: Issue[]) =>
@@ -79,6 +80,11 @@ function ReviewItem({ issue, onDone }: { issue: Issue; onDone: () => void }) {
   const noteRef = useRef<HTMLTextAreaElement>(null);
   const who = agentById(issue.assigneeAgentId);
   const latest = [...(comments.data ?? [])].reverse().find((c) => c.authorAgentId);
+  const items = checklistItems(issue.description);
+  const open_ = items.filter((i) => !i.done).length;
+  // Approving with boxes still open is allowed, but never by accident.
+  const confirmApprove = () =>
+    confirm(open_ ? `${open_} of ${items.length} checklist items on ${issue.identifier} aren't ticked. Approve and mark it done anyway?` : `Approve ${issue.identifier} and mark it done?`);
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: keys.issues(company.id) });
@@ -117,7 +123,7 @@ function ReviewItem({ issue, onDone }: { issue: Issue; onDone: () => void }) {
       if (e.key === "a") {
         e.preventDefault();
         e.stopImmediatePropagation();
-        if (!approve.isPending && confirm(`Approve ${issue.identifier} and mark it done?`)) approve.mutate();
+        if (!approve.isPending && confirmApprove()) approve.mutate();
       } else if (e.key === "s") {
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -126,7 +132,7 @@ function ReviewItem({ issue, onDone }: { issue: Issue; onDone: () => void }) {
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [issue.id, approve]);
+  }, [issue.id, approve, confirmApprove]);
 
   return (
     <div className="px-card" style={{ borderLeft: "8px solid #C9A7FF" }}>
@@ -165,6 +171,19 @@ function ReviewItem({ issue, onDone }: { issue: Issue; onDone: () => void }) {
         </div>
       )}
 
+      {items.length > 0 && (
+        <div className="review-checklist" aria-label="Checklist">
+          <h5 className="px-label" style={{ margin: "8px 0 4px" }}>
+            CHECKLIST · {items.length - open_} OF {items.length} TICKED
+          </h5>
+          {items.map((it, n) => (
+            <div key={n} style={{ fontSize: 16, color: it.done ? undefined : "var(--bad)" }}>
+              {it.done ? "✅" : "⬜"} {it.text}
+            </div>
+          ))}
+        </div>
+      )}
+
       <h5 className="px-label" style={{ margin: "8px 0 4px" }}>LATEST FROM {who?.name.toUpperCase() ?? "THE TEAM"}</h5>
       <div className="doc-view" style={{ maxHeight: 280 }}>
         {latest ? <Markdown text={latest.body} links={links} /> : <span className="muted">{comments.isLoading ? "Loading…" : "No update in the thread."}</span>}
@@ -181,7 +200,7 @@ function ReviewItem({ issue, onDone }: { issue: Issue; onDone: () => void }) {
       />
       <QuickReplies value={note} onChange={setNote} />
       <div className="row">
-        <button className="px-btn good" disabled={approve.isPending || sendBack.isPending} onClick={() => confirm(`Approve ${issue.identifier} and mark it done?`) && approve.mutate()}>
+        <button className="px-btn good" disabled={approve.isPending || sendBack.isPending} onClick={() => confirmApprove() && approve.mutate()}>
           ✔ Approve
         </button>
         <button className="px-btn" disabled={!note.trim() || approve.isPending || sendBack.isPending} onClick={() => sendBack.mutate()}>
