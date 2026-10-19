@@ -467,6 +467,19 @@ textarea {
   border-bottom: 3px solid #000;
   font-size: 19px;
 }
+.conn-banner {
+  padding: 6px 16px;
+  border-bottom: 3px solid #000;
+  font-size: 19px;
+}
+.conn-banner.down {
+  background: #6b4a00;
+  color: #fff3d6;
+}
+.conn-banner.up {
+  background: #145a32;
+  color: #e0ffe9;
+}
 .error-bar .row + .row {
   margin-top: 4px;
 }

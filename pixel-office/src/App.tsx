@@ -11,6 +11,7 @@ import { Hud } from "./ui/Hud";
 import { PxWindow } from "./ui/Window";
 import { useOfficeNotifications } from "./ui/useNotifications";
 import { ErrorBar } from "./ui/ErrorBar";
+import { ConnectionBanner } from "./ui/ConnectionBanner";
 import { CommandPalette } from "./ui/CommandPalette";
 import { Tour } from "./ui/Tour";
 import { Shortcuts } from "./ui/Shortcuts";
@@ -96,6 +97,7 @@ function Office({ company, companies, onSwitch }: { company: Company; companies:
     <OfficeDataProvider value={value}>
       <div className="app">
         <Hud company={company} attentionCount={value.attention.length} companies={companies} onSwitch={onSwitch} />
+        <ConnectionBanner />
         <ErrorBar />
         <main className={`stage mood-${mood.mood}`}>
           {mood.mood === "night" && (
