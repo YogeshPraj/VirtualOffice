@@ -39,13 +39,13 @@ interface Comment {
   createdAt: string;
 }
 
-async function get<T>(path: string): Promise<T> {
+export async function get<T>(path: string): Promise<T> {
   const r = await fetch(`${PAPERCLIP}${path}`, { signal: AbortSignal.timeout(20_000) });
   if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
   return r.json() as Promise<T>;
 }
 
-const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n)}…` : s);
+export const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n)}…` : s);
 
 /** The prompt: the question, then the office as data. Kept compact so answers stay quick. */
 export function buildPrompt(input: {
@@ -85,7 +85,7 @@ export function buildPrompt(input: {
 }
 
 /** Run Claude once, read-only: no tools, no MCP, no saved session, in an empty folder. */
-function askClaude(prompt: string): Promise<string> {
+export function askClaude(prompt: string): Promise<string> {
   const cwd = mkdtempSync(join(tmpdir(), "office-ask-"));
   return new Promise((done, fail) => {
     // cmd.exe drops a bare empty argument, so quote it there.

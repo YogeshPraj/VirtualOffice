@@ -5,6 +5,7 @@ import type { AttentionItem, HeartbeatRun, Issue } from "../api/types";
 import { useOfficeData } from "../state/officeData";
 import { useOffice } from "../state/officeStore";
 import { pendingTotal, useWatches } from "../lib/watches";
+import { firstVisitToday, MorningBriefing } from "./MorningBriefing";
 
 const LAST_SEEN = "pixel-office:last-seen";
 const BASELINE = "pixel-office:since";
@@ -87,7 +88,9 @@ export function SinceAway() {
   const open = useOffice((s) => s.open);
   const [since] = useState(awayBaseline);
   const [dismissed, setDismissed] = useState(() => read(sessionStorage, DISMISSED) === "1");
-  const away = since !== null && Date.now() - since > AWAY_MS;
+  // The first visit of a new day always gets the welcome, with the morning briefing on top.
+  const morning = firstVisitToday(since);
+  const away = since !== null && (Date.now() - since > AWAY_MS || morning);
   const { data: runs } = useQuery({ queryKey: ["runs-recent", company.id, 500], queryFn: () => api.recentRuns(company.id, 500), enabled: away && !dismissed });
   const { data: watches } = useWatches();
   const b = useMemo(() => (since && runs ? briefing(since, issues, attention, runs) : null), [since, issues, attention, runs]);
@@ -114,7 +117,7 @@ export function SinceAway() {
     <div className="palette-backdrop" onMouseDown={close}>
       <div className="palette" role="dialog" aria-label="Since you were away" onMouseDown={(e) => e.stopPropagation()}>
         <div className="row">
-          <h4 style={{ flex: 1, margin: 0 }}>☕ WELCOME BACK</h4>
+          <h4 style={{ flex: 1, margin: 0 }}>{morning ? "☀ GOOD MORNING" : "☕ WELCOME BACK"}</h4>
           <button className="px-btn small" onClick={close} autoFocus>
             Got it
           </button>
@@ -122,6 +125,7 @@ export function SinceAway() {
         <div className="muted" style={{ fontSize: 16, margin: "4px 0 8px" }}>
           You were away {ago(Date.now() - since!)}. {nothing ? "It was quiet: nothing needs you." : "Here's what happened:"}
         </div>
+        {morning && <MorningBriefing since={since!} onOpenItem={close} />}
         <Row icon="☎" n={b.waiting.length} label={`new thing${b.waiting.length === 1 ? "" : "s"} waiting on you`} onClick={() => open({ kind: "room", room: "ceo" })} />
         <Row icon="🔍" n={b.review.length} label={`task${b.review.length === 1 ? "" : "s"} ready for review`} onClick={() => open({ kind: "room", room: "meeting" })} />
         <Row icon="⚠" n={b.failed.length} label={`failed shift${b.failed.length === 1 ? "" : "s"}${b.failed.length ? ` (${[...new Set(b.failed.map((r) => agentById(r.agentId)?.name ?? "someone"))].join(", ")})` : ""}`} onClick={() => open({ kind: "room", room: "status" })} />

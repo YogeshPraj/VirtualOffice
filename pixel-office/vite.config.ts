@@ -20,6 +20,7 @@ import { companyImport } from "./company-import";
 import { machineSync } from "./machine-sync";
 import { askOffice } from "./ask-office";
 import { timeOff } from "./time-off";
+import { morningBriefing } from "./morning-briefing";
 
 // Paperclip runs on 127.0.0.1:3100 in local_trusted mode. Proxying /api keeps the
 // pixel office same-origin, so REST calls and the live-events WebSocket need no auth.
@@ -81,7 +82,7 @@ function detachAiConnection(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), detachAiConnection(), brainBridge(), recoveryBlockers(), intakeBridge(), statusBridge(), workingHours(), officeSettings(), backupBridge(), watchedQueries(), sourceDrift(), updateBridge(), watchdog(), autostartBridge(), leakWatch(), setupCheck(), companyImport(), machineSync(), askOffice(), timeOff()],
+  plugins: [react(), detachAiConnection(), brainBridge(), recoveryBlockers(), intakeBridge(), statusBridge(), workingHours(), officeSettings(), backupBridge(), watchedQueries(), sourceDrift(), updateBridge(), watchdog(), autostartBridge(), leakWatch(), setupCheck(), companyImport(), machineSync(), askOffice(), timeOff(), morningBriefing()],
   server: {
     port: 5180,
     strictPort: true,
