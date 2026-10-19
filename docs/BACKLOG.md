@@ -102,6 +102,6 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P2) Snooze.**** Put an inbox item off until later today, tomorrow morning or next week.
 - [x] **(P2) Quick replies.** One-click answers ("Go ahead", "Ship it", "Hold until I review") in threads
   and the review room; editable.
-- [ ] **(P2) What's new.** After an update, a short list of what changed in the office.
+- [x] **(P2) What's new.** After an update, a short list of what changed in the office.
 - [ ] **(P2) Stand-up reminder.** At the start of the working day, an alert that today's report is ready.
 - [ ] **(P3) Text size.** Make the office's text bigger or smaller.

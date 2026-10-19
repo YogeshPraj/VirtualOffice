@@ -65,6 +65,20 @@ export async function updateNow(root = ROOT) {
   return { ok: true, from: before, to: after, needsSetup: needsSetup(changed), changed: changed.length };
 }
 
+/** The running version, and the feature commits since `since` (a hash this copy has seen before). */
+export async function changesSince(since: string, root = ROOT) {
+  const git = (args: string[]) => run(args, 30_000, root);
+  const head = (await git(["rev-parse", "HEAD"])).out.trim();
+  if (!/^[0-9a-f]{7,40}$/i.test(since) || since === head) return { head, commits: [] };
+  const known = await git(["merge-base", "--is-ancestor", since, "HEAD"]);
+  if (!known.ok) return { head, commits: [] }; // unknown or unrelated: nothing sensible to list
+  const log = (await git(["log", "--format=%h%x09%s", `${since}..HEAD`, "-n", "60"])).out.split("\n").filter(Boolean);
+  const commits = log
+    .map((l) => ({ hash: l.split("\t")[0], subject: l.split("\t").slice(1).join("\t") }))
+    .filter((c) => !/^(Backlog:|Merge |README:)/i.test(c.subject));
+  return { head, commits };
+}
+
 export function updateBridge(): Plugin {
   return {
     name: "pixel-office-update",
@@ -72,6 +86,8 @@ export function updateBridge(): Plugin {
       server.middlewares.use("/office-admin/update", async (req, res) => {
         res.setHeader("content-type", "application/json");
         try {
+          const url = new URL(req.url ?? "/", "http://local");
+          if (req.method === "GET" && url.pathname === "/changes") return res.end(JSON.stringify(await changesSince(url.searchParams.get("since") ?? "")));
           if (req.method === "GET") return res.end(JSON.stringify(await updateStatus((req.url ?? "").includes("force=1"))));
           if (req.method === "POST") return res.end(JSON.stringify(await updateNow()));
           res.statusCode = 405;

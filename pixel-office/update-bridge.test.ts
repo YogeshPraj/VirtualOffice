@@ -47,3 +47,28 @@ describe("office updates against real git", () => {
     }
   }, 60_000);
 });
+
+import { changesSince } from "./update-bridge";
+
+describe("what's new", () => {
+  it("lists feature commits since a version, skipping housekeeping", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "office-whatsnew-"));
+    const g = (...a: string[]) => execFileSync("git", a, { cwd: dir, stdio: "pipe" }).toString().trim();
+    try {
+      g("init", "-q", "-b", "main");
+      g("config", "user.email", "t@example.com");
+      g("config", "user.name", "t");
+      const commit = (msg: string) => (writeFileSync(join(dir, "f.txt"), msg), g("add", "."), g("commit", "-qm", msg));
+      commit("first");
+      const since = g("rev-parse", "HEAD");
+      commit("Backlog: wave 9");
+      commit("Snooze: put inbox items off");
+      const r = await changesSince(since, dir);
+      expect(r.commits.map((c) => c.subject)).toEqual(["Snooze: put inbox items off"]);
+      expect((await changesSince("not-a-hash", dir)).commits).toEqual([]);
+      expect((await changesSince(r.head, dir)).commits).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+});
