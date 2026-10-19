@@ -15,6 +15,7 @@ import { TaskDocuments, useOfficeLinks } from "./TaskDocuments";
 import { TaskDetails } from "./TaskDetails";
 import { WorkProducts } from "./WorkProducts";
 import { LastShift } from "./LastShift";
+import { TaskCost } from "./TaskCost";
 import { TaskHistory } from "./TaskHistory";
 import { TaskMap } from "./TaskMap";
 import { MAX_FOCUS, useFocus } from "../lib/focus";
@@ -227,6 +228,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
 
       <LinkedWork description={issue.description} done={issue.status === "done"} latestAgentComment={[...(comments.data ?? [])].reverse().find((c) => c.authorAgentId)?.body ?? null} />
       <SourceDrift issue={issue} onStatus={(status) => update.mutate({ status })} />
+      <TaskCost issueId={issueId} updatedAt={issue.updatedAt} />
       <LastShift issue={issue} />
       {issue.status === "blocked" && <BlockedBy issueId={issueId} />}
       <WorkProducts issueId={issueId} projectId={issue.projectId} />

@@ -431,3 +431,14 @@ export interface SearchHit {
   snippets?: { field: string; label: string; text: string; highlights?: { start: number; end: number }[] }[];
   issue?: { id: string; identifier: string; status: string } | null;
 }
+
+/** GET /issues/{id}/cost-summary: a task and its sub-tasks. */
+export interface CostSummary {
+  issueCount: number;
+  costCents: number;
+  inputTokens: number;
+  cachedInputTokens: number;
+  outputTokens: number;
+  runCount: number;
+  runtimeMs: number;
+}

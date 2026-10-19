@@ -1,4 +1,5 @@
 import type {
+  CostSummary,
   ActivityEntry,
   RecoveryAction,
   AdapterInfo,
@@ -163,6 +164,8 @@ export const api = {
   /** Every task-related activity entry (status changes etc.), for team statistics. */
   companyIssueActivity: (companyId: string) => get<ActivityEntry[]>(`/companies/${companyId}/activity?entityType=issue&limit=2000`),
   issueActivity: (issueId: string) => get<ActivityEntry[]>(`/issues/${issueId}/activity`),
+  /** Paperclip's totals for a task and its sub-tasks: shifts, time, cost, tokens. */
+  issueCost: (issueId: string) => get<CostSummary>(`/issues/${issueId}/cost-summary`),
   /** A task's runs, newest first. */
   issueRuns: (issueId: string) =>
     get<
