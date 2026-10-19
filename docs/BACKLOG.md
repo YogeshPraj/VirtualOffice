@@ -128,7 +128,7 @@ Legend: [ ] todo · [x] done · (P1) daily-driver gap · (P2) important · (P3) 
 - [x] **(P3) Celebrate.** A little confetti when a goal is achieved or the focus list is all done.
 
 ## Wave 9: fixing things in place
-- [ ] **(P1) Edit tasks in place.** Change a task's title and details from its panel (with a preview).
+- [x] **(P1) Edit tasks in place.** Change a task's title and details from its panel (with a preview).
 - [ ] **(P1) Leak watch.** Scan task threads and documents for pasted secrets (tokens, keys, passwords) and
   flag them with where they are, so they can be removed and rotated.
 - [ ] **(P2) Follow-up tasks.** From any task, one click to create a linked follow-up (or a copy).

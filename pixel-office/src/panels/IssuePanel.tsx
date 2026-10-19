@@ -78,6 +78,12 @@ export function IssuePanel({ issueId }: { issueId: string }) {
   const people = agents.filter((a) => a.status !== "terminated" && a.status !== "pending_approval");
   const [pasting, setPasting] = useState(false);
   const [threadFilter, setThreadFilter] = useState<ThreadFilter>("all");
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [preview, setPreview] = useState(false);
+  const [editBase, setEditBase] = useState("");
+  useEffect(() => setEditing(false), [issueId]);
   const [showAll, setShowAll] = useState(false);
   // Each task opens folded.
   useEffect(() => setShowAll(false), [issueId]);
@@ -123,18 +129,69 @@ export function IssuePanel({ issueId }: { issueId: string }) {
     onError: (e: Error) => toast(e.message),
   });
 
+  const startEdit = () => {
+    if (!issue) return;
+    setEditTitle(issue.title);
+    setEditDesc(issue.description ?? "");
+    setEditBase(issue.updatedAt);
+    setPreview(false);
+    setEditing(true);
+  };
+  const saveEdit = () => {
+    if (!issue) return;
+    // Someone (usually the assignee) changed it while we were editing: don't silently overwrite.
+    if (issue.updatedAt !== editBase && !confirm(`${issue.identifier} changed while you were editing. Save your version over it?`)) return;
+    const body: { title?: string; description?: string } = {};
+    if (editTitle.trim() !== issue.title) body.title = editTitle.trim();
+    if (editDesc !== (issue.description ?? "")) body.description = editDesc;
+    if (Object.keys(body).length) update.mutate(body);
+    setEditing(false);
+  };
   if (!issue) return <div className="muted">Finding that sticky note…</div>;
   const pending = interactions.data?.filter((i) => i.status === "pending") ?? [];
 
   return (
     <>
       <div className="px-card note-card" style={{ background: NOTE_COLORS[issue.status as IssueStatus] }}>
-        <h4>{issue.identifier}</h4>
-        <div style={{ fontSize: 22 }}>{issue.title}</div>
-        {issue.description && (
-          <div style={{ fontSize: 18 }}>
-            <Markdown text={issue.description} links={links} />
+        <div className="row" style={{ margin: 0 }}>
+          <h4 style={{ flex: 1, margin: 0 }}>{issue.identifier}</h4>
+          {!editing && (
+            <button className="px-btn small" onClick={startEdit} title="Edit the title and details">
+              ✎ Edit
+            </button>
+          )}
+        </div>
+        {editing ? (
+          <div className="task-edit">
+            <input className="px-input" aria-label="Task title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+            <div className="row" style={{ margin: "2px 0" }}>
+              <button className={`reply-chip ${!preview ? "on" : ""}`} onClick={() => setPreview(false)}>Write</button>
+              <button className={`reply-chip ${preview ? "on" : ""}`} onClick={() => setPreview(true)}>Preview</button>
+            </div>
+            {preview ? (
+              <div className="doc-view" style={{ minHeight: 120 }}>
+                <Markdown text={editDesc || "_Nothing yet._"} links={links} />
+              </div>
+            ) : (
+              <textarea className="px-textarea" aria-label="Task details" style={{ minHeight: 180, fontSize: 16 }} value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
+            )}
+            <div className="row">
+              <button className="px-btn small primary" disabled={!editTitle.trim() || update.isPending} onClick={saveEdit}>
+                Save
+              </button>
+              <button className="px-btn small" onClick={() => setEditing(false)}>Cancel</button>
+              <span className="muted" style={{ fontSize: 14 }}>The assignee sees the new version on their next shift.</span>
+            </div>
           </div>
+        ) : (
+          <>
+            <div style={{ fontSize: 22 }}>{issue.title}</div>
+            {issue.description && (
+              <div style={{ fontSize: 18 }}>
+                <Markdown text={issue.description} links={links} />
+              </div>
+            )}
+          </>
         )}
         <div className="row">
           <select className="px-select" style={{ width: "auto", margin: 0 }} aria-label="Status" value={issue.status} onChange={(e) => update.mutate({ status: e.target.value as IssueStatus })}>

@@ -1,6 +1,6 @@
 import type { Issue } from "../api/types";
 
-type Change = Partial<Pick<Issue, "status" | "assigneeAgentId" | "priority" | "projectId" | "parentId" | "goalId" | "title">>;
+type Change = Partial<Pick<Issue, "status" | "assigneeAgentId" | "priority" | "projectId" | "parentId" | "goalId" | "title" | "description">>;
 
 /** The change that puts a task back the way it was before `change`. */
 export function inverseOf(before: Partial<Issue>, change: Change): Change {
@@ -21,5 +21,6 @@ export function describeChange(change: Change, agentName: (id: string | null | u
   if ("goalId" in change) return "goal changed";
   if ("projectId" in change) return "project changed";
   if ("parentId" in change) return "moved under another task";
+  if ("title" in change || "description" in change) return "edited";
   return "updated";
 }

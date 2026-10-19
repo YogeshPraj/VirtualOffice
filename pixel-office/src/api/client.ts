@@ -190,7 +190,7 @@ export const api = {
   ) => post<Issue>(`/companies/${companyId}/issues`, body),
   updateIssue: (
     issueId: string,
-    body: Partial<Pick<Issue, "status" | "assigneeAgentId" | "title" | "priority" | "projectId" | "parentId" | "goalId">> & { blockedByIssueIds?: string[] },
+    body: Partial<Pick<Issue, "status" | "assigneeAgentId" | "title" | "description" | "priority" | "projectId" | "parentId" | "goalId">> & { blockedByIssueIds?: string[] },
   ) =>
     patch<Issue>(`/issues/${issueId}`, body),
   comments: (issueId: string) => get<IssueComment[]>(`/issues/${issueId}/comments`),
