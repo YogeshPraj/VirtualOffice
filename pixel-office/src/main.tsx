@@ -4,6 +4,10 @@ import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react
 import { reportError } from "./ui/ErrorBar";
 import { App } from "./App";
 import "./styles.css";
+import { applySize, readSize } from "./ui/textSize";
+
+// The saved text size, before the first paint.
+applySize(readSize());
 
 const queryClient = new QueryClient({
   // Any button that fails (hire, answer, connect…) shows a sticky error, not just a fading toast.

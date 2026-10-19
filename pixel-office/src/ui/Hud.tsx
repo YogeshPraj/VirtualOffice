@@ -10,6 +10,7 @@ import { pendingTotal, useWatches } from "../lib/watches";
 import { useOfficeData } from "../state/officeData";
 import { reviewQueue } from "../panels/ReviewPanel";
 import { useUpdateStatus } from "../panels/UpdateCard";
+import { SIZES, useTextSize } from "./textSize";
 import { LEVEL_ICON, useBuildingStatus, worstLevel } from "../panels/StatusPanel";
 
 export function Hud({ company, attentionCount, companies, onSwitch }: {
@@ -31,6 +32,7 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
   const { issues } = useOfficeData();
   const toReview = reviewQueue(issues).length;
   const { data: update } = useUpdateStatus();
+  const text = useTextSize();
   const { data: watches } = useWatches();
   const newWork = pendingTotal(watches);
   const building = useBuildingStatus();
@@ -94,6 +96,18 @@ export function Hud({ company, attentionCount, companies, onSwitch }: {
         🔎 Ctrl+K
       </button>
       <BrainSwitcher />
+      <select
+        className="px-select"
+        style={{ width: "auto", margin: 0, padding: "2px 4px" }}
+        aria-label="Text size"
+        title="Text size"
+        value={text.size}
+        onChange={(e) => text.set(e.target.value as (typeof SIZES)[number]["id"])}
+      >
+        {SIZES.map((s) => (
+          <option key={s.id} value={s.id}>{s.label}</option>
+        ))}
+      </select>
       <button
         className={`px-btn small ${sounds.on ? "primary" : ""}`}
         onClick={sounds.toggle}
