@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { describeCron, SCHEDULES } from "../lib/schedules";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import type { OrgNode, Routine } from "../api/types";
@@ -298,19 +299,6 @@ function SkillAssign({ agents }: { agents: ReturnType<typeof useOfficeData>["age
 }
 
 // ── Scheduling room: routines ───────────────────────────────────────────
-const SCHEDULES: [string, string, string][] = [
-  ["none", "No schedule (run by hand)", ""],
-  ["hourly", "Every hour", "0 * * * *"],
-  ["daily", "Every day at 9:00", "0 9 * * *"],
-  ["weekdays", "Weekdays at 9:00", "0 9 * * 1-5"],
-  ["weekly", "Mondays at 9:00", "0 9 * * 1"],
-  ["custom", "Custom cron…", ""],
-];
-
-function describeCron(cron: string | null): string {
-  if (!cron) return "manual";
-  return SCHEDULES.find(([, , c]) => c === cron)?.[1] ?? `cron ${cron}`;
-}
 
 export function RoutinesPanel() {
   const { company, agents, agentById } = useOfficeData();

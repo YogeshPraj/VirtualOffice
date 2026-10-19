@@ -27,6 +27,7 @@ import { MentionTextarea } from "../ui/MentionTextarea";
 import { QuickReplies } from "../ui/QuickReplies";
 import { useDraft } from "../lib/useDraft";
 import { usePins } from "../lib/pins";
+import { RepeatTask } from "./RepeatTask";
 import { describeChange, inverseOf, isEmpty } from "../lib/undo";
 
 const STATUSES: IssueStatus[] = ["backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled"];
@@ -225,6 +226,7 @@ export function IssuePanel({ issueId }: { issueId: string }) {
           </button>
           <ShareTask issue={issue} />
           <NewFromTask issue={issue} />
+          <RepeatTask issue={issue} />
           <ClassicLink path={`/${company.issuePrefix}/issues/${issue.identifier}`}>Classic ↗</ClassicLink>
         </div>
       </div>
