@@ -16,6 +16,19 @@ function Start-Hidden([string]$script, [string]$log) {
         -WorkingDirectory $root -WindowStyle Hidden
 }
 
+# First run on a fresh clone: nothing is installed yet, so run setup once, right here (it takes
+# a few minutes and prints each step), then carry on starting the office.
+$installed = (Test-Path "$root\.tools\node\node.exe") -and (Test-Path "$root\pixel-office\node_modules")
+if (-not $installed) {
+    Write-Host "First start on this machine: setting up the office first (a few minutes)..." -ForegroundColor Cyan
+    $ok = $true
+    try { & "$root\setup.ps1"; $ok = $? } catch { Write-Host $_ -ForegroundColor Red; $ok = $false }
+    if (-not $ok -or -not (Test-Path "$root\pixel-office\node_modules")) {
+        Write-Host "Setup didn't finish. Fix what it says above, then run launch-office.ps1 again." -ForegroundColor Red
+        exit 1
+    }
+}
+
 # The brain starts first: employees connect to it as soon as Paperclip wakes them.
 if (-not (Test-Up $brainUrl)) { Start-Hidden "start-brain.ps1" ".brain-run.log" }
 if (-not (Test-Up $paperclipUrl)) { Start-Hidden "start-paperclip.ps1" ".paperclip-run.log" }

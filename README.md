@@ -86,6 +86,8 @@ cd VirtualOffice
 pwsh -ExecutionPolicy Bypass -File .\setup.ps1
 ```
 
+(Or skip straight to `pwsh .\launch-office.ps1`: on a fresh clone it runs `setup.ps1` for you first.)
+
 `setup.ps1` is safe to re-run; finished steps are skipped. It:
 
 1. downloads portable Node 24 and Bun into `.tools\` (checksum-verified; your system Node/Bun is untouched),
