@@ -73,6 +73,7 @@ Everything runs on your own Windows PC: the company database, the office, the br
 - **At least one AI to employ**:
   - **Claude Code** (with a Claude subscription or API key): install from [claude.com/claude-code](https://claude.com/claude-code), or `npm i -g @anthropic-ai/claude-code`.
   - and/or **GitHub Copilot CLI** (with a Copilot plan): `npm i -g @github/copilot`.
+  - Copilot alone is fine. The office's own read-only AI features (Ask the office, the morning briefing, handover and meeting drafts) use Claude Code if it's installed and Copilot CLI otherwise. Set `VIRTUAL_OFFICE_AI=copilot` (or `claude`) to choose.
 - **Python 3** for the small helper scripts (handbook and brain).
 - Optional:
   - `gh` (GitHub CLI) and `az` (Azure CLI) let the intake desk look up GitHub and Azure DevOps items: `winget install GitHub.cli Microsoft.AzureCLI`.
@@ -160,6 +161,8 @@ Install as above, clone your private company repo into `company/`, and open the 
 With two machines, the office warns when the other one has backed up more recently.
 
 ### If something's not right
+
+**`npm error code E401` during setup (common on work laptops).** Your npm settings point at a company registry that needs a login. The office now installs its packages from the public npm registry whatever your own npm settings say, so pull the latest and run setup again. If your network blocks the public registry, set `VIRTUAL_OFFICE_NPM_REGISTRY` to your company's npm mirror, sign in to it the way your company does, then run setup.
 
 **Building status** (top right) checks every service, runtime and sign-in, and gives a fix for anything red; its **Setup check** looks at the machine itself (tools, sign-ins, ports, disk). Each piece logs to the office folder: `.paperclip-run.log`, `.office-run.log`, `.brain-run.log` and `.supervisor-run.log`. Paperclip's version is pinned in `start-paperclip.ps1`; upgrade it on purpose.
 

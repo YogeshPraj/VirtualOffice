@@ -33,7 +33,7 @@ export function taskFromTurn(t: Pick<Turn, "q" | "a">): { title: string; descrip
   };
 }
 
-/** "Ask the office": a conversation with Claude about the tasks, threads and the brain, with actions on each answer. */
+/** "Ask the office": a conversation with the office's AI (Claude Code or Copilot CLI) about the tasks, threads and the brain, with actions on each answer. */
 export function AskOffice() {
   const { company, toast } = useOfficeData();
   const open = useOffice((s) => s.open);
@@ -156,7 +156,7 @@ export function AskOffice() {
             Ask
           </button>
         </div>
-        <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>Answered by Claude from the office's records (read-only; it can't change anything by itself).</div>
+        <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>Answered by the office's AI from its records (read-only; it can't change anything by itself).</div>
       </div>
     </div>
   );

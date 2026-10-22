@@ -16,4 +16,12 @@ $env:PAPERCLIP_HOME = "$root\.paperclip"
 $neutral = Join-Path ([IO.Path]::GetTempPath()) "paperclip-cwd"
 New-Item -ItemType Directory -Force $neutral | Out-Null
 Set-Location $neutral
-npx --yes "paperclipai@$PaperclipVersion" onboard --yes @args
+# setup.ps1 installs the pinned version into .tools\paperclip, so no npm is needed here (and
+# employees keep this machine's own npm settings). Without it, fall back to npx.
+$local = Join-Path $root ".tools\paperclip\node_modules\.bin\paperclipai.cmd"
+$pkg = Join-Path $root ".tools\paperclip\node_modules\paperclipai\package.json"
+if ((Test-Path $local) -and ((Get-Content $pkg -Raw | ConvertFrom-Json).version -eq $PaperclipVersion)) {
+    & $local onboard --yes @args
+} else {
+    npx --yes "paperclipai@$PaperclipVersion" onboard --yes @args
+}

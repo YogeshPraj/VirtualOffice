@@ -1,10 +1,10 @@
-// Ask the office: a question in plain words, answered by Claude from the company's tasks, threads
+// Ask the office: a question in plain words, answered by the office's AI (Claude Code or Copilot CLI) from the company's tasks, threads
 // and the brain facts the page passes along. Claude runs with no tools and no MCP servers, from an
 // empty folder, so it can only read what's in the prompt and can't change anything.
 //
 //   POST /office-admin/ask { companyId, question, facts?: string[] } -> { answer, sources }
 
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -91,27 +91,64 @@ export function buildPrompt(input: {
 }
 
 /** Run Claude once, read-only: no tools, no MCP, no saved session, in an empty folder. */
+export type Engine = "claude" | "copilot";
+
+/** Is a command on the PATH? (Cached: the answer doesn't change while the office runs.) */
+const found = new Map<string, boolean>();
+function onPath(cmd: string): boolean {
+  if (!found.has(cmd)) {
+    try {
+      execFileSync(process.platform === "win32" ? "where" : "which", [cmd], { stdio: "ignore", windowsHide: true });
+      found.set(cmd, true);
+    } catch {
+      found.set(cmd, false);
+    }
+  }
+  return found.get(cmd)!;
+}
+
+/**
+ * Which AI the office uses for its own read-only calls (Ask the office, the briefing, handover
+ * and meeting drafts): VIRTUAL_OFFICE_AI if set, else Claude Code if installed, else Copilot CLI.
+ */
+export function officeEngine(env = process.env, has: (cmd: string) => boolean = onPath): Engine | null {
+  const want = env.VIRTUAL_OFFICE_AI?.trim().toLowerCase();
+  if (want === "claude" || want === "copilot") return want;
+  if (has("claude")) return "claude";
+  if (has("copilot")) return "copilot";
+  return null;
+}
+
+/** The command line for a one-off, read-only answer: no tools, no MCP servers, no saved session. */
+export function engineArgs(engine: Engine, win = process.platform === "win32"): string[] {
+  if (engine === "claude") return ["-p", "--tools", win ? '""' : "", "--strict-mcp-config", "--no-session-persistence", "--output-format", "text", "--model", "sonnet"];
+  // Copilot: "--available-tools none" leaves it no tools at all (there's no tool called "none").
+  return ["-s", "--available-tools", "none", "--no-custom-instructions", "--disable-builtin-mcps", "--no-ask-user", "--no-auto-update"];
+}
+
+const ENGINE_NAME: Record<Engine, string> = { claude: "Claude Code", copilot: "GitHub Copilot CLI" };
+
+/** One read-only answer from the office's AI, run from an empty folder with the prompt on stdin. */
 export function askClaude(prompt: string): Promise<string> {
+  const engine = officeEngine();
+  if (!engine) return Promise.reject(new Error("The office needs Claude Code or GitHub Copilot CLI for this. Install one and sign in (see Setup check)."));
   const cwd = mkdtempSync(join(tmpdir(), "office-ask-"));
   return new Promise((done, fail) => {
-    // cmd.exe drops a bare empty argument, so quote it there.
-    const none = process.platform === "win32" ? '""' : "";
-    const args = ["-p", "--tools", none, "--strict-mcp-config", "--no-session-persistence", "--output-format", "text", "--model", "sonnet"];
-    const child = spawn("claude", args, { cwd, shell: process.platform === "win32", windowsHide: true });
+    const child = spawn(engine, engineArgs(engine), { cwd, shell: process.platform === "win32", windowsHide: true });
     let out = "";
     let err = "";
     const timer = setTimeout(() => {
       child.kill();
-      fail(new Error("Claude took too long to answer. Try a narrower question."));
+      fail(new Error(`${ENGINE_NAME[engine]} took too long to answer. Try a narrower question.`));
     }, TIMEOUT_MS);
     child.stdout.on("data", (d) => (out += d));
     child.stderr.on("data", (d) => (err += d));
-    child.on("error", (e) => fail(new Error(`Couldn't start Claude Code (${e.message}). Is it installed and signed in? See Setup check.`)));
+    child.on("error", (e) => fail(new Error(`Couldn't start ${ENGINE_NAME[engine]} (${e.message}). Is it installed and signed in? See Setup check.`)));
     child.on("close", (code) => {
       clearTimeout(timer);
       rmSync(cwd, { recursive: true, force: true });
       if (code === 0 && out.trim()) done(out.trim());
-      else fail(new Error(err.trim().split("\n").slice(-3).join(" ") || `Claude exited with code ${code}.`));
+      else fail(new Error(err.trim().split("\n").slice(-3).join(" ") || `${ENGINE_NAME[engine]} exited with code ${code}.`));
     });
     child.stdin.end(prompt);
   });

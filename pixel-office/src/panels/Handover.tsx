@@ -42,7 +42,7 @@ export function Handover({ agent }: { agent: Agent }) {
 
   if (!draft.data)
     return (
-      <button className="px-btn small" disabled={draft.isPending} onClick={() => draft.mutate()} title="Claude reads each open task and its thread (read-only)">
+      <button className="px-btn small" disabled={draft.isPending} onClick={() => draft.mutate()} title="The office's AI reads each open task and its thread (read-only)">
         {draft.isPending ? "Drafting… (up to a minute)" : "📝 Draft handover notes"}
       </button>
     );

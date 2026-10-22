@@ -21,6 +21,9 @@ param([switch]$SkipGlobal)
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $tools = Join-Path $root ".tools"
+# The office's packages come from the public npm registry, whatever this machine's own npm
+# settings say (a work laptop's company registry would otherwise fail with E401).
+. (Join-Path $root "scripts\office-npm.ps1")
 $results = [System.Collections.Generic.List[object]]::new()
 
 function Step([string]$name, [scriptblock]$body) {
@@ -124,6 +127,20 @@ Step "npm packages (pixel-office, adapters\copilot-local)" {
         $done += $dir
     }
     if ($done.Count) { "installed: $($done -join ', ')" } else { "already up to date" }
+}
+
+# -- 4b. Paperclip, installed here --------------------------------------------
+# Installed once into .tools\paperclip, so starting the office never needs npm (or this machine's
+# npm settings, which employees keep using for their own work).
+Step "Paperclip (pinned, .tools\paperclip)" {
+    $version = ([regex]::Match((Get-Content (Join-Path $root "start-paperclip.ps1") -Raw), '\$PaperclipVersion = "([^"]+)"')).Groups[1].Value
+    $dir = Join-Path $tools "paperclip"
+    $pkg = Join-Path $dir "node_modules\paperclipai\package.json"
+    if ((Test-Path $pkg) -and ((Get-Content $pkg -Raw | ConvertFrom-Json).version -eq $version)) { return "already $version" }
+    New-Item -ItemType Directory -Force $dir | Out-Null
+    & npm install --prefix $dir "paperclipai@$version" --no-audit --no-fund --loglevel=error
+    if ($LASTEXITCODE -ne 0) { throw "npm install paperclipai@$version failed" }
+    "installed $version"
 }
 
 if ($SkipGlobal) {

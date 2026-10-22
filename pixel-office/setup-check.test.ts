@@ -21,3 +21,19 @@ describe("setup check", () => {
     expect(diskCheck(null).level).toBe("warn");
   });
 });
+
+import { engineArgs, officeEngine } from "./ask-office";
+describe("the office's own AI", () => {
+  it("uses Claude Code if it's there, else Copilot CLI, unless told otherwise", () => {
+    const both = () => true;
+    const copilotOnly = (c: string) => c === "copilot";
+    expect(officeEngine({}, both)).toBe("claude");
+    expect(officeEngine({}, copilotOnly)).toBe("copilot");
+    expect(officeEngine({ VIRTUAL_OFFICE_AI: "Copilot" }, both)).toBe("copilot");
+    expect(officeEngine({}, () => false)).toBeNull();
+  });
+  it("runs read-only: no tools, no MCP servers", () => {
+    expect(engineArgs("copilot")).toEqual(expect.arrayContaining(["--available-tools", "none", "--disable-builtin-mcps", "--no-custom-instructions"]));
+    expect(engineArgs("claude", false)).toEqual(expect.arrayContaining(["--tools", "", "--strict-mcp-config"]));
+  });
+});

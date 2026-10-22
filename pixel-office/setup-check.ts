@@ -9,6 +9,7 @@ import { existsSync, readFileSync, statfsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import type { Plugin } from "vite";
+import { officeEngine } from "./ask-office";
 
 const ROOT = resolve(__dirname, "..");
 const CACHE_MS = 60_000;
@@ -106,6 +107,11 @@ export async function runChecks(): Promise<Check[]> {
     ? { id: "copilot", label: "Copilot CLI", level: "ok", detail: `${copilotVer.split("\n")[0].replace(/\.$/, "")} (sign-in lives in Windows Credential Manager, so it isn't checked here).`, fix: "If Copilot employees fail to start, run `copilot login`." }
     : { id: "copilot", label: "Copilot CLI", level: claudeVer ? "warn" : "bad", detail: "The copilot command isn't installed.", fix: "Only needed for employees on Copilot: `npm i -g @github/copilot`." });
 
+  // The office's own read-only AI calls (Ask the office, briefing, handovers, meeting drafts).
+  const engine = officeEngine(process.env, (cmd) => (cmd === "claude" ? !!claudeVer : cmd === "copilot" ? !!copilotVer : false));
+  add(engine
+    ? { id: "office-ai", label: "Office AI", level: "ok", detail: `Ask the office, the briefing and meeting drafts use ${engine === "claude" ? "Claude Code" : "GitHub Copilot CLI"}${process.env.VIRTUAL_OFFICE_AI ? " (set by VIRTUAL_OFFICE_AI)" : ""}.` }
+    : { id: "office-ai", label: "Office AI", level: "warn", detail: "Neither Claude Code nor Copilot CLI is installed, so Ask the office, the briefing and meeting drafts can't run.", fix: "Install one of them and sign in." });
   add(existsSync(join(home, ".claude", "skills", "gstack"))
     ? { id: "gstack", label: "gstack skills", level: "ok", detail: "Installed for Claude Code." }
     : { id: "gstack", label: "gstack skills", level: "warn", detail: "Not installed in ~/.claude/skills.", fix: rerun });

@@ -17,6 +17,7 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $env:PATH = "$root\.tools\node;$env:PATH"
 $env:PAPERCLIP_HOME = "$root\.paperclip"
+. (Join-Path $PSScriptRoot "office-npm.ps1")
 $version = ([regex]::Match((Get-Content "$root\start-paperclip.ps1" -Raw), '\$PaperclipVersion = "([^"]+)"')).Groups[1].Value
 
 if (-not $CompanyId) {
@@ -28,7 +29,11 @@ if (-not $CompanyId) {
 $out = Join-Path $root "company\paperclip-export"
 Push-Location $root
 try {
-    $result = npx --yes "paperclipai@$version" company export $CompanyId --out $out --include company,agents,skills,projects --force 2>&1 | Out-String
+    $local = Join-Path $root ".tools\paperclip\node_modules\.bin\paperclipai.cmd"
+    $pkg = Join-Path $root ".tools\paperclip\node_modules\paperclipai\package.json"
+    $same = (Test-Path $local) -and ((Get-Content $pkg -Raw | ConvertFrom-Json).version -eq $version)
+    $cli = if ($same) { @($local) } else { @("npx", "--yes", "paperclipai@$version") }
+    $result = & $cli[0] @($cli | Select-Object -Skip 1) company export $CompanyId --out $out --include company,agents,skills,projects --force 2>&1 | Out-String
     if ($LASTEXITCODE -ne 0 -or $result -notmatch '"ok":\s*true') { throw "Export failed:`n$result" }
 } finally { Pop-Location }
 

@@ -11,7 +11,7 @@ export function firstVisitToday(lastSeen: number | null, now = new Date()): bool
   return lastSeen !== null && lastSeen > 0 && localDay(new Date(lastSeen)) !== localDay(now);
 }
 
-/** Today's briefing, written by Claude once a day; shown at the top of the welcome-back window. */
+/** Today's briefing, written by the office's AI once a day; shown at the top of the welcome-back window. */
 export function MorningBriefing({ since, onOpenItem }: { since: number; onOpenItem: () => void }) {
   const { company, attention } = useOfficeData();
   const links = useOfficeLinks();
@@ -46,7 +46,7 @@ export function MorningBriefing({ since, onOpenItem }: { since: number; onOpenIt
           </button>
         )}
       </div>
-      {isFetching && !data && <div className="muted">Claude is reading the overnight records… (up to a minute)</div>}
+      {isFetching && !data && <div className="muted">Reading the overnight records… (up to a minute)</div>}
       {error && <div className="muted">No briefing today: {(error as Error).message}</div>}
       {data && (
         <div style={{ fontSize: 16 }}>
